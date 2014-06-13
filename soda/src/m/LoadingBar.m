@@ -32,7 +32,6 @@
         self.viewProcessBar=[[UIView alloc]initWithFrame:CGRectMake(0, 0, frame.size.width, self.frame.size.height)];
         [self.viewProcessBar setBackgroundColor:[UIColor whiteColor]];
         [self addSubview:self.viewProcessBar];
-
         
         self.maskLayer=[CAShapeLayer layer];
         UIBezierPath *maskPath = [UIBezierPath bezierPath];
@@ -58,11 +57,14 @@
         [self.viewProcessBar setFrame:CGRectMake(0,0, newWidth, self.frame.size.height)];
     } completion:^(BOOL finished) {
         if(finished){
-            completion();
+            if(completion!=nil){
+                completion();
+            }
         }
     }];
     return;
 }
+
 -(void)hide{
     self.isHiding=YES;
     [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
@@ -77,13 +79,5 @@
      }];
     
 }
-/*
-// Only override drawRect: if you perform custom drawing.
-// An empty implementation adversely affects performance during animation.
-- (void)drawRect:(CGRect)rect
-{
-    // Drawing code
-}
-*/
 
 @end

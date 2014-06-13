@@ -394,8 +394,7 @@
     [self initialFunctionBarProperty];
     [self hideNoDataCat];
     [self.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 40)];
-    [self.loading process:0 completion:^{
-    }];
+    [self.loading process:0 completion:nil];
     CLLocationCoordinate2D searchCenter;
     if(center.latitude>0 && center.longitude>0){
         searchCenter=CLLocationCoordinate2DMake(center.latitude, center.longitude);
@@ -554,15 +553,7 @@
             item.lat=[[[[[dicDataItem objectForKey:@"result"] objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lat"] doubleValue];
             item.lng=[[[[[dicDataItem objectForKey:@"result"] objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lng"] doubleValue];
             item.googleRef=[[dicDataItem objectForKey:@"result"] valueForKey:@"reference"];
-            NSMutableDictionary *dicPar=[[NSMutableDictionary alloc]init];
-            NSString *isFromLocalStr=@"0";
-            if(isFromLocal){
-                isFromLocalStr=@"1";
-            }
-            [dicPar setValue:[dicDataItem mutableCopy] forKey:@"data"];
-            [dicPar setValue:item forKey:@"item"];
-            NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(initialItem:) object:dicPar];
-            [self.gv.backgroundThreadManagement addOperation:operation];
+            item.jsonBaseData=[dicDataItem objectForKey:@"result"];
         }else{
             item.googleId=[dicDataItem valueForKey:@"id"];
             item.lat=[[[[dicDataItem objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lat"] doubleValue];
@@ -577,18 +568,24 @@
             [self createItemFromRadarResultWithIndex:currReulstIndex+1 isExistFilterCondition:isExistFilterCondition isExistSortingKey:isExistSortingKey isFromLocal:isFromLocal];
         }else{
             NSLog(@"create item instance finish;");
-            for(int i=0;i<arrItemList.count;i++){
-                ListItem *currItem=(ListItem *)[arrItemList objectAtIndex:i];
-                [currItem addLoadGooglePlaceDetailToQueue:currItem.googleRef];
+            if(isFromLocal){
+                for(int i=0;i<arrItemList.count;i++){
+                    ListItem *currItem=(ListItem *)[arrItemList objectAtIndex:i];
+                    NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(initialItem:) object:currItem];
+                    [self.gv.backgroundThreadManagement addOperation:operation];
+                }
+            }else{
+                for(int i=0;i<arrItemList.count;i++){
+                    ListItem *currItem=(ListItem *)[arrItemList objectAtIndex:i];
+                    [currItem addLoadGooglePlaceDetailToQueue:currItem.googleRef];
+                }
             }
         }
     }];
     
 }
--(void)initialItem:(NSMutableDictionary*) dicPar{
-    ListItem* item=(ListItem *)[dicPar objectForKey:@"item"];
-    NSMutableDictionary* dicData=(NSMutableDictionary *) [dicPar objectForKey:@"data"];
-    [item initialItem:[dicData objectForKey:@"result" ] isFromLocal:YES];
+-(void)initialItem:(ListItem*) item{
+    [item initialItem:item.jsonBaseData isFromLocal:YES];
 }
 //add subview all
 -(void)sortingAndFilterArrItemList{
@@ -668,9 +665,7 @@
     NSLog(@"targetIndex:%d",self.targetIndex);
     self.isLoadingList=YES;
 
-    [self createItemFromRadarResultWithIndex:self.currReulstIndex isExistFilterCondition:[self isExistfilterCondition] isExistSortingKey:[self isExistSortingKey] isFromLocal:NO];
-
-    
+    [self createItemFromRadarResultWithIndex:self.currReulstIndex isExistFilterCondition:[self isExistfilterCondition] isExistSortingKey:[self isExistSortingKey] isFromLocal:NO];    
 }
 
 -(void) initialFunctionBarProperty{

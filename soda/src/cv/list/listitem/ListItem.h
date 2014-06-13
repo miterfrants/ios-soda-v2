@@ -55,6 +55,7 @@
 @property NSMutableArray *arrReview;
 @property NSString *name;
 @property NSMutableDictionary *dicDetailPanel;
+@property NSMutableDictionary *jsonBaseData;
 @property UIView *scrollViewCurrentExpanded;
 @property ScrollViewDetailBase *scrollViewDetailBase;
 @property ScrollViewDetailReview *scrollViewDetailReview;

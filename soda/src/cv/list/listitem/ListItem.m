@@ -254,10 +254,12 @@ double posLeft;
                 //check opening hours
                 if([[data objectForKey:@"result"] objectForKey:@"opening_hours"]==nil){
                     NSString *name=[[data objectForKey:@"result"] valueForKey:@"name"];
+                    //let user grab facebook store opening data to local database
                     if(self.gv.loginType==Facebook){
                         //把facebook資料抓回來
+                        NSLog(@"%@",[NSString stringWithFormat:@"%@:https://graph.facebook.com/search?q=%@&type=page&access_token=%@",name,name,[FBSession activeSession].accessTokenData.accessToken]);
                         [Util jsonAsyncWithUrl:[NSString stringWithFormat:@"https://graph.facebook.com/search?q=%@&type=page&access_token=%@",name, [FBSession activeSession].accessTokenData.accessToken] target:self cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:5 completion:^(NSMutableDictionary *data, NSError *connectionError) {
-                            NSLog(@"%@",[NSString stringWithFormat:@"%@:%@",name,data]);
+                            //NSLog(@"%@",[NSString stringWithFormat:@"%@:%@",name,data]);
                         } queue:self.gv.backgroundThreadManagement];
                     }
                 }
@@ -450,9 +452,7 @@ double posLeft;
     }
     self.seq=scrollViewControllerList.createIndex;
     //finish all thing only sotring;
-//    NSLog([NSString stringWithFormat:@"%d/%d",scrollViewControllerList.createIndex,scrollViewControllerList.totalIndex]);
     if(scrollViewControllerList.createIndex==scrollViewControllerList.totalIndex && scrollViewControllerList.arrRadarResult.count>0){
-
         if([scrollViewControllerList isExistSortingKey]){
             dispatch_async(dispatch_get_main_queue(), ^{
                 //[scrollViewControllerList.loading stop];

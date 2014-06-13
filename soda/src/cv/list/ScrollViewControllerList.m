@@ -394,7 +394,8 @@
     [self initialFunctionBarProperty];
     [self hideNoDataCat];
     [self.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 40)];
-    [self.loading process:0];
+    [self.loading process:0 completion:^{
+    }];
     CLLocationCoordinate2D searchCenter;
     if(center.latitude>0 && center.longitude>0){
         searchCenter=CLLocationCoordinate2DMake(center.latitude, center.longitude);
@@ -463,6 +464,7 @@
             }
         }else{
             [scrollViewList setAlpha:0.0f];
+            self.isEndedForSearchResult=YES;
         }
         self.targetIndex=maxLen-1;
         NSLog(@"targetIndex:%d",self.targetIndex);
@@ -472,9 +474,7 @@
         BOOL isExistSortingKey=[self isExistSortingKey];
         NSLog(@"creat item instance");
         dispatch_async(dispatch_get_main_queue(), ^{
-            for(int i=0;i<maxLen;i++){
-                [self createItemFromRadarResult:[arrRadarResult objectAtIndex:i] index:i isExistFilterCondition:isExistFilterCondition isExistSortingKey:isExistSortingKey isFromLocal:isFromLocal];
-            }
+            [self createItemFromRadarResultWithIndex:0 isExistFilterCondition:isExistFilterCondition isExistSortingKey:isExistSortingKey isFromLocal:isFromLocal];
         });
 
         if(!isExistFilterCondition){;
@@ -532,46 +532,58 @@
     }
     return NO;
 }
-
--(void) createItemFromRadarResult:(NSDictionary *) obj index:(int) i isExistFilterCondition:(BOOL) isExistFilterCondition isExistSortingKey:(BOOL) isExistSortingKey isFromLocal:(BOOL) isFromLocal{
+-(void) createItemFromRadarResultWithIndex:(int) i isExistFilterCondition:(BOOL) isExistFilterCondition isExistSortingKey:(BOOL) isExistSortingKey isFromLocal:(BOOL) isFromLocal{
     //如果有過濾條件不要設定寬高由 ListItem addLoadGooglePlaceDetailToQueue 載完資料後設定 但要檢查一下y有沒有重複
     //這邊initail 50%; loading 50%;
-
+    //如果我alloc 和process bar 一起跑的話 process bar會被卡住 所以做完一次讓process bar動畫跑完再initial
     ListItem *item=[[ListItem alloc]init];
-    [self.loading process:(double)((i*0.5)/self.totalIndex)];
-    
-    [item setFrame:CGRectMake(0, i*150, gv.screenW, 150)];
-    if(!isExistSortingKey){
-        item.isShow=YES;
-        [scrollViewList addSubview:item];
-    }else{
-        item.isShow=NO;
-    }
-    [item setAlpha:0.0];
-    //要不要 distance
-    if(isFromLocal){
-        item.googleId=[[obj objectForKey:@"result"] valueForKey:@"id"];
-        item.lat=[[[[[obj objectForKey:@"result"] objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lat"] doubleValue];
-        item.lng=[[[[[obj objectForKey:@"result"] objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lng"] doubleValue];
-        item.googleRef=[[obj objectForKey:@"result"] valueForKey:@"reference"];
-        NSMutableDictionary *dicPar=[[NSMutableDictionary alloc]init];
-        NSString *isFromLocalStr=@"0";
-        if(isFromLocal){
-            isFromLocalStr=@"1";
+    [self.loading process:(double)((i*0.5)/self.totalIndex) completion:^{
+        //initial
+        [item setFrame:CGRectMake(0, i*150, gv.screenW, 150)];
+        if(!isExistSortingKey){
+            item.isShow=YES;
+            [scrollViewList addSubview:item];
+        }else{
+            item.isShow=NO;
         }
-        [dicPar setValue:[obj mutableCopy] forKey:@"data"];
-        [dicPar setValue:item forKey:@"item"];
-        NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(initialItem:) object:dicPar];
-        [self.gv.backgroundThreadManagement addOperation:operation];
-    }else{
-        item.googleId=[obj valueForKey:@"id"];
-        item.lat=[[[[obj objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lat"] doubleValue];
-        item.lng=[[[[obj objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lng"] doubleValue];
-        item.googleRef=[obj valueForKey:@"reference"];
-        [item addLoadGooglePlaceDetailToQueue:[obj valueForKey:@"reference"]];
-    }
-    [arrItemList addObject:item];
-    currReulstIndex=i;
+        [item setAlpha:0.0];
+        NSMutableDictionary *dicDataItem= [arrRadarResult objectAtIndex:i];
+        //要不要 distance
+        if(isFromLocal){
+            item.googleId=[[dicDataItem objectForKey:@"result"] valueForKey:@"id"];
+            item.lat=[[[[[dicDataItem objectForKey:@"result"] objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lat"] doubleValue];
+            item.lng=[[[[[dicDataItem objectForKey:@"result"] objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lng"] doubleValue];
+            item.googleRef=[[dicDataItem objectForKey:@"result"] valueForKey:@"reference"];
+            NSMutableDictionary *dicPar=[[NSMutableDictionary alloc]init];
+            NSString *isFromLocalStr=@"0";
+            if(isFromLocal){
+                isFromLocalStr=@"1";
+            }
+            [dicPar setValue:[dicDataItem mutableCopy] forKey:@"data"];
+            [dicPar setValue:item forKey:@"item"];
+            NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(initialItem:) object:dicPar];
+            [self.gv.backgroundThreadManagement addOperation:operation];
+        }else{
+            item.googleId=[dicDataItem valueForKey:@"id"];
+            item.lat=[[[[dicDataItem objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lat"] doubleValue];
+            item.lng=[[[[dicDataItem objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lng"] doubleValue];
+            item.googleRef=[dicDataItem valueForKey:@"reference"];
+        }
+        [arrItemList addObject:item];
+        currReulstIndex=i;
+        //next one
+        //NSLog(@"%@",[NSString stringWithFormat:@"%d/%d",currReulstIndex,self.totalIndex]);
+        if(currReulstIndex<self.targetIndex){
+            [self createItemFromRadarResultWithIndex:currReulstIndex+1 isExistFilterCondition:isExistFilterCondition isExistSortingKey:isExistSortingKey isFromLocal:isFromLocal];
+        }else{
+            NSLog(@"create item instance finish;");
+            for(int i=0;i<arrItemList.count;i++){
+                ListItem *currItem=(ListItem *)[arrItemList objectAtIndex:i];
+                [currItem addLoadGooglePlaceDetailToQueue:currItem.googleRef];
+            }
+        }
+    }];
+    
 }
 -(void)initialItem:(NSMutableDictionary*) dicPar{
     ListItem* item=(ListItem *)[dicPar objectForKey:@"item"];
@@ -656,9 +668,8 @@
     NSLog(@"targetIndex:%d",self.targetIndex);
     self.isLoadingList=YES;
 
-    for(int i=initialIndex+1;i<maxLen;i++){
-        [self createItemFromRadarResult:[arrRadarResult objectAtIndex:i]  index:i isExistFilterCondition:[self isExistfilterCondition] isExistSortingKey:[self isExistSortingKey] isFromLocal:NO];
-    }
+    [self createItemFromRadarResultWithIndex:self.currReulstIndex isExistFilterCondition:[self isExistfilterCondition] isExistSortingKey:[self isExistSortingKey] isFromLocal:NO];
+
     
 }
 

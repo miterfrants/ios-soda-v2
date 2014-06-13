@@ -30,45 +30,38 @@
         [self addSubview:self.viewBg];
         
         self.viewProcessBar=[[UIView alloc]initWithFrame:CGRectMake(0, 0, frame.size.width, self.frame.size.height)];
-        CAShapeLayer *processBarLayer=[CAShapeLayer layer];
-        UIBezierPath *processBarPath = [UIBezierPath bezierPath];
-        [processBarPath moveToPoint:CGPointMake(radius,frame.size.height-1)];
-        [processBarPath addArcWithCenter:CGPointMake(radius, radius) radius:radius-1 startAngle:M_PI_2 endAngle:M_PI+M_PI_2 clockwise:YES];
-        [processBarPath addLineToPoint:CGPointMake(frame.size.width-radius,1)];
-        [processBarPath addArcWithCenter:CGPointMake(frame.size.width-radius, radius) radius:radius-1 startAngle:M_PI+M_PI_2 endAngle:M_PI_2 clockwise:YES];
-        [processBarPath addLineToPoint:CGPointMake(radius,frame.size.height-1)];
-        [processBarPath closePath];
-        processBarLayer.path = [processBarPath CGPath];
-        processBarLayer.fillColor =[[Util colorWithHexString:@"#ffffffff"] CGColor];
-        [self.viewProcessBar.layer insertSublayer:processBarLayer atIndex:0];
+        [self.viewProcessBar setBackgroundColor:[UIColor whiteColor]];
         [self addSubview:self.viewProcessBar];
 
         
         self.maskLayer=[CAShapeLayer layer];
         UIBezierPath *maskPath = [UIBezierPath bezierPath];
-        [maskPath moveToPoint:CGPointMake(0,frame.size.height)];
-        [maskPath addLineToPoint:CGPointMake(0,0)];
-        [maskPath addLineToPoint:CGPointMake(radius,0)];
-        [maskPath addLineToPoint:CGPointMake(radius,frame.size.height)];
+        [maskPath moveToPoint:CGPointMake(radius,frame.size.height-1)];
+        [maskPath addArcWithCenter:CGPointMake(radius, radius) radius:radius-1 startAngle:M_PI_2 endAngle:M_PI+M_PI_2 clockwise:YES];
+        [maskPath addLineToPoint:CGPointMake(frame.size.width-radius,1)];
+        [maskPath addArcWithCenter:CGPointMake(frame.size.width-radius, radius) radius:radius-1 startAngle:M_PI+M_PI_2 endAngle:M_PI_2 clockwise:YES];
+        [maskPath addLineToPoint:CGPointMake(radius,frame.size.height-1)];
         [maskPath closePath];
         self.maskLayer.path = [maskPath CGPath];
         self.maskLayer.fillColor =[[Util colorWithHexString:@"#ffffffff"] CGColor];
         self.viewProcessBar.layer.mask=self.maskLayer;
-        
+        self.test=[[UIView alloc]init];
+        [self addSubview:self.test];
     }
     return self;
 }
 
--(void)process:(double)per{
+-(void)process:(double)per completion:(void(^)()) completion{
     double radius=self.frame.size.height/2;
     double newWidth=(self.frame.size.width-radius)*per+radius;
-    UIBezierPath *maskPath = [UIBezierPath bezierPath];
-    [maskPath moveToPoint:CGPointMake(0,self.frame.size.height)];
-    [maskPath addLineToPoint:CGPointMake(0,0)];
-    [maskPath addLineToPoint:CGPointMake(newWidth,0)];
-    [maskPath addLineToPoint:CGPointMake(newWidth,self.frame.size.height)];
-    [maskPath closePath];
-    [self.maskLayer setPath:maskPath.CGPath];
+    [UIView animateWithDuration:0.00 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+        [self.viewProcessBar setFrame:CGRectMake(0,0, newWidth, self.frame.size.height)];
+    } completion:^(BOOL finished) {
+        if(finished){
+            completion();
+        }
+    }];
+    return;
 }
 -(void)hide{
     self.isHiding=YES;
@@ -77,17 +70,8 @@
          [self setAlpha:0.0];
      } completion:^(BOOL finished) {
          if (finished){
-             self.maskLayer=[CAShapeLayer layer];
              double radius=self.frame.size.height/2;
-             UIBezierPath *maskPath = [UIBezierPath bezierPath];
-             [maskPath moveToPoint:CGPointMake(0,self.frame.size.height)];
-             [maskPath addLineToPoint:CGPointMake(0,0)];
-             [maskPath addLineToPoint:CGPointMake(radius,0)];
-             [maskPath addLineToPoint:CGPointMake(radius,self.frame.size.height)];
-             [maskPath closePath];
-             self.maskLayer.path = [maskPath CGPath];
-             self.maskLayer.fillColor =[[Util colorWithHexString:@"#ffffffff"] CGColor];
-             self.viewProcessBar.layer.mask=self.maskLayer;
+             [self.viewProcessBar setFrame:CGRectMake(0,0, radius, self.frame.size.height)];
              [self setHidden:YES];
          }
      }];

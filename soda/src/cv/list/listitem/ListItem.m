@@ -426,8 +426,9 @@ double posLeft;
         //loading info
         if(scrollViewControllerList.totalIndex>0){
             double perc=((float)(scrollViewControllerList.createIndex*0.5)/scrollViewControllerList.totalIndex);
-            [scrollViewControllerList.loading process:perc+0.5];
-            //scrollViewControllerList.loading.lblLoadingInfo.text=[NSString stringWithFormat:@"%.0f %%",floor(scrollViewControllerList.createIndex*100/(scrollViewControllerList.totalIndex))];
+            [scrollViewControllerList.loading process:perc+0.5 completion:^{
+            }];
+//            //scrollViewControllerList.loading.lblLoadingInfo.text=[NSString stringWithFormat:@"%.0f %%",floor(scrollViewControllerList.createIndex*100/(scrollViewControllerList.totalIndex))];
         }
     });
     if(![scrollViewControllerList isExistSortingKey]){
@@ -449,7 +450,9 @@ double posLeft;
     }
     self.seq=scrollViewControllerList.createIndex;
     //finish all thing only sotring;
+//    NSLog([NSString stringWithFormat:@"%d/%d",scrollViewControllerList.createIndex,scrollViewControllerList.totalIndex]);
     if(scrollViewControllerList.createIndex==scrollViewControllerList.totalIndex && scrollViewControllerList.arrRadarResult.count>0){
+
         if([scrollViewControllerList isExistSortingKey]){
             dispatch_async(dispatch_get_main_queue(), ^{
                 //[scrollViewControllerList.loading stop];

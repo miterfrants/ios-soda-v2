@@ -14,6 +14,6 @@
 @property CAShapeLayer *maskLayer;
 @property BOOL isHiding;
 @property UIView *test;
--(void)process:(double)per;
+-(void)process:(double)per completion:(void(^)()) completion;
 -(void)hide;
 @end

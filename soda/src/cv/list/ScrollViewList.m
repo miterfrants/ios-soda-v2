@@ -71,6 +71,7 @@ float positiveStartPos=0;
     }
 
     memoryDiffY=scrollView.contentOffset.y;
+
     if(controller.createIndex>=controller.targetIndex){
         controller.isLoadingList=NO;
     }

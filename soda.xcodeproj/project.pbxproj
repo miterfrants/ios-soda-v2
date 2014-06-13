@@ -110,7 +110,6 @@
 		029C86EC1945668900740266 /* GooglePlaceAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86EB1945668900740266 /* GooglePlaceAPI.m */; };
 		029C86F5194566EC00740266 /* GooglePlaceAPIPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86F4194566EC00740266 /* GooglePlaceAPIPool.m */; };
 		029C86F8194845CD00740266 /* LoadingBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86F7194845CD00740266 /* LoadingBar.m */; };
-		029C86FB1948B54C00740266 /* test.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86FA1948B54C00740266 /* test.m */; };
 		02B6ABA51917723100ACCF61 /* ViewConfig.m in Sources */ = {isa = PBXBuildFile; fileRef = 02B6ABA41917723100ACCF61 /* ViewConfig.m */; };
 		02B6ABAB19178F1500ACCF61 /* ButtonReset.m in Sources */ = {isa = PBXBuildFile; fileRef = 02B6ABAA19178F1500ACCF61 /* ButtonReset.m */; };
 		02B6ABF01917F4A900ACCF61 /* ButtonLogout.m in Sources */ = {isa = PBXBuildFile; fileRef = 02B6ABEB1917F4A900ACCF61 /* ButtonLogout.m */; };
@@ -390,8 +389,6 @@
 		029C86F4194566EC00740266 /* GooglePlaceAPIPool.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GooglePlaceAPIPool.m; sourceTree = "<group>"; };
 		029C86F6194845CD00740266 /* LoadingBar.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoadingBar.h; sourceTree = "<group>"; };
 		029C86F7194845CD00740266 /* LoadingBar.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoadingBar.m; sourceTree = "<group>"; };
-		029C86F91948B54C00740266 /* test.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = test.h; sourceTree = "<group>"; };
-		029C86FA1948B54C00740266 /* test.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = test.m; sourceTree = "<group>"; };
 		02B6ABA31917723100ACCF61 /* ViewConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewConfig.h; sourceTree = "<group>"; };
 		02B6ABA41917723100ACCF61 /* ViewConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewConfig.m; sourceTree = "<group>"; };
 		02B6ABA919178F1500ACCF61 /* ButtonReset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ButtonReset.h; sourceTree = "<group>"; };
@@ -681,8 +678,6 @@
 				0244A352193E158C00EA22BF /* CustomizeInfoWindow.m */,
 				0244A354193E202900EA22BF /* CustomizeMarker.h */,
 				0244A355193E202900EA22BF /* CustomizeMarker.m */,
-				029C86F91948B54C00740266 /* test.h */,
-				029C86FA1948B54C00740266 /* test.m */,
 			);
 			path = listitem;
 			sourceTree = "<group>";
@@ -1505,7 +1500,6 @@
 				02526E8D1933410700DE0327 /* ViewReview.m in Sources */,
 				02D889FE19016DD300941199 /* ButtonCate.m in Sources */,
 				028FFB05190623C5007CE44E /* ButtonForPersonal.m in Sources */,
-				029C86FB1948B54C00740266 /* test.m in Sources */,
 				02ED98F918F79EDC00B3B839 /* VariableStore.m in Sources */,
 				02B6AC31191F648700ACCF61 /* ScrollViewControllerList.m in Sources */,
 				02D889FF19016DD300941199 /* ButtonIcon.m in Sources */,

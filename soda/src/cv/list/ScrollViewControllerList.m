@@ -441,6 +441,7 @@
                 [self showNoDataCat];
                 [self.loading hide];
             });
+            return;
         }else if(arrFromLocal.count<arrFromGoogle.count){
             self.arrRadarResult=arrFromGoogle;
         }else if(arrFromLocal.count>=arrFromGoogle.count){
@@ -465,7 +466,11 @@
             [scrollViewList setAlpha:0.0f];
             self.isEndedForSearchResult=YES;
         }
-        self.targetIndex=maxLen-1;
+        if(maxLen>0){
+            self.targetIndex=maxLen-1;
+        }else{
+            self.targetIndex=0;
+        }
         NSLog(@"targetIndex:%d",self.targetIndex);
         NSLog(@"loading detail count:%d",maxLen);
         
@@ -661,7 +666,12 @@
         self.isEndedForSearchResult=YES;
     }
     NSLog(@"page:%d",currReulstIndex+self.gv.listBufferCount);
-    self.targetIndex=maxLen-1;
+    if(maxLen>0){
+        self.targetIndex=maxLen-1;
+    }else{
+        self.targetIndex=0;
+    }
+
     NSLog(@"targetIndex:%d",self.targetIndex);
     self.isLoadingList=YES;
 
@@ -761,6 +771,9 @@
         NSLog(@"list condition 8: 展開 keyboard");
         ButtonComment *btnComment=(ButtonComment *)touch.view.superview;
         [self statusExpandToWithKeyboard:btnComment];
+    }else if([touch.view isKindOfClass:[ListItem class]]){
+        ListItem *item=(ListItem *) touch.view;
+        NSLog(@"%@",item.name);
     }
     
     

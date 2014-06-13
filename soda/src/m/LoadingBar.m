@@ -53,7 +53,11 @@
 -(void)process:(double)per completion:(void(^)()) completion{
     double radius=self.frame.size.height/2;
     double newWidth=(self.frame.size.width-radius)*per+radius;
+    if(per==0){
+        newWidth=0;
+    }
     [UIView animateWithDuration:0.00 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+
         [self.viewProcessBar setFrame:CGRectMake(0,0, newWidth, self.frame.size.height)];
     } completion:^(BOOL finished) {
         if(finished){

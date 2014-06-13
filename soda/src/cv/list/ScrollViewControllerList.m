@@ -805,11 +805,24 @@
     NSString *originalExpandedName=item.expandName;
     [[item.dicDetailPanel objectForKey:willExpandDetailName] setHidden:NO];
     item.expandName=willExpandDetailName;
+    if([willExpandDetailName isEqual:@"review"]){
+        [((ScrollViewDetailReview *)[item.dicDetailPanel objectForKey:willExpandDetailName]) setContentOffset:CGPointMake(0, 0)];
+        [item.lblIForComment setFrame:CGRectMake(20-self.gv.screenW, item.lblIForComment.frame.origin.y, item.lblIForComment.frame.size.width, item.lblIForComment.frame.size.height)];
+        [item.btnComment setFrame:CGRectMake(28-self.gv.screenW, item.btnComment.frame.origin.y, item.btnComment.frame.size.width, item.btnComment.frame.size.height)];
+    }else if([originalExpandedName isEqual:@"review"]){
+        if(item.lblIForComment.frame.origin.x<0){
+            [item.lblIForComment setHidden:YES];
+        }
+        if(item.btnComment.frame.origin.x<0){
+            [item.btnComment setHidden:YES];
+        }
+    }
     [UIView animateWithDuration:0.28 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
         if([originalExpandedName isEqual:@"review"] && ![willExpandDetailName isEqual:@"review"]){
             [item.lblIForComment setFrame:CGRectMake(self.gv.screenW+item.lblIForComment.frame.origin.x, item.lblIForComment.frame.origin.y, item.lblIForComment.frame.size.width, item.lblIForComment.frame.size.height)];
             [item.btnComment setFrame:CGRectMake(self.gv.screenW+item.btnComment.frame.origin.x, item.btnComment.frame.origin.y, item.btnComment.frame.size.width, item.btnComment.frame.size.height)];
         }else if([willExpandDetailName isEqual:@"review"]){
+            NSLog(@"A");
             [item.lblIForComment setFrame:CGRectMake(20, item.lblIForComment.frame.origin.y, item.lblIForComment.frame.size.width, item.lblIForComment.frame.size.height)];
             [item.btnComment setFrame:CGRectMake(28, item.btnComment.frame.origin.y, item.btnComment.frame.size.width, item.btnComment.frame.size.height)];
         }
@@ -821,6 +834,8 @@
             if([originalExpandedName isEqual:@"review"] && ![willExpandDetailName isEqual:@"review"]){
                 [item.lblIForComment setFrame:CGRectMake(20-self.gv.screenW, item.lblIForComment.frame.origin.y, item.lblIForComment.frame.size.width, item.lblIForComment.frame.size.height)];
                 [item.btnComment setFrame:CGRectMake(28-self.gv.screenW, item.btnComment.frame.origin.y, item.btnComment.frame.size.width, item.btnComment.frame.size.height)];
+                [item.lblIForComment setHidden:NO];
+                [item.btnComment setHidden:NO];
             }
         }
     }];

@@ -251,19 +251,21 @@ double posLeft;
             }
 
             if(!isError){
+                //NSLog(@"A");
                 //check opening hours
-                if([[data objectForKey:@"result"] objectForKey:@"opening_hours"]==nil || [[[data objectForKey:@"result"] objectForKey:@"opening_hours"] intValue]==0){
+                if([[data objectForKey:@"result"] objectForKey:@"opening_hours"]==nil && [[data objectForKey:@"result"] objectForKey:@"opening_hours"]==nil){
                     NSString *name=[[data objectForKey:@"result"] valueForKey:@"name"];
 
                     //let user grab facebook store opening data to local database
                     if(self.gv.loginType==Facebook){
                         //把facebook資料抓回來
-                        NSLog(@"%@",[NSString stringWithFormat:@"%@:https://graph.facebook.com/search?q=%@&type=page&access_token=%@",name,name,[FBSession activeSession].accessTokenData.accessToken]);
+                        //NSLog(@"%@",[NSString stringWithFormat:@"%@:https://graph.facebook.com/search?q=%@&type=page&access_token=%@",name,name,[FBSession activeSession].accessTokenData.accessToken]);
                         [Util jsonAsyncWithUrl:[NSString stringWithFormat:@"https://graph.facebook.com/search?q=%@&type=page&access_token=%@",name, [FBSession activeSession].accessTokenData.accessToken] target:self cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:5 completion:^(NSMutableDictionary *data, NSError *connectionError) {
                             //NSLog(@"%@",[NSString stringWithFormat:@"%@:%@",name,data]);
                         } queue:self.gv.backgroundThreadManagement];
                     }
                 }
+                //NSLog(@"B");
                 NSString* jsonString = [[NSString alloc] initWithBytes:[jsonData bytes] length:[jsonData length] encoding:NSUTF8StringEncoding];
                 NSString *charactersToEscape = @"!*'();:@&=+$,/?%#[]\" ";
                 NSCharacterSet *allowedCharacters = [[NSCharacterSet characterSetWithCharactersInString:charactersToEscape] invertedSet];
@@ -416,7 +418,9 @@ double posLeft;
     }
     }
     //light
-    if([data objectForKey:@"opening_hours"] !=nil){
+                //NSLog(@"B");
+    if([data objectForKey:@"opening_hours"] !=nil && [[data objectForKey:@"opening_hours"] valueForKey:@"open_now"] !=nil){
+                //NSLog(@"C");
         self.isExistOpeningData=YES;
         if([[[data objectForKey:@"opening_hours"] valueForKey:@"open_now"] intValue]==1){
             self.isOpening=YES;
@@ -425,6 +429,7 @@ double posLeft;
     }else{
         self.isExistOpeningData=NO;
     }
+                //NSLog(@"D");
     dispatch_async(dispatch_get_main_queue(), ^{
         //loading info
         if(scrollViewControllerList.totalIndex>0){

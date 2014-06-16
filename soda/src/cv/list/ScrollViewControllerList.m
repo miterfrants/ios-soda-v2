@@ -908,6 +908,13 @@
         }
     }
     [self.mapview setCamera:camera];
+    CGPoint oriCenter=[self.mapview.projection pointForCoordinate:CLLocationCoordinate2DMake(item.lat, item.lng)];
+    CGPoint destCenter=CGPointMake(oriCenter.x, oriCenter.y-80);
+    CLLocationCoordinate2D destCoordinate=[self.mapview.projection coordinateForPoint:destCenter];
+    GMSCameraPosition *destCamera = [GMSCameraPosition cameraWithLatitude:destCoordinate.latitude
+                                                            longitude:destCoordinate.longitude
+                                                                 zoom:15];
+    [self.mapview setCamera:destCamera];
     [[item.dicDetailPanel objectForKey:@"map"] addSubview:self.mapview];
     scrollViewList.scrollEnabled=NO;
 }

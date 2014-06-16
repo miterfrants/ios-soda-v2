@@ -119,8 +119,6 @@
     }else{
         nextMarker=(CustomizeMarker *)[self.arrMarker objectAtIndex:marker.markerSeq+1];
     }
-    [self.mapview setSelectedMarker:nextMarker];
-
     if(scrollViewList.contentSize.height<nextMarker.markerSeq*150){
         [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, nextMarker.markerSeq*150)];
     }
@@ -197,6 +195,7 @@
      if(nextItem.imgViewBg.image!=nil){
          [nextItem.viewGradientBgForName setFrame:CGRectMake(0, 0, self.gv.screenW, 45)];
      }
+    [self.mapview setSelectedMarker:nextMarker];
     scrollViewList.isAutoAnimation=NO;
 }
 -(void)previousMarker{
@@ -208,7 +207,6 @@
     }else{
         prevMarker=(CustomizeMarker *)[self.arrMarker objectAtIndex:marker.markerSeq-1];
     }
-    [self.mapview setSelectedMarker:prevMarker];
     [scrollViewList setContentOffset:CGPointMake(0,(marker.markerSeq+1)*150) animated:NO];
     [self.mapview removeFromSuperview];
     ListItem *oriItem=(ListItem *)marker.userData;
@@ -224,6 +222,8 @@
     oriItem.isExpanded=NO;
     [oriItem.blurBg setAlpha:1.0];
     [oriItem.maskBg setAlpha:1.0];
+    [oriItem.blurBg setHidden:NO];
+    [oriItem.maskBg setHidden:NO];
     [oriItem.viewMiddleLigthBorder setAlpha:0.0f];
     [oriItem.viewMiddleDarkBorder setAlpha:0.0f];
     [oriItem.viewGradientBgForName setFrame:CGRectMake(0, -45, self.gv.screenW, 45)];
@@ -286,6 +286,7 @@
     if(prevItem.imgViewBg.image!=nil){
         [prevItem.viewGradientBgForName setFrame:CGRectMake(0, 0, self.gv.screenW, 45)];
     }
+    [self.mapview setSelectedMarker:prevMarker];
     scrollViewList.isAutoAnimation=NO;
 }
 
@@ -805,6 +806,10 @@
     NSString *originalExpandedName=item.expandName;
     [[item.dicDetailPanel objectForKey:willExpandDetailName] setHidden:NO];
     item.expandName=willExpandDetailName;
+    if(self.gv.localUserId ==nil){
+        [item.lblIForComment setHidden:YES];
+        [item.btnComment setHidden:YES];
+    }
     if([willExpandDetailName isEqual:@"review"]){
         [((ScrollViewDetailReview *)[item.dicDetailPanel objectForKey:willExpandDetailName]) setContentOffset:CGPointMake(0, 0)];
         [item.lblIForComment setFrame:CGRectMake(20-self.gv.screenW, item.lblIForComment.frame.origin.y, item.lblIForComment.frame.size.width, item.lblIForComment.frame.size.height)];
@@ -822,7 +827,6 @@
             [item.lblIForComment setFrame:CGRectMake(self.gv.screenW+item.lblIForComment.frame.origin.x, item.lblIForComment.frame.origin.y, item.lblIForComment.frame.size.width, item.lblIForComment.frame.size.height)];
             [item.btnComment setFrame:CGRectMake(self.gv.screenW+item.btnComment.frame.origin.x, item.btnComment.frame.origin.y, item.btnComment.frame.size.width, item.btnComment.frame.size.height)];
         }else if([willExpandDetailName isEqual:@"review"]){
-            NSLog(@"A");
             [item.lblIForComment setFrame:CGRectMake(20, item.lblIForComment.frame.origin.y, item.lblIForComment.frame.size.width, item.lblIForComment.frame.size.height)];
             [item.btnComment setFrame:CGRectMake(28, item.btnComment.frame.origin.y, item.btnComment.frame.size.width, item.btnComment.frame.size.height)];
         }
@@ -908,15 +912,19 @@
         }
     }
     [self.mapview setCamera:camera];
-    CGPoint oriCenter=[self.mapview.projection pointForCoordinate:CLLocationCoordinate2DMake(item.lat, item.lng)];
-    CGPoint destCenter=CGPointMake(oriCenter.x, oriCenter.y-80);
-    CLLocationCoordinate2D destCoordinate=[self.mapview.projection coordinateForPoint:destCenter];
-    GMSCameraPosition *destCamera = [GMSCameraPosition cameraWithLatitude:destCoordinate.latitude
-                                                            longitude:destCoordinate.longitude
-                                                                 zoom:15];
-    [self.mapview setCamera:destCamera];
+    [self.mapview setCamera:[self getNewDownABitOfCameraWithLat:item.lat lng:item.lng]];
     [[item.dicDetailPanel objectForKey:@"map"] addSubview:self.mapview];
     scrollViewList.scrollEnabled=NO;
+}
+-(GMSCameraPosition *)getNewDownABitOfCameraWithLat:(double) lat lng:(double)lng{
+    CGPoint oriCenter=[self.mapview.projection pointForCoordinate:CLLocationCoordinate2DMake(lat,lng)];
+    CGPoint destCenter=CGPointMake(oriCenter.x, oriCenter.y-80);
+    CLLocationCoordinate2D destCoordinate=[self.mapview.projection coordinateForPoint:destCenter];
+    NSLog(@"%@",[NSString stringWithFormat:@"%f,%f",lat,destCoordinate.latitude]);
+    GMSCameraPosition *destCamera = [GMSCameraPosition cameraWithLatitude:destCoordinate.latitude
+                                                                longitude:destCoordinate.longitude
+                                                                     zoom:15];
+    return destCamera;
 }
 
 -(void)statusExpandToWithKeyboard:(ButtonComment *) btnCoextmment{
@@ -944,10 +952,7 @@
         }
     }
     marker.icon=nil;
-    GMSCameraPosition *camera = [GMSCameraPosition cameraWithLatitude:marker.position.latitude
-                                                            longitude:marker.position.longitude
-                                                                 zoom:15];
-    [self.mapview setCamera:camera];
+    [self.mapview setCamera:[self getNewDownABitOfCameraWithLat:marker.position.latitude lng:marker.position.longitude]];
 
 
     CustomizeMarker * newMarker=(CustomizeMarker *) marker;
@@ -968,4 +973,5 @@
 - (BOOL)mapView:(GMSMapView *)mapView didTapMarker:(GMSMarker *)marker{
         return YES;
 }
+
 @end

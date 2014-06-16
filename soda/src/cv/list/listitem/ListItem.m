@@ -327,12 +327,19 @@ double posLeft;
 //            CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
 //            stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
 //        }
-        NSString *stringDist=@"0";
-        CLLocation *destination=[[CLLocation alloc] initWithLatitude:self.lat  longitude:self.lng];
-        CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
-        stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
-        self.distance=[stringDist doubleValue];
+//        NSString *stringDist=@"0";
+//        CLLocation *destination=[[CLLocation alloc] initWithLatitude:self.lat  longitude:self.lng];
+//        CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
+//        stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
+//        self.distance=[stringDist doubleValue];
     }
+    NSString *stringDist=@"0";
+    CLLocation *destination=[[CLLocation alloc] initWithLatitude:self.lat  longitude:self.lng];
+    CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
+    stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
+    self.distance=[stringDist doubleValue];
+    
+    
     //official suggestion
     if(!isFromLocal){
         if([self checkFlagByGoogleId:self.googleId]){
@@ -373,7 +380,7 @@ double posLeft;
     if([selected.sortingKey isEqual:@"rating"]){
         NSString *url=[NSString stringWithFormat:@"%@://%@/%@?action=%@&google_place_id=%@&is_from_local=0",self.gv.urlProtocol,self.gv.domain,self.gv.controllerReview,self.gv.actionGetReview,self.googleId];
         NSDictionary *dicReview=[Util jsonWithUrl:url];
-        NSLog(@"%@",url);
+//        NSLog(@"%@",url);
         NSArray * arrReviewFromLocal=[dicReview objectForKey:@"results"];
         int originalReviewCount=(int)self.arrReview.count;
         double totalRatingFromLocalSite=0;

@@ -206,6 +206,7 @@ double posLeft;
         [blurBg setDynamic:YES];
         [blurBg setBlurEnabled:YES];
     }
+    NSLog(@"%@",strURL);
     [imgViewBg loadImageFromURL:strURL target:self completion:@selector(blurVersion)];
     
 }
@@ -308,7 +309,8 @@ double posLeft;
         return NO;
     }
     if([[data objectForKey:@"photos"] count]>0){
-        [self loadPicFromGoogle:[[[[data objectForKey:@"result"] objectForKey:@"photos"] objectAtIndex:0]  valueForKey:@"photo_reference"]];
+
+        [self loadPicFromGoogle:[[[data  objectForKey:@"photos"] objectAtIndex:0]  valueForKey:@"photo_reference"]];
     }
     if([selected.sortingKey isEqual:@"distance"]){
 //        [NSThread sleepForTimeInterval:0.1];

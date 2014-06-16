@@ -15,6 +15,8 @@
 #import "KeyboardTopInput.h"
 #import <GoogleMaps/GoogleMaps.h>
 #import "CustomizeMarker.h"
+#import "ButtonMore.h"
+
 @interface ScrollViewControllerList : ViewControllerProtoType<CLLocationManagerDelegate, GMSMapViewDelegate>
 @property ScrollViewList *scrollViewList;
 
@@ -41,7 +43,7 @@
 @property BOOL isHidingNoDataCat;
 @property ButtonProtoType *btnNext;
 @property ButtonProtoType *btnPrevious;
-@property ButtonProtoType *btnMore;
+@property ButtonMore *btnMore;
 -(void)showNoDataCat;
 -(void)hideNoDataCat;
 

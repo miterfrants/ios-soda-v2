@@ -34,7 +34,7 @@
         scrollViewList=[[ScrollViewList alloc] initWithFrame:CGRectMake(0, 0, gv.screenW, gv.screenH-80)];
         [self.view addSubview:scrollViewList];
         scrollViewList.indicatorStyle = UIScrollViewIndicatorStyleWhite;
-        self.btnMore= [[ButtonProtoType alloc] initWithFrame:CGRectMake(0, 0, 320, 40)];
+        self.btnMore= [[ButtonMore alloc] initWithFrame:CGRectMake(0, 0, 320, 40)];
         [self.btnMore setBackgroundColor:[Util colorWithHexString:@"#8fc9c8ff"]];
 
         [self.btnMore setHidden:YES];

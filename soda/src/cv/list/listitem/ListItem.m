@@ -206,7 +206,6 @@ double posLeft;
         [blurBg setDynamic:YES];
         [blurBg setBlurEnabled:YES];
     }
-    NSLog(@"%@",strURL);
     [imgViewBg loadImageFromURL:strURL target:self completion:@selector(blurVersion)];
     
 }
@@ -627,7 +626,7 @@ double posLeft;
     isExpanded=YES;
 
     [self.superview bringSubviewToFront:self];
-    NSLog(@"detailName:%@",detailName);
+//    NSLog(@"detailName:%@",detailName);
     if(![detailName isEqual:@"review"]){
         [self.btnComment setFrame:CGRectMake(28-self.gv.screenW, self.btnComment.frame.origin.y, self.btnComment.frame.size.width, self.btnComment.frame.size.height)];
         [self.lblIForComment setFrame:CGRectMake(20-self.gv.screenW, self.lblIForComment.frame.origin.y, self.lblIForComment.frame.size.width, self.lblIForComment.frame.size.height)];
@@ -649,7 +648,21 @@ double posLeft;
         duration=0.0;
     }
     scrollViewControllerList.scrollViewList.isAutoAnimation=YES;
-    [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
+//    [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (scrollViewControllerList.scrollViewList.subviews.count-2)*150+(self.gv.screenH-80-150))];
+
+    [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
+     {
+         if(self.imgViewBg.image==nil && self.seq>0){
+             [scrollViewControllerList.scrollViewList setContentOffset:CGPointMake(0, self.seq*150-1) animated:YES];
+         }else{
+             [scrollViewControllerList.scrollViewList setContentOffset:CGPointMake(0, self.seq*150+1) animated:YES];
+         }
+     } completion:^(BOOL finished) {
+         if(finished){
+             
+         }
+     }];
+    [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
      {
          //這邊要修改成 再scrollViewList裡頭做掉 要不然scroll 再轉的時候會變更viewFunBar的高度
          [scrollViewControllerList.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 0)];
@@ -694,14 +707,8 @@ double posLeft;
          }
      }];
 
-
-    [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (scrollViewControllerList.scrollViewList.subviews.count-2)*150+(self.gv.screenH-80-150))];
     
-    if(self.imgViewBg.image==nil && self.seq>0){
-        [scrollViewControllerList.scrollViewList setContentOffset:CGPointMake(0, self.seq*150-1) animated:YES];
-    }else{
-        [scrollViewControllerList.scrollViewList setContentOffset:CGPointMake(0, self.seq*150+1) animated:YES];
-    }
+
 
 }
 

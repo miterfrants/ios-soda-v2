@@ -108,6 +108,7 @@
 		028FFB2F190A6851007CE44E /* ViewSuggestion.m in Sources */ = {isa = PBXBuildFile; fileRef = 028FFB2D190A6851007CE44E /* ViewSuggestion.m */; };
 		028FFB32190A68A9007CE44E /* TextComment.m in Sources */ = {isa = PBXBuildFile; fileRef = 028FFB31190A68A9007CE44E /* TextComment.m */; };
 		0291A6C6194EB8AE00B112A5 /* LoadingCircle.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6C5194EB8AE00B112A5 /* LoadingCircle.m */; };
+		0291A6C9194EF7DE00B112A5 /* ButtonMore.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6C8194EF7DE00B112A5 /* ButtonMore.m */; };
 		029C86EC1945668900740266 /* GooglePlaceAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86EB1945668900740266 /* GooglePlaceAPI.m */; };
 		029C86F5194566EC00740266 /* GooglePlaceAPIPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86F4194566EC00740266 /* GooglePlaceAPIPool.m */; };
 		029C86F8194845CD00740266 /* LoadingBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86F7194845CD00740266 /* LoadingBar.m */; };
@@ -386,6 +387,8 @@
 		028FFB31190A68A9007CE44E /* TextComment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextComment.m; sourceTree = "<group>"; };
 		0291A6C4194EB8AE00B112A5 /* LoadingCircle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoadingCircle.h; sourceTree = "<group>"; };
 		0291A6C5194EB8AE00B112A5 /* LoadingCircle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoadingCircle.m; sourceTree = "<group>"; };
+		0291A6C7194EF7DE00B112A5 /* ButtonMore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ButtonMore.h; path = listitem/ButtonMore.h; sourceTree = "<group>"; };
+		0291A6C8194EF7DE00B112A5 /* ButtonMore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ButtonMore.m; path = listitem/ButtonMore.m; sourceTree = "<group>"; };
 		029C86EA1945668900740266 /* GooglePlaceAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GooglePlaceAPI.h; sourceTree = "<group>"; };
 		029C86EB1945668900740266 /* GooglePlaceAPI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GooglePlaceAPI.m; sourceTree = "<group>"; };
 		029C86F3194566EC00740266 /* GooglePlaceAPIPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GooglePlaceAPIPool.h; sourceTree = "<group>"; };
@@ -879,6 +882,8 @@
 				02B6AC8E1924B61C00ACCF61 /* function */,
 				02B6AC2C191F5DBC00ACCF61 /* ScrollViewList.h */,
 				02B6AC2D191F5DBC00ACCF61 /* ScrollViewList.m */,
+				0291A6C7194EF7DE00B112A5 /* ButtonMore.h */,
+				0291A6C8194EF7DE00B112A5 /* ButtonMore.m */,
 				02B6AC2F191F648700ACCF61 /* ScrollViewControllerList.h */,
 				02B6AC30191F648700ACCF61 /* ScrollViewControllerList.m */,
 			);
@@ -1443,6 +1448,7 @@
 				02526E531929089A00DE0327 /* SliderDistance.m in Sources */,
 				028FFB2E190A6851007CE44E /* ButtonSendSuggestion.m in Sources */,
 				02B6AC9D1924B6FA00ACCF61 /* ViewPanelForLocation.m in Sources */,
+				0291A6C9194EF7DE00B112A5 /* ButtonMore.m in Sources */,
 				0244A34B193DA17800EA22BF /* ButtonExpand.m in Sources */,
 				02D88A0419016DD300941199 /* ScrollViewControllerCate.m in Sources */,
 				02ED98F718F79EDC00B3B839 /* UIAsyncLabel.m in Sources */,

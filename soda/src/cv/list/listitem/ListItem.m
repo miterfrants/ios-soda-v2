@@ -292,10 +292,52 @@ double posLeft;
             }else{
                 BOOL iniResult=[self initialItem:[data objectForKey:@"result"] isFromLocal:NO];
                 dispatch_async(dispatch_get_main_queue(), ^{
+                    [self.loadingCircle stop];
                     if(iniResult){
                         [self placeElement];
                         [self displaySelf];
+                    }else{
+                        self.seq=-1;
+                        [self removeFromSuperview];
+                        [self setAlpha:0.0];
+                        [self setHidden:YES];
                     }
+                    //filter condition current page complete;
+                    if(scrollViewControllerList.isExistfilterCondition && scrollViewControllerList.checkedConditionCount>=scrollViewControllerList.targetIndex){
+                        double moreButtonOffset =0;
+                        if(!scrollViewControllerList.isEndedForSearchResult){
+                            moreButtonOffset=40;
+                        }
+                        [scrollViewControllerList.btnMore setHidden:NO];
+                        int itemCount=(int)scrollViewControllerList.scrollViewList.subviews.count-3;
+                        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, itemCount*150+40+moreButtonOffset)];
+                        [scrollViewControllerList.btnMore setFrame:CGRectMake(0, (scrollViewControllerList.scrollViewList.subviews.count-3)*150+40, self.gv.screenW, 40)];
+                        [UIView animateWithDuration:0.28 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                            if(moreButtonOffset==0){
+                                [scrollViewControllerList.btnMore setAlpha:0.0f];
+                            }else{
+                                [scrollViewControllerList.btnMore setAlpha:1.0f];
+                            }
+                            [scrollViewControllerList.scrollViewList setAlpha:1.0];
+                            [scrollViewControllerList.loading stop];
+                            NSArray *subviews=scrollViewControllerList.scrollViewList.subviews;
+                            for(int i=0;i<subviews.count;i++){
+                                if(![[subviews objectAtIndex:i] isKindOfClass:[ListItem class]]){
+                                    continue;
+                                }
+                                ListItem *item=(ListItem *)[subviews objectAtIndex:i];
+                                if(item.seq>0){
+                                    [item setAlpha:1.0f];
+                                }
+                            }
+                        } completion:^(BOOL finished) {
+                            
+                        }];
+                    }else{
+                        scrollViewControllerList.checkedConditionCount+=1;
+                    }
+                    
+
                 });
             }
         } queue:self.gv.backgroundThreadManagement];
@@ -305,9 +347,6 @@ double posLeft;
 
 
 -(BOOL) initialItem:(NSMutableDictionary *)data isFromLocal:(BOOL) isFromLocal{
-//    NSLog(@"name:%@",[[data objectForKey:@"result"] valueForKey:@"name"]);
-//    NSLog(@"status:%@",[data objectForKey:@"status"]);
-    
     ScrollViewControllerCate *scrollViewControllerCate=(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList *)self.gv.scrollViewControlllerList;
     ButtonCate *selected=scrollViewControllerCate.selectedButtonCate;
@@ -472,12 +511,12 @@ double posLeft;
         }
     }
     if([scrollViewControllerList isExistSortingKey]){
-        self.seq=scrollViewControllerList.createIndex;        
+        self.seq=scrollViewControllerList.createItemCount;        
     }
 
     //finish all thing only sotring;
-    NSLog(@"%@",[NSString stringWithFormat:@"%d/%d",scrollViewControllerList.createIndex,scrollViewControllerList.totalIndex]);
-    if(scrollViewControllerList.createIndex==scrollViewControllerList.totalIndex && scrollViewControllerList.arrRadarResult.count>0){
+//    NSLog(@"%@",[NSString stringWithFormat:@"%d/%d",scrollViewControllerList.createItemCount,scrollViewControllerList.totalIndex]);
+    if(scrollViewControllerList.createItemCount==scrollViewControllerList.totalIndex && scrollViewControllerList.arrRadarResult.count>0){
         NSLog(@"show list");
         if([scrollViewControllerList isExistSortingKey]){
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -487,7 +526,10 @@ double posLeft;
             });
         }
     }
-    scrollViewControllerList.createIndex+=1;
+    if(scrollViewControllerList.isExistSortingKey){
+        scrollViewControllerList.createItemCount+=1;
+    }
+    //exist filter condition createIndex add one
     return YES;
 }
 
@@ -499,12 +541,13 @@ double posLeft;
                           userInfo:nil];
         @throw e;
     }
-    [self.loadingCircle stop];
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList *)self.gv.scrollViewControlllerList;
     if([scrollViewControllerList isExistfilterCondition] && ![scrollViewControllerList isExistSortingKey]){
         self.isShow=YES;
         [scrollViewControllerList.scrollViewList addSubview:self];
-        [self setFrame:CGRectMake(0, 150*self.seq, self.gv.screenW, 150)];
+        [self setFrame:CGRectMake(0, 150*scrollViewControllerList.createItemCount+40, self.gv.screenW, 150)];
+        self.seq=scrollViewControllerList.createItemCount;
+        scrollViewControllerList.createItemCount+=1;
         [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
          {
              [self.contentCon setAlpha:1.0f];
@@ -512,7 +555,6 @@ double posLeft;
              if (finished){
              }
          }];
-        [((UIScrollView*)self.superview) setContentSize:CGSizeMake(self.gv.screenW, scrollViewControllerList.createIndex*150)];
     }else if(![scrollViewControllerList isExistfilterCondition] && ![scrollViewControllerList isExistSortingKey]){
         [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
          {
@@ -528,6 +570,7 @@ double posLeft;
 
 //main thread function
 -(void) placeElement{
+    [self.loadingCircle stop];
     if(![NSThread isMainThread]){
         NSException *e = [NSException
                           exceptionWithName:@"main thread exception"
@@ -562,6 +605,8 @@ double posLeft;
         [btnPhone setHidden:NO];
     }else{
         if(selected.isOnlyShowPhone && ![scrollViewControllerList isExistSortingKey]){
+            [self.loadingCircle stop];
+            [self setHidden:YES];
             return;
         }
         iniPos+=44;
@@ -583,6 +628,8 @@ double posLeft;
     iniPos+=53;
     [btnReview setHidden:NO];
     if(rate<selected.rating && ![scrollViewControllerList isExistSortingKey]){
+        [self.loadingCircle stop];
+        [self setHidden:YES];
         return;
     }
     [btnReview setRate:rate];
@@ -596,6 +643,8 @@ double posLeft;
         if(self.isOpening){
             [btnLigth turnOn];
         }else if(selected.isOnlyShowOpening && ![scrollViewControllerList isExistSortingKey]){
+            [self.loadingCircle stop];
+            [self setHidden:YES];
             return;
         }
     }
@@ -944,7 +993,11 @@ double posLeft;
          ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList*) self.gv.scrollViewControlllerList;
          [scrollViewControllerList.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 40)];
          [scrollViewControllerList.scrollViewList iniMarker];
-         scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, self.seq*150);
+         if(self.seq*150>scrollViewControllerList.scrollViewList.contentSize.height-self.gv.screenH+80){
+             scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, scrollViewControllerList.scrollViewList.contentSize.height-self.gv.screenH+80);
+         }else{
+             scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, self.seq*150);
+         }
         [[dicDetailPanel objectForKey:self.expandName] setFrame:CGRectMake(0, 150, self.gv.screenW, self.gv.screenH-80-150)];
 
          for(int i =0;i<[arrItemList count];i++){

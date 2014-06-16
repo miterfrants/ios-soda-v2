@@ -24,7 +24,7 @@
 @property CLLocationManager *locationManager;
 @property NSArray *arrRadarResult;
 @property NSMutableArray *arrMarker;
-@property int currReulstIndex;
+
 @property BOOL isLoadingList;
 @property BOOL isEndedForSearchResult;
 @property NSString *keyword;
@@ -32,9 +32,14 @@
 @property FunctionBar *viewFunBar;
 @property GMSMapView *mapview;
 @property double distance;
-@property int createIndex;
+
+@property int itemInstanceCreateCount;
+@property int createItemCount;
 @property int totalIndex;
 @property int targetIndex;
+@property int checkedConditionCount;
+@property int startIndex;
+
 @property LoadingCircle *loading;
 @property BOOL isCancelCurrentLoadItemListMarker;
 @property NSMutableArray *arrItemList;

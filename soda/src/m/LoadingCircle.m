@@ -54,6 +54,7 @@
          [self setAlpha:0.0];
      } completion:^(BOOL finished) {
          if (finished){
+            self.transform=CGAffineTransformMakeRotation(0);
              [self.animationTimer invalidate];
              self.animationTimer=nil;
              [self setHidden:YES];

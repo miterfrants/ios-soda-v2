@@ -61,7 +61,7 @@
        ){
         return;
     }
-    ListItem *item=(ListItem *)self.superview;
+    ListItem *item=(ListItem *)self.superview.superview;
     if([self.gv.localUserId isEqual:@"2"]){
         NSString *action=self.gv.actionAddOfficialSuggestPlace;
         if([self isFavorite]){
@@ -109,7 +109,7 @@
 }
 -(void) _updateFavorite{
     FMDatabase *db=[DB getShareInstance].db;
-    ListItem *item=(ListItem*) self.superview;
+    ListItem *item=(ListItem*) self.superview.superview;
     [db open];
     int countForPlace=[db intForQuery:[NSString stringWithFormat:@"SELECT COUNT(*) FROM favorite where google_id='%@'",item.googleId]];
     if(countForPlace>0){

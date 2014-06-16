@@ -149,7 +149,7 @@
     pathAnimationForTriangle.fillMode=kCAFillModeForwards;
     [self.layerTriangle addAnimation:pathAnimationForTriangle forKey:nil];
     
-    ListItem* item=(ListItem *)self.superview;
+    ListItem* item=(ListItem *)self.superview.superview;
     [item.scrollViewDetailReview setContentSize:CGSizeMake(self.gv.screenW, item.scrollViewDetailReview.originalContentHeight+self.expandedSize.height)];
     [UIView animateWithDuration:0.23 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
         [item.lblIForComment setFrame:CGRectMake(item.lblIForComment.frame.origin.x, 180+midOfHeight-28, item.lblIForComment.frame.size.width, item.lblIForComment.frame.size.height)];

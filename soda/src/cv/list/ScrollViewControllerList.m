@@ -22,7 +22,7 @@
 @end
 
 @implementation ScrollViewControllerList
-@synthesize scrollViewList,gv,nextPageToken,locationManager,arrRadarResult,currReulstIndex,keyword,types,viewFunBar,arrItemList,isShowNoDataCate,isHidingNoDataCat;
+@synthesize scrollViewList,gv,nextPageToken,locationManager,arrRadarResult,itemInstanceCreateCount,keyword,types,viewFunBar,arrItemList,isShowNoDataCate,isHidingNoDataCat;
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
@@ -172,6 +172,7 @@
             [[nextItem.dicDetailPanel objectForKey:key] setFrame:CGRectMake(0, 150, self.gv.screenW, 0)];
         }
     }
+    [nextItem.contentCon setFrame:CGRectMake(0, 0, self.gv.screenW, self.gv.screenH-80)];
     [nextItem setFrame:CGRectMake(0, nextItem.seq*150+40, self.gv.screenW, self.gv.screenH-80)];
     for(int i =0;i<[arrItemList count];i++){
         ListItem* item=(ListItem*) [arrItemList objectAtIndex:i];
@@ -262,7 +263,7 @@
         }
     }
     [prevItem setFrame:CGRectMake(0, prevItem.frame.origin.y, self.gv.screenW, self.gv.screenH-80)];
-    
+    [prevItem.contentCon setFrame:CGRectMake(0, 0, self.gv.screenW, self.gv.screenH-80)];
     for(int i =0;i<[arrItemList count];i++){
         ListItem* item=(ListItem*) [arrItemList objectAtIndex:i];
         if(item.seq==-1){
@@ -362,14 +363,6 @@
              ScrollViewControllerCate *scrollViewControllerCate =(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
              ButtonCate *selected=scrollViewControllerCate.selectedButtonCate;
              [self loadListAndInitWithKeyword:selected.keyword type:@"" dist:selected.distance center:selected.centerLocation];
-             [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
-              {
-                  [self.scrollViewList setAlpha:1.0f];
-              } completion:^(BOOL finished){
-                  if (finished){
-
-                  }
-              }];
          }
      }];
 }
@@ -378,23 +371,27 @@
     NSLog(@"%@",@"loadListWithKeyword");
     NSLog(@"distance:%f",dist);
     [self.scrollViewList setContentOffset:CGPointMake(0, 0)];
+    [self.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, 0)];
+    [self.scrollViewList setScrollEnabled:YES];
+    [self.scrollViewList setAlpha:0.0f];
+    
     self.isLoadingList=YES;
     self.keyword=pKeyword;
     self.distance=dist;
     self.types=pType;
     self.isEndedForSearchResult=NO;
-    self.createIndex=0;
+    self.createItemCount=0;
     self.totalIndex=0;
     self.targetIndex=0;
+    self.checkedConditionCount=0;
     self.isCancelCurrentLoadItemListMarker=NO;
-    [self.scrollViewList setScrollEnabled:YES];
     self.arrItemList=[[NSMutableArray alloc] init];
-    [self.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, 0)];
+
     [self clearList];
     [self initialFunctionBarProperty];
     [self hideNoDataCat];
     [self.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 40)];
-//    [self.loading process:0 completion:nil];
+    [self.loading setFrame:CGRectMake((self.gv.screenW-30)/2, (150-30)/2+40, 30, 30)];
 
     CLLocationCoordinate2D searchCenter;
     if(center.latitude>0 && center.longitude>0){
@@ -408,7 +405,7 @@
         searchCenter=CLLocationCoordinate2DMake(locationManager.location.coordinate.latitude,locationManager.location.coordinate.longitude);
     }
 
-    if([self isExistSortingKey]){
+    if([self isExistSortingKey] || [self isExistfilterCondition]){
         //[self.loading start];
         [self.loading setAlpha:0.0f];
         [self.loading setHidden:NO];
@@ -442,7 +439,7 @@
             NSLog(@"NO DATA");
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self showNoDataCat];
-                [self.loading hide];
+                [self.loading stop];
             });
             return;
         }else if(arrFromLocal.count<arrFromGoogle.count){
@@ -455,25 +452,32 @@
             //update empty data and expired data   
         }
         NSLog(@"radar result:%d",(int) [arrRadarResult count]);
+        
         self.totalIndex=(int) [arrRadarResult count]-1;
         int maxLen=(int) [arrRadarResult count];
         //no sorting key load by onece
-        if(![self isExistSortingKey]){
+        if([self isExistSortingKey]){
+            [scrollViewList setAlpha:0.0f];
+            self.isEndedForSearchResult=YES;
+        }else{
+            if([self isExistfilterCondition]){
+                [scrollViewList setAlpha:0.0f];
+            }else{
+                [scrollViewList setAlpha:1.0f];
+            }
             if(maxLen>self.gv.listBufferCount){
                 maxLen=self.gv.listBufferCount;
             }else{
                 //ScrollView Load NextPage marker;
                 self.isEndedForSearchResult=YES;
             }
-        }else{
-            [scrollViewList setAlpha:0.0f];
-            self.isEndedForSearchResult=YES;
         }
         if(maxLen>0){
             self.targetIndex=maxLen-1;
         }else{
             self.targetIndex=0;
         }
+        
         NSLog(@"targetIndex:%d",self.targetIndex);
         NSLog(@"loading detail count:%d",maxLen);
         
@@ -481,7 +485,8 @@
         BOOL isExistSortingKey=[self isExistSortingKey];
         NSLog(@"creat item instance");
         dispatch_async(dispatch_get_main_queue(), ^{
-            [self createItemFromRadarResultWithIndex:0 isExistFilterCondition:isExistFilterCondition isExistSortingKey:isExistSortingKey isFromLocal:isFromLocal];
+            self.startIndex=0;
+            [self createItemFromRadarResultWithIndex:0 isExistFilterCondition:isExistFilterCondition isExistSortingKey:isExistSortingKey isFromLocal:isFromLocal isSecondPage:NO];
         });
 
         if(!isExistFilterCondition){
@@ -551,68 +556,74 @@
     }
     return NO;
 }
--(void) createItemFromRadarResultWithIndex:(int) i isExistFilterCondition:(BOOL) isExistFilterCondition isExistSortingKey:(BOOL) isExistSortingKey isFromLocal:(BOOL) isFromLocal{
+-(void) createItemFromRadarResultWithIndex:(int) i isExistFilterCondition:(BOOL) isExistFilterCondition isExistSortingKey:(BOOL) isExistSortingKey isFromLocal:(BOOL) isFromLocal isSecondPage:(BOOL) isSecondPage{
     //如果有過濾條件不要設定寬高由 ListItem addLoadGooglePlaceDetailToQueue 載完資料後設定 但要檢查一下y有沒有重複
     //這邊initail 50%; loading 50%;
     //如果我alloc 和process bar 一起跑的話 process bar會被卡住 所以做完一次讓process bar動畫跑完再initial
     ListItem *item=[[ListItem alloc]init];
-//loading progress bar
-//    [self.loading process:(double)((i*0.5)/self.totalIndex) completion:^{
-        //initial
-        [item setFrame:CGRectMake(0, i*150+40, gv.screenW, 150)];
-        if(!isExistSortingKey){
-            item.isShow=YES;
-            item.seq=i;
-            [item.loadingCircle start];
-            [scrollViewList addSubview:item];
-            [item.contentCon setAlpha:0.0];
+
+
+    //initial
+    [item setFrame:CGRectMake(0, i*150+40, gv.screenW, 150)];
+    //common status
+    if(!isExistSortingKey && !isExistFilterCondition){
+        item.isShow=YES;
+        item.seq=i;
+        [item.loadingCircle start];
+        [scrollViewList addSubview:item];
+        [item.contentCon setAlpha:0.0];
+    //exist condition
+    }else{
+        item.seq=i;
+        item.isShow=NO;
+        if(isSecondPage){
+            [item setAlpha:0.0];
         }else{
-            item.isShow=NO;
             [item.contentCon setAlpha:1.0];
         }
+    }
 
-        NSMutableDictionary *dicDataItem= [arrRadarResult objectAtIndex:i];
-        //要不要 distance
+    NSMutableDictionary *dicDataItem= [arrRadarResult objectAtIndex:i];
+    //要不要 distance
+    if(isFromLocal){
+        item.googleId=[[dicDataItem objectForKey:@"result"] valueForKey:@"id"];
+        item.lat=[[[[[dicDataItem objectForKey:@"result"] objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lat"] doubleValue];
+        item.lng=[[[[[dicDataItem objectForKey:@"result"] objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lng"] doubleValue];
+        item.googleRef=[[dicDataItem objectForKey:@"result"] valueForKey:@"reference"];
+        item.jsonBaseData=[dicDataItem objectForKey:@"result"];
+    }else{
+        item.googleId=[dicDataItem valueForKey:@"id"];
+        item.lat=[[[[dicDataItem objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lat"] doubleValue];
+        item.lng=[[[[dicDataItem objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lng"] doubleValue];
+        item.googleRef=[dicDataItem valueForKey:@"reference"];
+    }
+    [arrItemList addObject:item];
+    itemInstanceCreateCount=i;
+    //NSLog(@"create:%@",[NSString stringWithFormat:@"%d/%d",itemInstanceCreateCount,self.totalIndex]);
+    //next one
+    if(itemInstanceCreateCount<self.targetIndex){
+        [self createItemFromRadarResultWithIndex:itemInstanceCreateCount+1 isExistFilterCondition:isExistFilterCondition isExistSortingKey:isExistSortingKey isFromLocal:isFromLocal isSecondPage:isSecondPage];
+    }else{
+        NSLog(@"create item instance finish;");
+        NSLog(@"finish and target index:%d",self.targetIndex);
+        if(isExistSortingKey){
+            itemInstanceCreateCount=self.gv.listBufferCount-1;
+        }
         if(isFromLocal){
-            item.googleId=[[dicDataItem objectForKey:@"result"] valueForKey:@"id"];
-            item.lat=[[[[[dicDataItem objectForKey:@"result"] objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lat"] doubleValue];
-            item.lng=[[[[[dicDataItem objectForKey:@"result"] objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lng"] doubleValue];
-            item.googleRef=[[dicDataItem objectForKey:@"result"] valueForKey:@"reference"];
-            item.jsonBaseData=[dicDataItem objectForKey:@"result"];
-        }else{
-            item.googleId=[dicDataItem valueForKey:@"id"];
-            item.lat=[[[[dicDataItem objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lat"] doubleValue];
-            item.lng=[[[[dicDataItem objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lng"] doubleValue];
-            item.googleRef=[dicDataItem valueForKey:@"reference"];
-        }
-        [arrItemList addObject:item];
-        currReulstIndex=i;
-        NSLog(@"create:%@",[NSString stringWithFormat:@"%d/%d",currReulstIndex,self.totalIndex]);
-        //next one
-        if(currReulstIndex<self.targetIndex){
-            [self createItemFromRadarResultWithIndex:currReulstIndex+1 isExistFilterCondition:isExistFilterCondition isExistSortingKey:isExistSortingKey isFromLocal:isFromLocal];
-        }else{
-            NSLog(@"create item instance finish;");
-            NSLog(@"finish and target index:%d",self.targetIndex);
-            if(isExistSortingKey){
-                currReulstIndex=self.gv.listBufferCount-1;
+            for(int i=self.startIndex;i<=self.targetIndex;i++){
+                ListItem *currItem=(ListItem *)[arrItemList objectAtIndex:i];
+                NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(initialItem:) object:currItem];
+                [self.gv.backgroundThreadManagement addOperation:operation];
             }
-            if(isFromLocal){
-                for(int i=currReulstIndex-self.gv.listBufferCount+1;i<=self.targetIndex;i++){
-                    ListItem *currItem=(ListItem *)[arrItemList objectAtIndex:i];
-                    NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(initialItem:) object:currItem];
-                    [self.gv.backgroundThreadManagement addOperation:operation];
-                }
-            }else{
-                for(int i=currReulstIndex-self.gv.listBufferCount+1;i<=self.targetIndex;i++){
-                    ListItem *currItem=(ListItem *)[arrItemList objectAtIndex:i];
-                    [currItem addLoadGooglePlaceDetailToQueue:currItem.googleRef];
-                }
+        }else{
+            for(int i=self.startIndex;i<=self.targetIndex;i++){
+                ListItem *currItem=(ListItem *)[arrItemList objectAtIndex:i];
+                [currItem addLoadGooglePlaceDetailToQueue:currItem.googleRef];
             }
-            //ScrollView Load NextPage marker;
-            self.isLoadingList=NO;
         }
-//    }];
+        //ScrollView Load NextPage marker;
+        self.isLoadingList=NO;
+    }
     
 }
 -(void)initialItem:(ListItem*) item{
@@ -678,7 +689,6 @@
 }
 
 -(void)loadNextPageList{
-    
     if(self.isEndedForSearchResult){
         return;
     }
@@ -686,28 +696,44 @@
         return;
     }
     int maxLen=(int)self.arrRadarResult.count;
-    if(maxLen>currReulstIndex+self.gv.listBufferCount+1){
-        maxLen=currReulstIndex+self.gv.listBufferCount+1;
+    if(maxLen>itemInstanceCreateCount+self.gv.listBufferCount+1){
+        maxLen=itemInstanceCreateCount+self.gv.listBufferCount+1;
     }else{
         self.isEndedForSearchResult=YES;
     }
-    NSLog(@"page:%d",currReulstIndex+self.gv.listBufferCount);
+
     if(maxLen>0){
         self.targetIndex=maxLen-1;
     }else{
         self.targetIndex=0;
     }
+    self.startIndex=itemInstanceCreateCount;
+    
+    NSLog(@"page:%d",itemInstanceCreateCount+self.gv.listBufferCount);
     NSLog(@"targetIndex:%d",self.targetIndex);
+
+    
     self.isLoadingList=YES;
-    if(self.targetIndex<self.totalIndex){
-        [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (self.targetIndex+1)*150+40+40   )];
-        [self.btnMore setFrame:CGRectMake(0, (self.targetIndex+1)*150+40, 320, 40)];
-        [self.btnMore setHidden:NO];
+
+    if([self isExistfilterCondition]){
+        [self.loading setFrame:CGRectMake((self.gv.screenW-30)/2, self.gv.screenH-30-80-8, 30, 30)];
+        [self.loading start];
+        [self.loading setHidden:NO];
+        [UIView animateWithDuration:0.28 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+            [self.loading setAlpha:1.0f];
+        } completion:^(BOOL finished) {
+        }];
     }else{
-        [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (self.targetIndex+1)*150+40)];
-        [self.btnMore setHidden:YES];
+        if(self.targetIndex<self.totalIndex){
+            [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (self.targetIndex+1)*150+40+40   )];
+            [self.btnMore setFrame:CGRectMake(0, (self.targetIndex+1)*150+40, 320, 40)];
+            [self.btnMore setHidden:NO];
+        }else{
+            [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (self.targetIndex+1)*150+40)];
+            [self.btnMore setHidden:YES];
+        }
     }
-    [self createItemFromRadarResultWithIndex:self.currReulstIndex+1 isExistFilterCondition:[self isExistfilterCondition] isExistSortingKey:[self isExistSortingKey] isFromLocal:NO];
+    [self createItemFromRadarResultWithIndex:self.itemInstanceCreateCount+1 isExistFilterCondition:[self isExistfilterCondition] isExistSortingKey:[self isExistSortingKey] isFromLocal:NO isSecondPage:YES];
 }
 
 -(void) initialFunctionBarProperty{
@@ -796,7 +822,7 @@
         [viewFunBar switchViewPanelWithTargetButton:(ButtonFunction *)touch.view];
     }else if([touch.view isKindOfClass:[ButtonSaveReview class]] && [GV getGlobalStatus]== LIST_EXPAND){
         NSLog(@"list condition 7: 存review");
-        ListItem *item=(ListItem *) touch.view.superview.superview;
+        ListItem *item=(ListItem *) touch.view.superview.superview.superview;
         [item saveReview];
     }
     else if([touch.view isKindOfClass:[ButtonInputForComment class]]){

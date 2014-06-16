@@ -20,6 +20,7 @@
 #import "ScrollViewDetailBase.h"
 #import "ScrollViewDetailOpening.h"
 #import "ScrollViewDetailReview.h"
+#import "LoadingCircle.h"
 
 @interface ListItem : ViewProtoType
 @property AsyncImgView *imgViewBg;
@@ -46,6 +47,7 @@
 @property double distance;
 @property double lat;
 @property double lng;
+@property int countFinishAllAnimation;
 @property BOOL isOpening;
 @property BOOL isExistOpeningData;
 @property BOOL isFavorite;
@@ -65,7 +67,8 @@
 @property UIView *viewGradientBgForName;
 @property UIView *viewMiddleLigthBorder;
 @property UIView *viewMiddleDarkBorder;
-
+@property LoadingCircle *loadingCircle;
+@property UIView *contentCon;
 //for review
 @property UILabel *lblIForComment;
 @property UIView *viewTopBgForComment;

@@ -21,6 +21,7 @@
 #import "Util.h"
 
 #import "ReviewHeart.h"
+#import "LoadingCircle.h"
 
 @interface ViewControllerRoot ()
 
@@ -62,17 +63,6 @@
         [self.view addSubview:scrollViewControllerList.view];
         gv.scrollViewControlllerList=scrollViewControllerList;
         
-
-        
-//        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-//            dispatch_async(dispatch_get_main_queue(), ^{
-//                for(int i=0;i<50;i++){
-//                    [test setFrame:CGRectMake(20, 150, 10+i*200/50, 20)];
-//                    NSLog(@"%d",i);
-//                    [NSThread sleepForTimeInterval:0.1];
-//                }
-//            });
-//        });
 
     }
     return self;

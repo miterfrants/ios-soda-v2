@@ -18,6 +18,8 @@ double posLeft;
 {
     self = [super initWithFrame:frame];
     if (self) {
+        self.contentCon=[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 150)];
+        //self.contentCon.userInteractionEnabled=NO;
         // Initialization code
         CGRect rec=CGRectMake(0, 0, self.gv.screenW, 150);
         imgViewBg = [[AsyncImgView alloc]initWithFrame:rec];
@@ -30,24 +32,23 @@ double posLeft;
         dicDetailPanel=[[NSMutableDictionary alloc] init];
         scrollViewDetailMap=[[ScrollViewDetailMap alloc] initWithFrame:CGRectMake(0, 150, self.gv.screenW, self.gv.screenH-40-80-150)];
         scrollViewDetailMap.name=@"map";
-        [scrollViewDetailMap setBackgroundColor:[Util colorWithHexString:@"#FF00007F"]];
-        [self addSubview:scrollViewDetailMap];
+        [self.contentCon addSubview:scrollViewDetailMap];
         [dicDetailPanel setValue:scrollViewDetailMap forKey:scrollViewDetailMap.name];
         
         scrollViewDetailReview=[[ScrollViewDetailReview alloc] initWithFrame:CGRectMake(0, 150, self.gv.screenW, self.gv.screenH-80-150)];
         scrollViewDetailReview.name=@"review";
-        [self addSubview:scrollViewDetailReview];
+        [self.contentCon addSubview:scrollViewDetailReview];
         [dicDetailPanel setValue:scrollViewDetailReview forKey:scrollViewDetailReview.name];
         
         scrollViewDetailOpening=[[ScrollViewDetailOpening alloc] initWithFrame:CGRectMake(0, 150, self.gv.screenW, self.gv.screenH-40-80-150)];
         scrollViewDetailOpening.name=@"opening";
-        [self addSubview:scrollViewDetailOpening];
+        [self.contentCon addSubview:scrollViewDetailOpening];
         [dicDetailPanel setValue:scrollViewDetailOpening forKey:scrollViewDetailOpening.name];
         
         scrollViewDetailBase=[[ScrollViewDetailBase alloc] initWithFrame:CGRectMake(0, 150, self.gv.screenW, self.gv.screenH-40-80-150)];
         scrollViewDetailBase.name=@"base";
         [scrollViewDetailBase setBackgroundColor:[UIColor whiteColor]];
-        [self addSubview:scrollViewDetailBase];
+        [self.contentCon addSubview:scrollViewDetailBase];
         [dicDetailPanel setValue:scrollViewDetailBase forKey:scrollViewDetailBase.name];
         
         //mask
@@ -56,6 +57,7 @@ double posLeft;
         [maskBg setBackgroundColor:[Util colorWithHexString:@"#00000050"]];
         [maskBg setUserInteractionEnabled:NO];
         [self addSubview:maskBg];
+
         
         //blurVersion
         if(self.gv.isBlurModel){
@@ -79,38 +81,40 @@ double posLeft;
         gradient.colors = [NSArray arrayWithObjects:(id)[[Util colorWithHexString:@"0000008f"] CGColor], (id)[[Util colorWithHexString:@"00000000"] CGColor], nil];
         [viewGradientBgForName.layer insertSublayer:gradient atIndex:0];
         [self addSubview:viewGradientBgForName];
+        [self addSubview:self.contentCon];
+        
         
         btnFlag=[[ButtonFlag alloc] initWithFrame:CGRectMake(0, 0, 44, 44)];
-        [self addSubview:btnFlag];
+        [self.contentCon addSubview:btnFlag];
         
         lblName=[[UILabel alloc] init];
         [lblName setFont:self.gv.fontListName];
         [lblName setTextColor:[UIColor whiteColor]];
-        [self addSubview:lblName];
+        [self.contentCon addSubview:lblName];
         
         btnPhone=[[ButtonPhone alloc] initWithFrame:CGRectMake(posLeft,posBottomLine, 44, 44)];
         [btnPhone setHidden:YES];
         strPhone=@"";
-        [self addSubview:btnPhone];
+        [self.contentCon addSubview:btnPhone];
         
         btnLigth=[[ButtonLight alloc] initWithFrame:CGRectMake(posLeft,posBottomLine, 44, 44)];
         [btnLigth setHidden:YES];
         self.isOpening=NO;
-        [self addSubview:btnLigth];
+        [self.contentCon addSubview:btnLigth];
         
         btnFavorite=[[ButtonLike alloc] initWithFrame:CGRectMake(posLeft, posBottomLine, 44, 44)];
         [btnFavorite setHidden:YES];
         self.isFavorite=NO;
-        [self addSubview:btnFavorite];
+        [self.contentCon addSubview:btnFavorite];
 
         
         btnShowMap=[[ButtonShowMap alloc] initWithFrame:CGRectMake(posLeft, posBottomLine, 44, 44)];
         [btnShowMap setHidden:YES];
-        [self addSubview:btnShowMap];
+        [self.contentCon addSubview:btnShowMap];
         
         btnReview=[[ButtonReview alloc] initWithFrame:CGRectMake(posLeft,  posBottomLine, 44, 44)];
         [btnReview setHidden:YES];
-        [self addSubview:btnReview];
+        [self.contentCon addSubview:btnReview];
         
         
         viewTopBorder= [[UIView alloc]initWithFrame:CGRectMake(0, 0, self.gv.screenW, 1)];
@@ -125,11 +129,11 @@ double posLeft;
         
         self.viewMiddleLigthBorder=[[UIView alloc] initWithFrame:CGRectMake(0, 150, self.gv.screenW, 1)];
         [self.viewMiddleLigthBorder setBackgroundColor:[Util colorWithHexString:@"#FFFFFF55"]];
-        [self addSubview:self.viewMiddleLigthBorder];
+        [self.contentCon addSubview:self.viewMiddleLigthBorder];
         [self.viewMiddleLigthBorder setAlpha:0.0];
         self.viewMiddleDarkBorder=[[UIView alloc] initWithFrame:CGRectMake(0, 149, self.gv.screenW, 1)];
         [self.viewMiddleDarkBorder setBackgroundColor:[Util colorWithHexString:@"#00000055"]];
-        [self addSubview:self.viewMiddleDarkBorder];
+        [self.contentCon addSubview:self.viewMiddleDarkBorder];
         [self.viewMiddleDarkBorder setAlpha:0.0];
         
         //comment block
@@ -137,11 +141,15 @@ double posLeft;
         [self.lblIForComment setFont:self.gv.fontListFunctionTitle];
         [self.lblIForComment setText:@"I"];
         [self.lblIForComment setTextColor:[UIColor whiteColor]];
-        [self addSubview:self.lblIForComment];
+        [self.contentCon addSubview:self.lblIForComment];
         
         self.btnComment=[[ButtonComment alloc] initWithFrame:CGRectMake(28, 162,44, 44)];
-        [self addSubview:self.btnComment];
+        [self.contentCon addSubview:self.btnComment];
         [self.btnComment addTarget:self.btnComment action:@selector(switchCommentArea) forControlEvents:UIControlEventTouchUpInside];
+        
+        //circle
+        self.loadingCircle =[[LoadingCircle alloc]initWithFrame:CGRectMake((320-30)/2, (150-30)/2, 30, 30)];
+        [self addSubview:self.loadingCircle];
     }
     return self;
 }
@@ -251,7 +259,6 @@ double posLeft;
             }
 
             if(!isError){
-                //NSLog(@"A");
                 //check opening hours
                 if([[data objectForKey:@"result"] objectForKey:@"opening_hours"]==nil && [[data objectForKey:@"result"] objectForKey:@"opening_hours"]==nil){
                     NSString *name=[[data objectForKey:@"result"] valueForKey:@"name"];
@@ -437,16 +444,16 @@ double posLeft;
     }else{
         self.isExistOpeningData=NO;
     }
-                //NSLog(@"D");
-    dispatch_async(dispatch_get_main_queue(), ^{
-        //loading info
-        if(scrollViewControllerList.totalIndex>0){
-            double perc=((float)(scrollViewControllerList.createIndex*0.5)/scrollViewControllerList.totalIndex);
-            [scrollViewControllerList.loading process:perc+0.5 completion:^{
-            }];
+//loading progress bar
+//    dispatch_async(dispatch_get_main_queue(), ^{
+//        //loading info
+//        if(scrollViewControllerList.totalIndex>0){
+//            double perc=((float)(scrollViewControllerList.createIndex*0.5)/scrollViewControllerList.totalIndex);
+//            [scrollViewControllerList.loading process:perc+0.5 completion:^{
+//            }];
 //            //scrollViewControllerList.loading.lblLoadingInfo.text=[NSString stringWithFormat:@"%.0f %%",floor(scrollViewControllerList.createIndex*100/(scrollViewControllerList.totalIndex))];
-        }
-    });
+//        }
+//    });
     if(![scrollViewControllerList isExistSortingKey]){
         if(selected.isOnlyShowFavorite && !self.isFavorite){
             return NO;
@@ -464,7 +471,10 @@ double posLeft;
             return NO;
         }
     }
-    self.seq=scrollViewControllerList.createIndex;
+    if([scrollViewControllerList isExistSortingKey]){
+        self.seq=scrollViewControllerList.createIndex;        
+    }
+
     //finish all thing only sotring;
     NSLog(@"%@",[NSString stringWithFormat:@"%d/%d",scrollViewControllerList.createIndex,scrollViewControllerList.totalIndex]);
     if(scrollViewControllerList.createIndex==scrollViewControllerList.totalIndex && scrollViewControllerList.arrRadarResult.count>0){
@@ -489,15 +499,15 @@ double posLeft;
                           userInfo:nil];
         @throw e;
     }
+    [self.loadingCircle stop];
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList *)self.gv.scrollViewControlllerList;
     if([scrollViewControllerList isExistfilterCondition] && ![scrollViewControllerList isExistSortingKey]){
         self.isShow=YES;
         [scrollViewControllerList.scrollViewList addSubview:self];
         [self setFrame:CGRectMake(0, 150*self.seq, self.gv.screenW, 150)];
-        [self setAlpha:0.0f];
         [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
          {
-             [self setAlpha:1.0f];
+             [self.contentCon setAlpha:1.0f];
          } completion:^(BOOL finished) {
              if (finished){
              }
@@ -506,7 +516,7 @@ double posLeft;
     }else if(![scrollViewControllerList isExistfilterCondition] && ![scrollViewControllerList isExistSortingKey]){
         [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
          {
-             [self setAlpha:1.0f];
+             [self.contentCon setAlpha:1.0f];
          } completion:^(BOOL finished) {
              if (finished){
              }
@@ -618,15 +628,14 @@ double posLeft;
 
 -(void)expandDetail:(NSString *) detailName animate:(BOOL) animate{
     self.expandName=detailName;
-
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList*)self.gv.scrollViewControlllerList;
+    scrollViewControllerList.scrollViewList.isAutoAnimation=YES;
     self.poseOfCurrentReview=0;
     [self generateReview];
     [scrollViewDetailReview setContentOffset:CGPointMake(0, 0)];
     isExpanded=YES;
 
     [self.superview bringSubviewToFront:self];
-//    NSLog(@"detailName:%@",detailName);
     if(![detailName isEqual:@"review"]){
         [self.btnComment setFrame:CGRectMake(28-self.gv.screenW, self.btnComment.frame.origin.y, self.btnComment.frame.size.width, self.btnComment.frame.size.height)];
         [self.lblIForComment setFrame:CGRectMake(20-self.gv.screenW, self.lblIForComment.frame.origin.y, self.lblIForComment.frame.size.width, self.lblIForComment.frame.size.height)];
@@ -644,76 +653,62 @@ double posLeft;
 
     NSArray *arrItemList=scrollViewControllerList.arrItemList;
     double duration=0.28;
+    self.countFinishAllAnimation=0;
     if(!animate){
         duration=0.0;
     }
-    scrollViewControllerList.scrollViewList.isAutoAnimation=YES;
-//    [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (scrollViewControllerList.scrollViewList.subviews.count-2)*150+(self.gv.screenH-80-150))];
+    if(scrollViewControllerList.isEndedForSearchResult){
+        [self.contentCon setFrame:CGRectMake(0, 0, scrollViewControllerList.scrollViewList.frame.size.width, self.gv.screenH-40)];
+    }else{
+        [self.contentCon setFrame:CGRectMake(0, 0, scrollViewControllerList.scrollViewList.frame.size.width, self.gv.screenH)];
+    }
+    [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(0, 150*(scrollViewControllerList.scrollViewList.subviews.count-3)+self.gv.screenH-150-80)];
 
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
-     {
-         if(self.imgViewBg.image==nil && self.seq>0){
-             [scrollViewControllerList.scrollViewList setContentOffset:CGPointMake(0, self.seq*150-1) animated:YES];
-         }else{
-             [scrollViewControllerList.scrollViewList setContentOffset:CGPointMake(0, self.seq*150+1) animated:YES];
-         }
-     } completion:^(BOOL finished) {
-         if(finished){
-             
-         }
-     }];
-    [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
-     {
-         //這邊要修改成 再scrollViewList裡頭做掉 要不然scroll 再轉的時候會變更viewFunBar的高度
-         [scrollViewControllerList.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 0)];
-         [scrollViewControllerList.scrollViewList setFrame:CGRectMake(0, 0, scrollViewControllerList.scrollViewList.frame.size.width, self.gv.screenH-40)];
-        [[dicDetailPanel objectForKey:detailName] setFrame:CGRectMake(0, 150, self.gv.screenW, self.gv.screenH-80-150)];
-         [self.viewMiddleLigthBorder setAlpha:1.0f];
-         [self.viewMiddleDarkBorder setAlpha:1.0f];
-         if([detailName isEqual:@"review"]){
-             [self.btnComment setAlpha:1.0f];
-         }
-        [self setFrame:CGRectMake(0, self.frame.origin.y, self.gv.screenW, self.gv.screenH-80)];
-        [viewBottomBorder setFrame:CGRectMake(0, self.gv.screenH-80-150, self.gv.screenW, 1)];
-         
-         [blurBg setAlpha:0.0f];
-         [maskBg setAlpha:0.0f];
-         if(self.imgViewBg.image!=nil){
-             [viewGradientBgForName setFrame:CGRectMake(0, 0, self.gv.screenW, 45)];
-         }
-         for(int i =0;i<[arrItemList count];i++){
-             ListItem* item=(ListItem*) [arrItemList objectAtIndex:i];
-             if(item.isExpanded && ![item isEqual:self]){
-                 [item clearReview];
-                 [item contractDetailWithAll:YES];
-             }
-             if(item.seq==-1){
-                 continue;
-             }
-             if(!item.isShow){
-                 continue;
-             }
-             if(item.seq>self.seq){
-                 [item setFrame:CGRectMake(0, item.seq*150+self.gv.screenH-80-150, self.gv.screenW, 150)];
-             }
-         }
-     } completion:^(BOOL finished) {
-         if (finished){
-             NSLog(@"viewFunBar height:%f",scrollViewControllerList.viewFunBar.frame.size.height);
-             NSLog(@"scrollViewList top:%f",scrollViewControllerList.scrollViewList.frame.origin.y);
-             [blurBg setHidden:YES];
-             [maskBg setHidden:YES];
-             scrollViewControllerList.scrollViewList.isAutoAnimation=NO;
-         }
-     }];
+        {
+            //這邊要修改成 再scrollViewList裡頭做掉 要不然scroll 再轉的時候會變更viewFunBar的高度
+            if(self.imgViewBg.image==nil && self.seq>0){
+                scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, self.seq*150-1+40) ;
+            }else{
+                scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, self.seq*150+1+40);
+            }
+            [scrollViewControllerList.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 0)];
+            [[dicDetailPanel objectForKey:detailName] setFrame:CGRectMake(0, 150, self.gv.screenW, self.gv.screenH-80-150)];
+            [self.viewMiddleLigthBorder setAlpha:1.0f];
+            [self.viewMiddleDarkBorder setAlpha:1.0f];
+            if([detailName isEqual:@"review"]){
+              [self.btnComment setAlpha:1.0f];
+            }
+            [self setFrame:CGRectMake(0, self.frame.origin.y, self.gv.screenW, self.gv.screenH-80)];
+            [viewBottomBorder setFrame:CGRectMake(0, self.gv.screenH-80-150, self.gv.screenW, 1)];
 
-    
-
-
-}
-
--(void)contractDetail:(NSString *) detailName{
-    
+            [blurBg setAlpha:0.0f];
+            [maskBg setAlpha:0.0f];
+            if(self.imgViewBg.image!=nil){
+              [viewGradientBgForName setFrame:CGRectMake(0, 0, self.gv.screenW, 45)];
+            }
+            for(int i =0;i<[arrItemList count];i++){
+              ListItem* item=(ListItem*) [arrItemList objectAtIndex:i];
+              if(item.isExpanded && ![item isEqual:self]){
+                  [item clearReview];
+              }
+              if(item.seq==-1){
+                  continue;
+              }
+              if(!item.isShow){
+                  continue;
+              }
+              if(item.seq>self.seq){
+                  [item setFrame:CGRectMake(0, item.seq*150+self.gv.screenH-80-150+40, self.gv.screenW, 150)];
+              }
+            }
+            [scrollViewControllerList.btnMore setFrame:CGRectMake(0, (scrollViewControllerList.scrollViewList.subviews.count-3)*150+self.gv.screenH-150-80+40, self.gv.screenW, scrollViewControllerList.btnMore.frame.size.height)];
+        } completion:^(BOOL finished) {
+            if (finished){
+              [blurBg setHidden:YES];
+              [maskBg setHidden:YES];
+            }
+    }];
 }
 
 -(void)generateReview{
@@ -924,6 +919,12 @@ double posLeft;
     [maskBg setHidden:NO];
     isExpanded=NO;
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList*)self.gv.scrollViewControlllerList;
+    scrollViewControllerList.scrollViewList.isAutoAnimation=YES;
+    if(scrollViewControllerList.isEndedForSearchResult){
+        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (scrollViewControllerList.scrollViewList.subviews.count-3)*150+40)];
+    }else{
+        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (scrollViewControllerList.scrollViewList.subviews.count-3)*150+40+40)];
+    }
     NSArray *arrItemList=scrollViewControllerList.arrItemList;
     [self.btnComment contractCommentArea];
     double duration=0.28;
@@ -932,6 +933,7 @@ double posLeft;
     }
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
      {
+
         [blurBg setAlpha:1.0];
         [maskBg setAlpha:1.0];
         [self.viewMiddleLigthBorder setAlpha:0.0f];
@@ -941,9 +943,8 @@ double posLeft;
         [self setFrame:CGRectMake(0, self.frame.origin.y, self.gv.screenW, 150)];
          ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList*) self.gv.scrollViewControlllerList;
          [scrollViewControllerList.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 40)];
-
-         [scrollViewControllerList.scrollViewList setFrame:CGRectMake(0, 40, self.gv.screenW, self.gv.screenH-80-40)];
          [scrollViewControllerList.scrollViewList iniMarker];
+         scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, self.seq*150);
         [[dicDetailPanel objectForKey:self.expandName] setFrame:CGRectMake(0, 150, self.gv.screenW, self.gv.screenH-80-150)];
 
          for(int i =0;i<[arrItemList count];i++){
@@ -958,15 +959,18 @@ double posLeft;
                  continue;
              }
              if(item.seq>self.seq){
-                 [item setFrame:CGRectMake(0, item.seq*150, self.gv.screenW, 150)];
+                 [item setFrame:CGRectMake(0, item.seq*150+40, self.gv.screenW, 150)];
              }
          }
+         [scrollViewControllerList.btnMore setFrame:CGRectMake(0, (scrollViewControllerList.scrollViewList.subviews.count-3)*150+40, self.gv.screenW, scrollViewControllerList.btnMore.frame.size.height)];
      } completion:^(BOOL finished) {
          if(finished){
+             scrollViewControllerList.scrollViewList.isAutoAnimation=NO;
             [self clearReview];
          }
      }];
-    [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (scrollViewControllerList.scrollViewList.subviews.count-2)*150)];
+
+
 }
 
 

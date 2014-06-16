@@ -10,5 +10,6 @@
 #import "ScrollViewProtoType.h"
 @interface ScrollViewList : ScrollViewProtoType <UIScrollViewDelegate>
 @property BOOL isAutoAnimation;
+@property BOOL innerIsAutoAnimation;
 -(void)iniMarker;
 @end

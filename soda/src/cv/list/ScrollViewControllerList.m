@@ -28,12 +28,21 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         self.gv=[GV sharedInstance];
+        
         arrItemList=[[NSMutableArray alloc] init];
-        scrollViewList=[[ScrollViewList alloc] initWithFrame:CGRectMake(0, 40, gv.screenW, gv.screenH-80-40)];
+        
+        scrollViewList=[[ScrollViewList alloc] initWithFrame:CGRectMake(0, 0, gv.screenW, gv.screenH-80)];
         [self.view addSubview:scrollViewList];
         scrollViewList.indicatorStyle = UIScrollViewIndicatorStyleWhite;
+        self.btnMore= [[ButtonProtoType alloc] initWithFrame:CGRectMake(0, 0, 320, 40)];
+        [self.btnMore setBackgroundColor:[Util colorWithHexString:@"#8fc9c8ff"]];
 
-        self.loading=[[LoadingBar alloc] initWithFrame:CGRectMake((self.gv.screenW-200)/2, (150-10)/2+40,200, 10)];
+        [self.btnMore setHidden:YES];
+        [self.btnMore addTarget:self action:@selector(loadNextPageList) forControlEvents:UIControlEventTouchUpInside];
+        [self.scrollViewList addSubview:self.btnMore];
+        
+        
+        self.loading=[[LoadingCircle alloc] initWithFrame:CGRectMake((self.gv.screenW-30)/2, (150-30)/2+40,30, 30)];
         [self.view addSubview:self.loading];
         [self.loading setHidden:YES];
         
@@ -97,18 +106,10 @@
         self.btnNext.layer.shadowColor = [Util colorWithHexString:@"#000000ff"].CGColor
         ;
         arrRadarResult=[[NSArray alloc] init];
-        
-//        UIButton *btnTest=[[UIButton alloc] initWithFrame:CGRectMake(0, 0, 50, 50)];
-//        [btnTest setBackgroundColor:[Util colorWithHexString:@"#FF00007f"]];
-//        [self.view addSubview:btnTest];
-//        [btnTest addTarget:self action:@selector(testLoop:) forControlEvents:UIControlEventTouchUpInside];
     }
-
     return self;
 }
--(void)testLoop:(id)sender{
-    [self nextMarker];
-}
+
 //peter modify memory leak risk
 -(void)nextMarker{
     CustomizeMarker *marker=(CustomizeMarker *)self.mapview.selectedMarker;
@@ -119,10 +120,10 @@
     }else{
         nextMarker=(CustomizeMarker *)[self.arrMarker objectAtIndex:marker.markerSeq+1];
     }
-    if(scrollViewList.contentSize.height<nextMarker.markerSeq*150){
-        [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, nextMarker.markerSeq*150)];
+    if(scrollViewList.contentSize.height<nextMarker.markerSeq*150+self.gv.screenH-80){
+        [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, nextMarker.markerSeq*150+self.gv.screenH-80)];
     }
-    [scrollViewList setContentOffset:CGPointMake(0,nextMarker.markerSeq*150) animated:NO];
+    [scrollViewList setContentOffset:CGPointMake(0,nextMarker.markerSeq*150+40) animated:NO];
 
     ListItem *oriItem=(ListItem *)marker.userData;
     ListItem *nextItem=(ListItem *)nextMarker.userData;
@@ -171,8 +172,7 @@
             [[nextItem.dicDetailPanel objectForKey:key] setFrame:CGRectMake(0, 150, self.gv.screenW, 0)];
         }
     }
-     [nextItem setFrame:CGRectMake(0, nextItem.frame.origin.y, self.gv.screenW, self.gv.screenH-80)];
-
+    [nextItem setFrame:CGRectMake(0, nextItem.seq*150+40, self.gv.screenW, self.gv.screenH-80)];
     for(int i =0;i<[arrItemList count];i++){
         ListItem* item=(ListItem*) [arrItemList objectAtIndex:i];
         if(item.seq==-1){
@@ -182,7 +182,7 @@
             continue;
         }
         if(item.seq>nextItem.seq){
-            [item setFrame:CGRectMake(0, item.seq*150+self.gv.screenH-80-150, self.gv.screenW, 150)];
+            [item setFrame:CGRectMake(0, item.seq*150+self.gv.screenH-80-150+40, self.gv.screenW, 150)];
         }
     }
 
@@ -212,10 +212,9 @@
     ListItem *oriItem=(ListItem *)marker.userData;
     ListItem *prevItem=(ListItem *)prevMarker.userData;
     [prevItem.scrollViewDetailMap addSubview:self.mapview];
-    if(scrollViewList.contentSize.height<prevMarker.markerSeq*150){
-        [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, prevMarker.markerSeq*150)];
-    }
-    [scrollViewList setContentOffset:CGPointMake(0,prevMarker.markerSeq*150) animated:NO];
+    
+    [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (scrollViewList.subviews.count-3)*150+40+40)];
+    [scrollViewList setContentOffset:CGPointMake(0,prevMarker.markerSeq*150+40) animated:NO];
     
     [self.mapview removeFromSuperview];
     [prevItem.scrollViewDetailMap addSubview:self.mapview];
@@ -352,7 +351,7 @@
     [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
      {
          [self.scrollViewList setAlpha:0.0f];
-         [self.scrollViewList setFrame:CGRectMake(0, 40, self.gv.screenW, self.gv.screenH-40-80)];
+         [self.scrollViewList setFrame:CGRectMake(0, 0, self.gv.screenW, self.gv.screenH-80)];
          [self.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 40)];
          self.viewFunBar.isExpanded=NO;
      } completion:^(BOOL finished){
@@ -395,7 +394,8 @@
     [self initialFunctionBarProperty];
     [self hideNoDataCat];
     [self.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 40)];
-    [self.loading process:0 completion:nil];
+//    [self.loading process:0 completion:nil];
+
     CLLocationCoordinate2D searchCenter;
     if(center.latitude>0 && center.longitude>0){
         searchCenter=CLLocationCoordinate2DMake(center.latitude, center.longitude);
@@ -417,10 +417,12 @@
              [self.loading setAlpha:1.0f];
          } completion:^(BOOL finished) {
              if (finished){
+                 [self.loading start];
                  [self sendRequest:searchCenter dist:dist pKeyword:pKeyword pType:pType];
              }
          }];
     }else{
+        [self.loading stop];
         [self sendRequest:searchCenter dist:dist pKeyword:pKeyword pType:pType];
     }
 
@@ -482,12 +484,24 @@
             [self createItemFromRadarResultWithIndex:0 isExistFilterCondition:isExistFilterCondition isExistSortingKey:isExistSortingKey isFromLocal:isFromLocal];
         });
 
-        if(!isExistFilterCondition){;
-            [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, [arrRadarResult count]*150)];
+        if(!isExistFilterCondition){
+            if(isExistSortingKey){
+                [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, [arrRadarResult count]*150)];
+            }else{
+                if(self.targetIndex<self.totalIndex){
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (self.targetIndex+1)*150+40+40)];
+                        [self.btnMore setFrame:CGRectMake(0, (self.targetIndex+1)*150+40, 320, 40)];
+                        [self.btnMore setHidden:NO];
+                    });
+                }else{
+                    dispatch_async(dispatch_get_main_queue(), ^{
+                        [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (self.targetIndex+1)*150+40)];
+                        [self.btnMore setHidden:YES];
+                    });
+                }
+            }
         }
-        //ScrollView Load NextPage marker;
-        self.isLoadingList=NO;
-
     } queue:self.gv.backgroundThreadManagement];
 }
 
@@ -542,16 +556,21 @@
     //這邊initail 50%; loading 50%;
     //如果我alloc 和process bar 一起跑的話 process bar會被卡住 所以做完一次讓process bar動畫跑完再initial
     ListItem *item=[[ListItem alloc]init];
-    [self.loading process:(double)((i*0.5)/self.totalIndex) completion:^{
+//loading progress bar
+//    [self.loading process:(double)((i*0.5)/self.totalIndex) completion:^{
         //initial
-        [item setFrame:CGRectMake(0, i*150, gv.screenW, 150)];
+        [item setFrame:CGRectMake(0, i*150+40, gv.screenW, 150)];
         if(!isExistSortingKey){
             item.isShow=YES;
+            item.seq=i;
+            [item.loadingCircle start];
             [scrollViewList addSubview:item];
+            [item.contentCon setAlpha:0.0];
         }else{
             item.isShow=NO;
+            [item.contentCon setAlpha:1.0];
         }
-        [item setAlpha:0.0];
+
         NSMutableDictionary *dicDataItem= [arrRadarResult objectAtIndex:i];
         //要不要 distance
         if(isFromLocal){
@@ -568,26 +587,32 @@
         }
         [arrItemList addObject:item];
         currReulstIndex=i;
+        NSLog(@"create:%@",[NSString stringWithFormat:@"%d/%d",currReulstIndex,self.totalIndex]);
         //next one
-        //NSLog(@"%@",[NSString stringWithFormat:@"%d/%d",currReulstIndex,self.totalIndex]);
         if(currReulstIndex<self.targetIndex){
             [self createItemFromRadarResultWithIndex:currReulstIndex+1 isExistFilterCondition:isExistFilterCondition isExistSortingKey:isExistSortingKey isFromLocal:isFromLocal];
         }else{
             NSLog(@"create item instance finish;");
+            NSLog(@"finish and target index:%d",self.targetIndex);
+            if(isExistSortingKey){
+                currReulstIndex=self.gv.listBufferCount-1;
+            }
             if(isFromLocal){
-                for(int i=0;i<arrItemList.count;i++){
+                for(int i=currReulstIndex-self.gv.listBufferCount+1;i<=self.targetIndex;i++){
                     ListItem *currItem=(ListItem *)[arrItemList objectAtIndex:i];
                     NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(initialItem:) object:currItem];
                     [self.gv.backgroundThreadManagement addOperation:operation];
                 }
             }else{
-                for(int i=0;i<arrItemList.count;i++){
+                for(int i=currReulstIndex-self.gv.listBufferCount+1;i<=self.targetIndex;i++){
                     ListItem *currItem=(ListItem *)[arrItemList objectAtIndex:i];
                     [currItem addLoadGooglePlaceDetailToQueue:currItem.googleRef];
                 }
             }
+            //ScrollView Load NextPage marker;
+            self.isLoadingList=NO;
         }
-    }];
+//    }];
     
 }
 -(void)initialItem:(ListItem*) item{
@@ -625,7 +650,7 @@
             continue;
         }
         [scrollViewList addSubview:item];
-        [item setFrame:CGRectMake(0, sortingCreateIndex*150, self.gv.screenW, 150)];
+        [item setFrame:CGRectMake(0, sortingCreateIndex*150+40, self.gv.screenW, 150)];
         [item placeElement];
         //只會進到 setAlpha:1.0f;
         [item displaySelf];
@@ -633,7 +658,7 @@
         item.isShow=YES;
         sortingCreateIndex+=1;
     }
-    [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, 150*(sortingCreateIndex))];
+    [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, 150*(sortingCreateIndex)+40)];
     NSLog(@"sorting finish");
     [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
      {
@@ -653,13 +678,13 @@
 }
 
 -(void)loadNextPageList{
+    
     if(self.isEndedForSearchResult){
         return;
     }
     if(self.isLoadingList){
         return;
     }
-    int initialIndex=currReulstIndex;
     int maxLen=(int)self.arrRadarResult.count;
     if(maxLen>currReulstIndex+self.gv.listBufferCount+1){
         maxLen=currReulstIndex+self.gv.listBufferCount+1;
@@ -672,11 +697,17 @@
     }else{
         self.targetIndex=0;
     }
-
     NSLog(@"targetIndex:%d",self.targetIndex);
     self.isLoadingList=YES;
-
-    [self createItemFromRadarResultWithIndex:self.currReulstIndex isExistFilterCondition:[self isExistfilterCondition] isExistSortingKey:[self isExistSortingKey] isFromLocal:NO];    
+    if(self.targetIndex<self.totalIndex){
+        [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (self.targetIndex+1)*150+40+40   )];
+        [self.btnMore setFrame:CGRectMake(0, (self.targetIndex+1)*150+40, 320, 40)];
+        [self.btnMore setHidden:NO];
+    }else{
+        [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (self.targetIndex+1)*150+40)];
+        [self.btnMore setHidden:YES];
+    }
+    [self createItemFromRadarResultWithIndex:self.currReulstIndex+1 isExistFilterCondition:[self isExistfilterCondition] isExistSortingKey:[self isExistSortingKey] isFromLocal:NO];
 }
 
 -(void) initialFunctionBarProperty{
@@ -699,10 +730,10 @@
     //if status is edit selected button
     UITouch* touch=[[event allTouches]anyObject];
     NSLog(@"list:%@",NSStringFromClass(touch.view.class));
-//    if([touch.view isKindOfClass:[ListItem class]]){
-//        ListItem *item=(ListItem *)touch.view;
-//        NSLog(@"%@",[NSString stringWithFormat:@"%@://%@/soda/place.aspx?google_id&=%@&google_ref=%@&lang=%@",self.gv.urlProtocol,self.gv.domain,item.googleId,item.googleRef,[DB getSysConfig:@"lang"]]);
-//    }
+    if([touch.view isKindOfClass:[ListItem class]]){
+        ListItem *item=(ListItem *)touch.view;
+        NSLog(@"%d",item.seq);
+    }
     if([GV getGlobalStatus] == LIST_EXPAND &&
         [touch.view isKindOfClass:[LabelForComment class]]
        ){
@@ -719,7 +750,7 @@
             return;
         }
         NSLog(@"list condition 2: 展開detail");
-        ListItem* item=(ListItem*)touch.view.superview;
+        ListItem* item=(ListItem*)touch.view.superview.superview;
         [item bringSubviewToFront:scrollViewList];
         ButtonExpand *btnExpand=(ButtonExpand *)touch.view;
         [self statusListToExpand:item expandName:btnExpand.name];
@@ -731,7 +762,7 @@
             return;
         }
         NSLog(@"list condition 3: 縮小 detail 或是 slid 到其他的detail info");
-        ListItem* item=(ListItem*)touch.view.superview;
+        ListItem* item=(ListItem*)touch.view.superview.superview;
         ButtonExpand *btnExpand=(ButtonExpand *)touch.view;
         if(item.expandName==btnExpand.name){
             [self statusExpandToList:item];
@@ -920,7 +951,6 @@
     CGPoint oriCenter=[self.mapview.projection pointForCoordinate:CLLocationCoordinate2DMake(lat,lng)];
     CGPoint destCenter=CGPointMake(oriCenter.x, oriCenter.y-80);
     CLLocationCoordinate2D destCoordinate=[self.mapview.projection coordinateForPoint:destCenter];
-    NSLog(@"%@",[NSString stringWithFormat:@"%f,%f",lat,destCoordinate.latitude]);
     GMSCameraPosition *destCamera = [GMSCameraPosition cameraWithLatitude:destCoordinate.latitude
                                                                 longitude:destCoordinate.longitude
                                                                      zoom:15];

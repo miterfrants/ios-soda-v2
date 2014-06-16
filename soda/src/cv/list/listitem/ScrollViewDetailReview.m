@@ -12,7 +12,7 @@
 }
 
 -(void)scrollViewDidScroll:(UIScrollView*)scrollView{
-    ListItem *item=(ListItem *) self.superview;
+    ListItem *item=(ListItem *) self.superview.superview;
     double flyOutRate=1.2;
     if(item.btnComment.isExpanded){
         flyOutRate=5;

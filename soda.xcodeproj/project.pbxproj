@@ -107,6 +107,7 @@
 		028FFB2E190A6851007CE44E /* ButtonSendSuggestion.m in Sources */ = {isa = PBXBuildFile; fileRef = 028FFB2B190A6851007CE44E /* ButtonSendSuggestion.m */; };
 		028FFB2F190A6851007CE44E /* ViewSuggestion.m in Sources */ = {isa = PBXBuildFile; fileRef = 028FFB2D190A6851007CE44E /* ViewSuggestion.m */; };
 		028FFB32190A68A9007CE44E /* TextComment.m in Sources */ = {isa = PBXBuildFile; fileRef = 028FFB31190A68A9007CE44E /* TextComment.m */; };
+		0291A6C6194EB8AE00B112A5 /* LoadingCircle.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6C5194EB8AE00B112A5 /* LoadingCircle.m */; };
 		029C86EC1945668900740266 /* GooglePlaceAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86EB1945668900740266 /* GooglePlaceAPI.m */; };
 		029C86F5194566EC00740266 /* GooglePlaceAPIPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86F4194566EC00740266 /* GooglePlaceAPIPool.m */; };
 		029C86F8194845CD00740266 /* LoadingBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86F7194845CD00740266 /* LoadingBar.m */; };
@@ -383,6 +384,8 @@
 		028FFB2D190A6851007CE44E /* ViewSuggestion.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewSuggestion.m; sourceTree = "<group>"; };
 		028FFB30190A68A9007CE44E /* TextComment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TextComment.h; sourceTree = "<group>"; };
 		028FFB31190A68A9007CE44E /* TextComment.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TextComment.m; sourceTree = "<group>"; };
+		0291A6C4194EB8AE00B112A5 /* LoadingCircle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LoadingCircle.h; sourceTree = "<group>"; };
+		0291A6C5194EB8AE00B112A5 /* LoadingCircle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoadingCircle.m; sourceTree = "<group>"; };
 		029C86EA1945668900740266 /* GooglePlaceAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GooglePlaceAPI.h; sourceTree = "<group>"; };
 		029C86EB1945668900740266 /* GooglePlaceAPI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GooglePlaceAPI.m; sourceTree = "<group>"; };
 		029C86F3194566EC00740266 /* GooglePlaceAPIPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GooglePlaceAPIPool.h; sourceTree = "<group>"; };
@@ -656,8 +659,8 @@
 				02526E831932F4B200DE0327 /* ScrollViewDetailOpening.m */,
 				02526E851932F4BC00DE0327 /* ScrollViewDetailBase.h */,
 				02526E861932F4BC00DE0327 /* ScrollViewDetailBase.m */,
-				02526E881932F59700DE0327 /* ScrollViewDetail.h */,
 				02526E891932F59700DE0327 /* ScrollViewDetail.m */,
+				02526E881932F59700DE0327 /* ScrollViewDetail.h */,
 				02526E8B1933410700DE0327 /* ViewReview.h */,
 				02526E8C1933410700DE0327 /* ViewReview.m */,
 				02526E8E193483B900DE0327 /* ReviewHeart.h */,
@@ -1050,8 +1053,6 @@
 				02D88A1B1901952F00941199 /* ScrollViewProtoType.m */,
 				02B6AC08191A05B600ACCF61 /* SecretIcon.h */,
 				02B6AC09191A05B600ACCF61 /* SecretIcon.m */,
-				02526E6D192E4D8200DE0327 /* LoadingIcon.h */,
-				02526E6E192E4D8200DE0327 /* LoadingIcon.m */,
 				02080D9E19384D9C000CD9C5 /* TextFieldCheckCoverOver.h */,
 				02080D9F19384D9C000CD9C5 /* TextFieldCheckCoverOver.m */,
 				022C53641938F5B500B0120D /* TextViewCheckCoverOver.h */,
@@ -1064,6 +1065,10 @@
 				029C86F4194566EC00740266 /* GooglePlaceAPIPool.m */,
 				029C86F6194845CD00740266 /* LoadingBar.h */,
 				029C86F7194845CD00740266 /* LoadingBar.m */,
+				02526E6D192E4D8200DE0327 /* LoadingIcon.h */,
+				02526E6E192E4D8200DE0327 /* LoadingIcon.m */,
+				0291A6C4194EB8AE00B112A5 /* LoadingCircle.h */,
+				0291A6C5194EB8AE00B112A5 /* LoadingCircle.m */,
 			);
 			path = m;
 			sourceTree = "<group>";
@@ -1460,6 +1465,7 @@
 				02D88A0519016DD300941199 /* ScrollViewIcon.m in Sources */,
 				028FFB25190A1871007CE44E /* ButtonRoundedCorner.m in Sources */,
 				02B6AC38191F804700ACCF61 /* ButtonHome.m in Sources */,
+				0291A6C6194EB8AE00B112A5 /* LoadingCircle.m in Sources */,
 				029C86F8194845CD00740266 /* LoadingBar.m in Sources */,
 				0248E3CB1903ABCC00ABC9B9 /* ButtonMenu.m in Sources */,
 				028FFAE31905F9F1007CE44E /* ButtonGoogle.m in Sources */,

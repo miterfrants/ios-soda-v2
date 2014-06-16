@@ -238,7 +238,7 @@
     pathAnimationForTriangle.removedOnCompletion=NO;
     pathAnimationForTriangle.fillMode=kCAFillModeForwards;
     [self.layerTriangle addAnimation:pathAnimationForTriangle forKey:nil];
-    ListItem* item=(ListItem *)self.superview;
+    ListItem* item=(ListItem *)self.superview.superview;
     [item.scrollViewDetailReview setContentSize:CGSizeMake(self.gv.screenW, item.scrollViewDetailReview.originalContentHeight)];
     [self.viewBgForFinish setAlpha:0.0f];
     [self.voteHeart setAlpha:0.0f];

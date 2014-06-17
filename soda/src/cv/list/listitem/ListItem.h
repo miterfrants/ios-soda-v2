@@ -85,5 +85,5 @@
 -(void)contractDetailWithAll:(BOOL) animate;
 -(void)saveReview;
 -(void)generateReview;
--(BOOL) initialItem:(NSMutableDictionary *)data isFromLocal:(BOOL) isFromLocal;
+-(BOOL) initialItemData:(NSMutableDictionary *)data isFromLocal:(BOOL) isFromLocal;
 @end

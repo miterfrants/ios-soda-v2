@@ -5,10 +5,7 @@
 //  Created by Po-Hsiang Huang on 2014/4/2.
 //  Copyright (c) 2014年 ___FULLUSERNAME___. All rights reserved.
 //
-//1:轉換語言和rest 沒有套用 ui 轉換語言現在都是英文
-//2:轉換語言的時候  root.scrollViewControllerCate.viewIconEditPeanel.viewEditKeyword 寬度沒有調整
-//3:有時候進入列表展開沒有把下面的列表推開 在沒有 sorting key的時候
-//4:沒有sorting key 的狀況在還沒讀完資料的時候 展開列表會重疊到
+//nextMarker 不會照列表順序跑
 
 #import "AppDelegate.h"
 #import <GoogleOpenSource/GoogleOpenSource.h>
@@ -78,7 +75,7 @@
     gv=[GV sharedInstance];
     
     //ini url
-    gv.domain=@"36.224.19.242";
+    gv.domain=@"36.224.4.27";
     gv.controllerCollection=@"api/soda/collection.aspx";
     gv.controllerUI=@"api/soda/ui.aspx";
     gv.controllerIcon=@"api/soda/icon.aspx";

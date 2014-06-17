@@ -34,7 +34,7 @@
 @property double distance;
 
 @property int itemInstanceCreateCount;
-@property int createItemCount;
+@property int itemPrepareDataCount;
 @property int totalIndex;
 @property int targetIndex;
 @property int checkedConditionCount;
@@ -60,5 +60,5 @@
 -(BOOL)isExistfilterCondition;
 -(BOOL)isExistSortingKey;
 -(void)sortingAndFilterArrItemList;
-
+-(int) getListItemCountInnerScrollViewList;
 @end

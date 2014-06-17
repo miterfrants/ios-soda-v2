@@ -288,9 +288,9 @@ double posLeft;
             }
             api.busy-=1;
             if([scrollViewControllerList isExistSortingKey]){
-                [self initialItem:[data objectForKey:@"result"] isFromLocal:NO];
+                [self initialItemData:[data objectForKey:@"result"] isFromLocal:NO];
             }else{
-                BOOL iniResult=[self initialItem:[data objectForKey:@"result"] isFromLocal:NO];
+                BOOL iniResult=[self initialItemData:[data objectForKey:@"result"] isFromLocal:NO];
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self.loadingCircle stop];
                     if(iniResult){
@@ -303,21 +303,24 @@ double posLeft;
                         [self setHidden:YES];
                     }
                     //filter condition current page complete;
+                    //NSLog(@"%@",[NSString stringWithFormat:@"%d>=%d",scrollViewControllerList.checkedConditionCount,scrollViewControllerList.targetIndex]);
                     if(scrollViewControllerList.isExistfilterCondition && scrollViewControllerList.checkedConditionCount>=scrollViewControllerList.targetIndex){
                         double moreButtonOffset =0;
                         if(!scrollViewControllerList.isEndedForSearchResult){
                             moreButtonOffset=40;
                         }
                         [scrollViewControllerList.btnMore setHidden:NO];
-                        int itemCount=(int)scrollViewControllerList.scrollViewList.subviews.count-3;
-                        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, itemCount*150+40+moreButtonOffset)];
+                        int itemCount=[scrollViewControllerList getListItemCountInnerScrollViewList];
                         [scrollViewControllerList.btnMore setFrame:CGRectMake(0, (scrollViewControllerList.scrollViewList.subviews.count-3)*150+40, self.gv.screenW, 40)];
+                        
                         [UIView animateWithDuration:0.28 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
                             if(moreButtonOffset==0){
                                 [scrollViewControllerList.btnMore setAlpha:0.0f];
                             }else{
                                 [scrollViewControllerList.btnMore setAlpha:1.0f];
+                                [scrollViewControllerList.btnMore.lblTitle setTextColor:[UIColor whiteColor]];
                             }
+                            [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, itemCount*150+40+moreButtonOffset)];
                             [scrollViewControllerList.scrollViewList setAlpha:1.0];
                             [scrollViewControllerList.loading stop];
                             NSArray *subviews=scrollViewControllerList.scrollViewList.subviews;
@@ -333,11 +336,8 @@ double posLeft;
                         } completion:^(BOOL finished) {
                             
                         }];
-                    }else{
-                        scrollViewControllerList.checkedConditionCount+=1;
                     }
-                    
-
+                    scrollViewControllerList.checkedConditionCount+=1;
                 });
             }
         } queue:self.gv.backgroundThreadManagement];
@@ -346,7 +346,7 @@ double posLeft;
 
 
 
--(BOOL) initialItem:(NSMutableDictionary *)data isFromLocal:(BOOL) isFromLocal{
+-(BOOL) initialItemData:(NSMutableDictionary *)data isFromLocal:(BOOL) isFromLocal{
     ScrollViewControllerCate *scrollViewControllerCate=(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList *)self.gv.scrollViewControlllerList;
     ButtonCate *selected=scrollViewControllerCate.selectedButtonCate;
@@ -358,33 +358,32 @@ double posLeft;
         [self loadPicFromGoogle:[[[data  objectForKey:@"photos"] objectAtIndex:0]  valueForKey:@"photo_reference"]];
     }
     if([selected.sortingKey isEqual:@"distance"]){
-//        [NSThread sleepForTimeInterval:0.1];
-//        NSMutableDictionary *dicDist =[Util jsonWithUrl:[NSString stringWithFormat:@"https://maps.googleapis.com/maps/api/distancematrix/json?origins=%.8F,%.8F&destinations=%.8F,%.8F&mode=walk&language=zh-TW&sensor=false",selected.centerLocation.latitude,selected.centerLocation.longitude,self.lat,self.lng]];
-//        NSString *stringDist=@"0";
-//        if([[dicDist valueForKey:@"status"] isEqualToString:@"OK"]){
-//            if([[dicDist objectForKey:@"rows"] count]>0 &&[[[[dicDist objectForKey:@"rows"] objectAtIndex:0] objectForKey:@"elements"] count]>0){
-//                stringDist=[[[[[[dicDist objectForKey:@"rows"] objectAtIndex:0] objectForKey:@"elements"] objectAtIndex:0] objectForKey:@"distance"] objectForKey:@"value"];
-//            }
-//            NSString *address=[dicDist objectForKey:@"destination_addresses"];
-//            if(self.address.length==0){
-//                self.address=address;
-//            }
-//        }else{
-//            CLLocation *destination=[[CLLocation alloc] initWithLatitude:self.lat  longitude:self.lng];
-//            CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
-//            stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
-//        }
-//        NSString *stringDist=@"0";
+        [NSThread sleepForTimeInterval:0.1];
+        NSMutableDictionary *dicDist =[Util jsonWithUrl:[NSString stringWithFormat:@"https://maps.googleapis.com/maps/api/distancematrix/json?origins=%.8F,%.8F&destinations=%.8F,%.8F&mode=walk&language=zh-TW&sensor=false",selected.centerLocation.latitude,selected.centerLocation.longitude,self.lat,self.lng]];
+        NSString *stringDist=@"0";
+        if([[dicDist valueForKey:@"status"] isEqualToString:@"OK"]){
+            if([[dicDist objectForKey:@"rows"] count]>0 &&[[[[dicDist objectForKey:@"rows"] objectAtIndex:0] objectForKey:@"elements"] count]>0){
+                stringDist=[[[[[[dicDist objectForKey:@"rows"] objectAtIndex:0] objectForKey:@"elements"] objectAtIndex:0] objectForKey:@"distance"] objectForKey:@"value"];
+            }
+            NSString *address=[dicDist objectForKey:@"destination_addresses"];
+            if(self.address.length==0){
+                self.address=address;
+            }
+        }else{
+            CLLocation *destination=[[CLLocation alloc] initWithLatitude:self.lat  longitude:self.lng];
+            CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
+            stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
+        }
 //        CLLocation *destination=[[CLLocation alloc] initWithLatitude:self.lat  longitude:self.lng];
 //        CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
 //        stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
-//        self.distance=[stringDist doubleValue];
+        self.distance=[stringDist doubleValue];
     }
-    NSString *stringDist=@"0";
-    CLLocation *destination=[[CLLocation alloc] initWithLatitude:self.lat  longitude:self.lng];
-    CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
-    stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
-    self.distance=[stringDist doubleValue];
+//    NSString *stringDist=@"0";
+//    CLLocation *destination=[[CLLocation alloc] initWithLatitude:self.lat  longitude:self.lng];
+//    CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
+//    stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
+//    self.distance=[stringDist doubleValue];
     
     
     //official suggestion
@@ -511,12 +510,12 @@ double posLeft;
         }
     }
     if([scrollViewControllerList isExistSortingKey]){
-        self.seq=scrollViewControllerList.createItemCount;        
+        self.seq=scrollViewControllerList.itemPrepareDataCount;
     }
 
     //finish all thing only sotring;
-//    NSLog(@"%@",[NSString stringWithFormat:@"%d/%d",scrollViewControllerList.createItemCount,scrollViewControllerList.totalIndex]);
-    if(scrollViewControllerList.createItemCount==scrollViewControllerList.totalIndex && scrollViewControllerList.arrRadarResult.count>0){
+    NSLog(@"initial item data:%@",[NSString stringWithFormat:@"%d/%d",scrollViewControllerList.itemPrepareDataCount,scrollViewControllerList.totalIndex]);
+    if(scrollViewControllerList.itemPrepareDataCount>=scrollViewControllerList.totalIndex && scrollViewControllerList.arrRadarResult.count>0){
         NSLog(@"show list");
         if([scrollViewControllerList isExistSortingKey]){
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -527,7 +526,7 @@ double posLeft;
         }
     }
     if(scrollViewControllerList.isExistSortingKey){
-        scrollViewControllerList.createItemCount+=1;
+        scrollViewControllerList.itemPrepareDataCount+=1;
     }
     //exist filter condition createIndex add one
     return YES;
@@ -545,9 +544,9 @@ double posLeft;
     if([scrollViewControllerList isExistfilterCondition] && ![scrollViewControllerList isExistSortingKey]){
         self.isShow=YES;
         [scrollViewControllerList.scrollViewList addSubview:self];
-        [self setFrame:CGRectMake(0, 150*scrollViewControllerList.createItemCount+40, self.gv.screenW, 150)];
-        self.seq=scrollViewControllerList.createItemCount;
-        scrollViewControllerList.createItemCount+=1;
+        [self setFrame:CGRectMake(0, 150*scrollViewControllerList.itemPrepareDataCount+40, self.gv.screenW, 150)];
+        self.seq=scrollViewControllerList.itemPrepareDataCount;
+        scrollViewControllerList.itemPrepareDataCount+=1;
         [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
          {
              [self.contentCon setAlpha:1.0f];
@@ -711,7 +710,7 @@ double posLeft;
     }else{
         [self.contentCon setFrame:CGRectMake(0, 0, scrollViewControllerList.scrollViewList.frame.size.width, self.gv.screenH)];
     }
-    [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(0, 150*(scrollViewControllerList.scrollViewList.subviews.count-3)+self.gv.screenH-150-80)];
+    [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(0, 150*[scrollViewControllerList getListItemCountInnerScrollViewList]+self.gv.screenH-150-80)];
 
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
         {
@@ -970,9 +969,9 @@ double posLeft;
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList*)self.gv.scrollViewControlllerList;
     scrollViewControllerList.scrollViewList.isAutoAnimation=YES;
     if(scrollViewControllerList.isEndedForSearchResult){
-        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (scrollViewControllerList.scrollViewList.subviews.count-3)*150+40)];
+        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, [scrollViewControllerList getListItemCountInnerScrollViewList]*150+40)];
     }else{
-        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (scrollViewControllerList.scrollViewList.subviews.count-3)*150+40+40)];
+        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, [scrollViewControllerList getListItemCountInnerScrollViewList]*150+40+40)];
     }
     NSArray *arrItemList=scrollViewControllerList.arrItemList;
     [self.btnComment contractCommentArea];

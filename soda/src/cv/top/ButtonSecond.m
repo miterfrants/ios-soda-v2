@@ -40,7 +40,7 @@
         //[self addSubview:imgViewIcon];
         
         lblCate=[[UILabel alloc]initWithFrame:CGRectMake(20, 0, 100, 28)];
-        [lblCate setFont:self.gv.contentFont];
+        [lblCate setFont:self.gv.fontNormalForHebrew];
         [lblCate setTextColor:[UIColor whiteColor]];
         [lblCate setTextAlignment:NSTextAlignmentLeft];
         [self addSubview:lblCate];

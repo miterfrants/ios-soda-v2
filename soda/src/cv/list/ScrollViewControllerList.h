@@ -16,6 +16,7 @@
 #import <GoogleMaps/GoogleMaps.h>
 #import "CustomizeMarker.h"
 #import "ButtonMore.h"
+#import "ListItem.h"
 
 @interface ScrollViewControllerList : ViewControllerProtoType<CLLocationManagerDelegate, GMSMapViewDelegate>
 @property ScrollViewList *scrollViewList;
@@ -25,8 +26,7 @@
 @property NSArray *arrRadarResult;
 @property NSMutableArray *arrMarker;
 
-@property BOOL isLoadingList;
-@property BOOL isEndedForSearchResult;
+
 @property NSString *keyword;
 @property NSString *types;
 @property FunctionBar *viewFunBar;
@@ -35,10 +35,16 @@
 
 @property int itemInstanceCreateCount;
 @property int itemPrepareDataCount;
+@property int itemDisplayCount;
+@property int checkedConditionCount;
+
 @property int totalIndex;
 @property int targetIndex;
-@property int checkedConditionCount;
 @property int startIndex;
+
+@property BOOL isLoadingList;
+@property BOOL isEndedForSearchResult;
+@property BOOL isPrepareDataEndOfItem;
 
 @property LoadingCircle *loading;
 @property BOOL isCancelCurrentLoadItemListMarker;
@@ -61,4 +67,5 @@
 -(BOOL)isExistSortingKey;
 -(void)sortingAndFilterArrItemList;
 -(int) getListItemCountInnerScrollViewList;
+-(void)initialItemDataAndThen:(ListItem*) item isFromLocal:(BOOL) isFromLocal;
 @end

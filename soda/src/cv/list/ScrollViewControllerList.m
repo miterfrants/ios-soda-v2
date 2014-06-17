@@ -10,7 +10,6 @@
 #import "ScrollViewControllerCate.h"
 #import "Util.h"
 #import "DB.h"
-#import "ListItem.h"
 #import "ButtonCate.h"
 #import "ButtonInputForComment.h"
 #import "ButtonExpand.h"
@@ -376,15 +375,20 @@
     [self.scrollViewList setAlpha:0.0f];
     
     self.isLoadingList=YES;
+    self.isPrepareDataEndOfItem=NO;
+    self.isEndedForSearchResult=NO;
+    self.isCancelCurrentLoadItemListMarker=NO;
+    
     self.keyword=pKeyword;
     self.distance=dist;
     self.types=pType;
-    self.isEndedForSearchResult=NO;
+
     self.itemPrepareDataCount=0;
+    self.itemDisplayCount=0;  //for extra filter condition display
     self.totalIndex=0;
     self.targetIndex=0;
-    self.checkedConditionCount=0;
-    self.isCancelCurrentLoadItemListMarker=NO;
+    self.checkedConditionCount=0;   //for extra filter condition logic
+
     self.arrItemList=[[NSMutableArray alloc] init];
 
     [self clearList];
@@ -406,28 +410,26 @@
         searchCenter=CLLocationCoordinate2DMake(locationManager.location.coordinate.latitude,locationManager.location.coordinate.longitude);
     }
 
-    //if([self isExistSortingKey] || [self isExistfilterCondition]){
-        [self.loading setAlpha:0.0f];
-        [self.loading setHidden:NO];
-        [UIView animateWithDuration:0.28 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
-         {
-             [self.loading setAlpha:1.0f];
-         } completion:^(BOOL finished) {
-             if (finished){
-                 [self.loading start];
-                 [self sendRequest:searchCenter dist:dist pKeyword:pKeyword pType:pType];
-             }
-         }];
-//    }else{
-//        [self.loading stop];
-//        [self sendRequest:searchCenter dist:dist pKeyword:pKeyword pType:pType];
-//    }
-
+    //loading start then finish send request;
+    [self.loading setAlpha:0.0f];
+    [self.loading setHidden:NO];
+    [UIView animateWithDuration:0.28 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
+     {
+         [self.loading setAlpha:1.0f];
+     } completion:^(BOOL finished) {
+         if (finished){
+             [self.loading start];
+             [self sendRequest:searchCenter dist:dist pKeyword:pKeyword pType:pType];
+         }
+     }];
 }
+
 -(void) sendRequest:(CLLocationCoordinate2D) searchCenter dist:(double) dist pKeyword:(NSString*) pKeyword pType:(NSString *) pType {
+    
     //check local server
     NSString *strUrlFromLocalServer=[NSString stringWithFormat:@"%@://%@/%@?action=%@&lat=%f&lng=%f&dist=%f&tag=%@",self.gv.urlProtocol,self.gv.domain,self.gv.controllerPlace,self.gv.actionSearchPlace,searchCenter.latitude,searchCenter.longitude,dist,pKeyword];
     NSLog(@"%@",strUrlFromLocalServer);
+    
     [Util jsonAsyncWithUrl:strUrlFromLocalServer target:self cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:3 completion:^(NSMutableDictionary *data, NSError *connectionError) {
         NSLog(@"local data finish");
         NSMutableArray *arrFromLocal=[data objectForKey:@"results"];
@@ -444,20 +446,16 @@
             return;
         }else if(arrFromLocal.count<arrFromGoogle.count){
             self.arrRadarResult=arrFromGoogle;
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self.loading stop];
-            });
         }else if(arrFromLocal.count>=arrFromGoogle.count){
-            isFromLocal =YES;
-            self.arrRadarResult=arrFromLocal;
-            //NSLog(@"use local result");
+            self.arrRadarResult=arrFromGoogle;
+//            isFromLocal =YES;
+//            self.arrRadarResult=arrFromLocal;
         }
         
         self.totalIndex=(int) [arrRadarResult count]-1;
         self.startIndex=0;
         int maxLen=(int) [arrRadarResult count];
 
-        //no sorting key load by onece
         if([self isExistSortingKey] || isFromLocal){
             self.isEndedForSearchResult=YES;
         }else{
@@ -473,13 +471,9 @@
             self.targetIndex=0;
         }
         
-        //NSLog(@"targetIndex:%d",self.targetIndex);
-        //NSLog(@"loading detail count:%d",maxLen);
-        
         BOOL isExistFilterCondition=[self isExistfilterCondition];
         BOOL isExistSortingKey=[self isExistSortingKey];
 
-        //NSLog(@"creat item instance start");
         dispatch_async(dispatch_get_main_queue(), ^{
             [self initialViewWithBoolIsExistsSortingKey:isExistSortingKey isExistFilterCondition:isExistFilterCondition];
             [self createItemFromRadarResultWithIndex:0 isExistFilterCondition:isExistFilterCondition isExistSortingKey:isExistSortingKey isFromLocal:isFromLocal isSecondPage:NO];
@@ -490,28 +484,21 @@
 //initial btnMore scrollViewList
 -(void)initialViewWithBoolIsExistsSortingKey:(BOOL) isExistSortingKey isExistFilterCondition:(BOOL)isExistFilterCondition{
     if(isExistSortingKey){
-        //b+c
         [scrollViewList setAlpha:0.0f];
     }else{
-        //a+d
         if(isExistFilterCondition){
-            //a
             [scrollViewList setAlpha:0.0f];
         }else{
-            //d
             [scrollViewList setAlpha:1.0f];
         }
     }
 
     if(!isExistFilterCondition){
-        //d+c
         if(isExistSortingKey){
-            //c
             [self.btnMore setAlpha:0.0f];
             [self.btnMore setHidden:YES];
             [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, [arrRadarResult count]*150)];
         }else{
-            //d
             if(self.targetIndex<self.totalIndex){
                 [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, (self.targetIndex+1)*150+40+40)];
                 [self.btnMore setFrame:CGRectMake(0, (self.targetIndex+1)*150+40, 320, 40)];
@@ -612,7 +599,7 @@
     [arrItemList addObject:item];
     itemInstanceCreateCount=i;
     
-    NSLog(@"create:%@",[NSString stringWithFormat:@"%d/%d",itemInstanceCreateCount,self.totalIndex]);
+    //NSLog(@"create:%@",[NSString stringWithFormat:@"%d/%d",itemInstanceCreateCount,self.totalIndex]);
     
     if(itemInstanceCreateCount<self.targetIndex){
         [self createItemFromRadarResultWithIndex:itemInstanceCreateCount+1 isExistFilterCondition:isExistFilterCondition isExistSortingKey:isExistSortingKey isFromLocal:isFromLocal isSecondPage:isSecondPage];
@@ -623,7 +610,7 @@
             [scrollViewList setAlpha:1.0];
             for(int i=self.startIndex;i<=self.arrRadarResult.count-1;i++){
                 ListItem *currItem=(ListItem *)[arrItemList objectAtIndex:i];
-                NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(initialItemData:) object:currItem];
+                NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(_initialItemDataAndThenForLocal:) object:currItem];
                 [self.gv.backgroundThreadManagement addOperation:operation];
             }
         }else{
@@ -638,28 +625,66 @@
     
 }
 
-
--(void)initialItemData:(ListItem*) item{
-    BOOL beShown=[item initialItemData:item.jsonBaseData isFromLocal:YES];
+-(void)_initialItemDataAndThenForLocal:(ListItem *)item{
+    [self initialItemDataAndThen:item isFromLocal:YES];
+}
+//from local data
+//因為ListItem.initialItemData 是多執行緒所以裡頭沒辦法做item check;
+-(void)initialItemDataAndThen:(ListItem*) item isFromLocal:(BOOL) isFromLocal{
+    BOOL beShown=[item initialItemData:item.jsonBaseData isFromLocal:isFromLocal];
     dispatch_async(dispatch_get_main_queue(), ^{
-        [self.loading stop];
-        if([self isExistfilterCondition]){
-            self.checkedConditionCount+=1;
+        self.checkedConditionCount+=1;
+        if([self isExistSortingKey]){
+            if(self.checkedConditionCount>=self.arrRadarResult.count){
+                [self sortingAndFilterArrItemList];
+                [self.loading stop];
+            }
+        }else{
             if(!beShown){
                 [item removeFromSuperview];
-                return;
             }else{
-                [self.btnMore setHidden:YES];
-                if(self.checkedConditionCount>=self.arrRadarResult.count){
-
-                    [UIView animateWithDuration:0.28 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-                        [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, [self getListItemCountInnerScrollViewList]*150+40)];
-                    } completion:^(BOOL finished) {
-                        if(finished){
-                            
-                        }
-                    }];
+                self.itemDisplayCount+=1;
+                if([self isExistfilterCondition]){
+                    item.seq=self.itemDisplayCount-1;
                 }
+                [self.btnMore setHidden:YES];
+                [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, self.itemDisplayCount*150+40)];
+                [item setAlpha:1.0f];
+            }
+            int checkMax=(int)self.arrRadarResult.count;
+            if(!isFromLocal){
+                checkMax=self.targetIndex;
+            }
+            
+            //NSLog(@"%@",[NSString stringWithFormat:@"%d>%d",self.checkedConditionCount,checkMax]);
+            if(self.checkedConditionCount>=checkMax){
+                //finish check condition;
+                if(!isFromLocal){
+                    double moreButtonOffset =0;
+                    if(!self.isEndedForSearchResult){
+                        moreButtonOffset=40;
+                        [self.btnMore setAlpha:0.0];
+                        [self.btnMore setHidden:NO];
+                        [self.btnMore setFrame:CGRectMake(0,self.itemDisplayCount*150+40, self.gv.screenW, 40)];
+                    }else{
+                        [self.btnMore setHidden:YES];
+                    }
+                }else{
+                    [self.btnMore setHidden:YES];
+                }
+                [self.loading stop];
+                [UIView animateWithDuration:0.28 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                    if(!self.btnMore.isHidden){
+                        [self.btnMore setAlpha:1.0];
+                        [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, self.itemDisplayCount*150+40+40)];
+                        [self.btnMore.lblTitle setTextColor:[UIColor whiteColor]];
+                    }else{
+                        [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, self.itemDisplayCount*150+40)];
+                    }
+                    [scrollViewList setAlpha:1.0f];
+                } completion:^(BOOL finished) {
+                    
+                }];
             }
         }
         [item.loadingCircle stop];
@@ -667,6 +692,7 @@
         [item displaySelf];
     });
 }
+
 -(int) getListItemCountInnerScrollViewList{
     int result=0;
     NSArray *subviews=scrollViewList.subviews;
@@ -867,7 +893,7 @@
              &&
              [touch.view isKindOfClass:[ButtonPhone class]]){
         NSLog(@"list condition 5: 打電話");
-        ListItem *item=(ListItem *) touch.view.superview;
+        ListItem *item=(ListItem *) touch.view.superview.superview;
         [item call];
     }else if([GV getGlobalStatus]==LIST && [touch.view isKindOfClass:[ButtonFunction class]]){
         NSLog(@"list condition 6: 切換搜尋設定");
@@ -998,11 +1024,19 @@
     [self.mapview clear];
     self.arrMarker =[[NSMutableArray alloc]init];
     NSArray *subviews =self.scrollViewList.subviews;
+    NSMutableArray *sortinListItem=[[NSMutableArray alloc]init];
     for(int i=0;i<subviews.count;i++){
         if(![[subviews objectAtIndex:i] isKindOfClass:[ListItem class]]){
             continue;
         }
-        ListItem *tempItem=(ListItem *)[subviews objectAtIndex:i];
+        [sortinListItem addObject:[subviews objectAtIndex:i]];
+    }
+    
+    NSSortDescriptor *sort=[NSSortDescriptor sortDescriptorWithKey:@"seq" ascending:YES];
+    [sortinListItem sortUsingDescriptors:[NSArray arrayWithObject:sort]];
+    
+    for(int i=0;i<sortinListItem.count;i++){
+        ListItem *tempItem=(ListItem *)[sortinListItem objectAtIndex:i];
         if(tempItem.isShow){
             CustomizeMarker *marker = [[CustomizeMarker alloc] init];
             marker.position = CLLocationCoordinate2DMake(tempItem.lat, tempItem.lng);

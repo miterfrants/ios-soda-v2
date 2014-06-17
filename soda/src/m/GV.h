@@ -130,6 +130,7 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property UIFont *fontInfoWindowDistance;
 @property UIFont *fontFuncFavoriteName;
 @property UIFont *fontFuncFavoriteAddress;
+@property UIFont *fontNormalForHebrew;
 
 @property LoginType loginType;
 @property NSString *jsonGoods;

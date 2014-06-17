@@ -174,6 +174,8 @@
     gv.fontInfoWindowAddress=[UIFont fontWithName:@"HelveticaNeue" size:12.0f];
     gv.fontFuncFavoriteName=[UIFont fontWithName:@"HelveticaNeue" size:15.0f];
     gv.fontFuncFavoriteAddress=[UIFont fontWithName:@"HelveticaNeue" size:12.0f];
+    gv.fontNormalForHebrew=[UIFont fontWithName:@"HelveticaNeue-Light" size:16.0f];
+    
     //key
     gv.googleWebKey=@"AIzaSyCYM1UUnXbgP3eD__x2EjIugNOy-vE3McY";
     

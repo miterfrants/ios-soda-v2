@@ -272,7 +272,6 @@ double posLeft;
                         } queue:self.gv.backgroundThreadManagement];
                     }
                 }
-                //NSLog(@"B");
                 NSString* jsonString = [[NSString alloc] initWithBytes:[jsonData bytes] length:[jsonData length] encoding:NSUTF8StringEncoding];
                 NSString *charactersToEscape = @"!*'();:@&=+$,/?%#[]\" ";
                 NSCharacterSet *allowedCharacters = [[NSCharacterSet characterSetWithCharactersInString:charactersToEscape] invertedSet];
@@ -287,59 +286,8 @@ double posLeft;
                 } queue:self.gv.backgroundThreadManagement postData:[NSString stringWithFormat:@"google_place_detail=%@",encodeJsonString]];
             }
             api.busy-=1;
-            if([scrollViewControllerList isExistSortingKey]){
-                [self initialItemData:[data objectForKey:@"result"] isFromLocal:NO];
-            }else{
-                BOOL iniResult=[self initialItemData:[data objectForKey:@"result"] isFromLocal:NO];
-                dispatch_async(dispatch_get_main_queue(), ^{
-                    [self.loadingCircle stop];
-                    if(iniResult){
-                        [self placeElement];
-                        [self displaySelf];
-                    }else{
-                        self.seq=-1;
-                        [self removeFromSuperview];
-                        [self setAlpha:0.0];
-                        [self setHidden:YES];
-                    }
-                    //filter condition current page complete;
-                    //NSLog(@"%@",[NSString stringWithFormat:@"%d>=%d",scrollViewControllerList.checkedConditionCount,scrollViewControllerList.targetIndex]);
-                    if(scrollViewControllerList.isExistfilterCondition && scrollViewControllerList.checkedConditionCount>=scrollViewControllerList.targetIndex){
-                        double moreButtonOffset =0;
-                        if(!scrollViewControllerList.isEndedForSearchResult){
-                            moreButtonOffset=40;
-                        }
-                        [scrollViewControllerList.btnMore setHidden:NO];
-                        int itemCount=[scrollViewControllerList getListItemCountInnerScrollViewList];
-                        [scrollViewControllerList.btnMore setFrame:CGRectMake(0, (scrollViewControllerList.scrollViewList.subviews.count-3)*150+40, self.gv.screenW, 40)];
-                        
-                        [UIView animateWithDuration:0.28 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
-                            if(moreButtonOffset==0){
-                                [scrollViewControllerList.btnMore setAlpha:0.0f];
-                            }else{
-                                [scrollViewControllerList.btnMore setAlpha:1.0f];
-                                [scrollViewControllerList.btnMore.lblTitle setTextColor:[UIColor whiteColor]];
-                            }
-                            [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, itemCount*150+40+moreButtonOffset)];
-                            [scrollViewControllerList.scrollViewList setAlpha:1.0];
-                            [scrollViewControllerList.loading stop];
-                            NSArray *subviews=scrollViewControllerList.scrollViewList.subviews;
-                            for(int i=0;i<subviews.count;i++){
-                                if(![[subviews objectAtIndex:i] isKindOfClass:[ListItem class]]){
-                                    continue;
-                                }
-                                ListItem *item=(ListItem *)[subviews objectAtIndex:i];
-                                if(item.seq>0){
-                                    [item setAlpha:1.0f];
-                                }
-                            }
-                        } completion:^(BOOL finished) {
-                            
-                        }];
-                    }
-                    scrollViewControllerList.checkedConditionCount+=1;
-                });
-            }
+            self.jsonBaseData=[data objectForKey:@"result"];
+            [scrollViewControllerList initialItemDataAndThen:self isFromLocal:NO];
         } queue:self.gv.backgroundThreadManagement];
     }
 }
@@ -353,6 +301,15 @@ double posLeft;
     if(scrollViewControllerList.isCancelCurrentLoadItemListMarker){
         return NO;
     }
+    
+    //filter condition or sorting key on thie condition
+    //有sorting key 的時候在這邊把seq 重新定義
+    //如果有 filter condition 在 scrollViewControllerList.sorting 會在做一次
+    if([scrollViewControllerList isExistSortingKey]){
+        self.seq=scrollViewControllerList.itemPrepareDataCount;
+    }
+    scrollViewControllerList.itemPrepareDataCount+=1;
+    
     if([[data objectForKey:@"photos"] count]>0){
 
         [self loadPicFromGoogle:[[[data  objectForKey:@"photos"] objectAtIndex:0]  valueForKey:@"photo_reference"]];
@@ -374,16 +331,8 @@ double posLeft;
             CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
             stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
         }
-//        CLLocation *destination=[[CLLocation alloc] initWithLatitude:self.lat  longitude:self.lng];
-//        CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
-//        stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
         self.distance=[stringDist doubleValue];
     }
-//    NSString *stringDist=@"0";
-//    CLLocation *destination=[[CLLocation alloc] initWithLatitude:self.lat  longitude:self.lng];
-//    CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
-//    stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
-//    self.distance=[stringDist doubleValue];
     
     
     //official suggestion
@@ -399,8 +348,10 @@ double posLeft;
     //phone;
     strPhone=[data valueForKey:@"formatted_phone_number"];
     strPhone=[strPhone stringByReplacingOccurrencesOfString:@" " withString:@""];
+    
     //address;
     self.address=[data valueForKey:@"formatted_address"];
+    
     //types
     NSArray *types=[data objectForKey:@"types"];
     NSMutableString *typesString=[[NSMutableString alloc]init];
@@ -412,86 +363,76 @@ double posLeft;
         }
     }
     self.googleTypes=typesString;
+    
     //name
     self.name=[data valueForKey:@"name"];
+    
     //rate
     self.rate=[[data valueForKey:@"rating"] floatValue];
-//    NSLog(@"%@",[NSString stringWithFormat:@"name: %@, rate:%f",self.name,self.rate]);
+
     //review
     self.arrReview=[data objectForKey:@"reviews"];
     NSSortDescriptor *sort=[NSSortDescriptor sortDescriptorWithKey:@"time" ascending:NO];
     self.arrReview=[[self.arrReview sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]] mutableCopy];
+    
     //抓自己的review
     if(!isFromLocal){
-    if([selected.sortingKey isEqual:@"rating"]){
-        NSString *url=[NSString stringWithFormat:@"%@://%@/%@?action=%@&google_place_id=%@&is_from_local=0",self.gv.urlProtocol,self.gv.domain,self.gv.controllerReview,self.gv.actionGetReview,self.googleId];
-        NSDictionary *dicReview=[Util jsonWithUrl:url];
-//        NSLog(@"%@",url);
-        NSArray * arrReviewFromLocal=[dicReview objectForKey:@"results"];
-        int originalReviewCount=(int)self.arrReview.count;
-        double totalRatingFromLocalSite=0;
-        for(int i=0;i<arrReviewFromLocal.count;i++){
-            totalRatingFromLocalSite+=[[[arrReviewFromLocal objectAtIndex:i] valueForKey:@"rating"] doubleValue];
-            [self.arrReview addObject:[arrReviewFromLocal objectAtIndex:i]];
+        if([selected.sortingKey isEqual:@"rating"]){
+            NSString *url=[NSString stringWithFormat:@"%@://%@/%@?action=%@&google_place_id=%@&is_from_local=0",self.gv.urlProtocol,self.gv.domain,self.gv.controllerReview,self.gv.actionGetReview,self.googleId];
+            NSDictionary *dicReview=[Util jsonWithUrl:url];
+            NSArray * arrReviewFromLocal=[dicReview objectForKey:@"results"];
+            int originalReviewCount=(int)self.arrReview.count;
+            double totalRatingFromLocalSite=0;
+            for(int i=0;i<arrReviewFromLocal.count;i++){
+                totalRatingFromLocalSite+=[[[arrReviewFromLocal objectAtIndex:i] valueForKey:@"rating"] doubleValue];
+                [self.arrReview addObject:[arrReviewFromLocal objectAtIndex:i]];
+            }
+            if(originalReviewCount>0){
+                self.rate=(
+                           (self.rate*originalReviewCount)+
+                           totalRatingFromLocalSite
+                           )
+                            /(arrReviewFromLocal.count+originalReviewCount);
+            }else if(arrReviewFromLocal.count>0){
+                self.rate=totalRatingFromLocalSite/arrReviewFromLocal.count;
+            }
+            NSSortDescriptor *sort=[NSSortDescriptor sortDescriptorWithKey:@"time" ascending:NO];
+            self.arrReview=[[self.arrReview sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]] mutableCopy];
+        }else{
+            NSString *url=[NSString stringWithFormat:@"%@://%@/%@?action=%@&google_place_id=%@&is_from_local=0",self.gv.urlProtocol,self.gv.domain,self.gv.controllerReview,self.gv.actionGetReview,self.googleId];
+            NSMutableDictionary *dicData=[Util jsonWithUrl:url];
+            
+            NSArray * arrReviewFromLocal=[dicData objectForKey:@"results"];
+            int originalReviewCount=(int)self.arrReview.count;
+            double totalRatingFromLocalSite=0;
+            for(int i=0;i<arrReviewFromLocal.count;i++){
+                totalRatingFromLocalSite+=[[[arrReviewFromLocal objectAtIndex:i] valueForKey:@"rating"] doubleValue];
+                [self.arrReview addObject:[arrReviewFromLocal objectAtIndex:i]];
+            }
+            if(originalReviewCount>0){
+                self.rate=(
+                           (self.rate*originalReviewCount)+
+                           totalRatingFromLocalSite
+                           )
+                /(arrReviewFromLocal.count+originalReviewCount);
+            }else if(arrReviewFromLocal.count>0){
+                self.rate=totalRatingFromLocalSite/arrReviewFromLocal.count;
+            }
+            NSSortDescriptor *sort=[NSSortDescriptor sortDescriptorWithKey:@"time" ascending:NO];
+            self.arrReview=[[self.arrReview sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]] mutableCopy];
         }
-        if(originalReviewCount>0){
-            self.rate=(
-                       (self.rate*originalReviewCount)+
-                       totalRatingFromLocalSite
-                       )
-                        /(arrReviewFromLocal.count+originalReviewCount);
-        }else if(arrReviewFromLocal.count>0){
-            self.rate=totalRatingFromLocalSite/arrReviewFromLocal.count;
-        }
-        NSSortDescriptor *sort=[NSSortDescriptor sortDescriptorWithKey:@"time" ascending:NO];
-        self.arrReview=[[self.arrReview sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]] mutableCopy];
-    }else{
-        NSString *url=[NSString stringWithFormat:@"%@://%@/%@?action=%@&google_place_id=%@&is_from_local=0",self.gv.urlProtocol,self.gv.domain,self.gv.controllerReview,self.gv.actionGetReview,self.googleId];
-        NSMutableDictionary *dicData=[Util jsonWithUrl:url];
-        
-        NSArray * arrReviewFromLocal=[dicData objectForKey:@"results"];
-        int originalReviewCount=(int)self.arrReview.count;
-        double totalRatingFromLocalSite=0;
-        for(int i=0;i<arrReviewFromLocal.count;i++){
-            totalRatingFromLocalSite+=[[[arrReviewFromLocal objectAtIndex:i] valueForKey:@"rating"] doubleValue];
-            [self.arrReview addObject:[arrReviewFromLocal objectAtIndex:i]];
-        }
-        if(originalReviewCount>0){
-            self.rate=(
-                       (self.rate*originalReviewCount)+
-                       totalRatingFromLocalSite
-                       )
-            /(arrReviewFromLocal.count+originalReviewCount);
-        }else if(arrReviewFromLocal.count>0){
-            self.rate=totalRatingFromLocalSite/arrReviewFromLocal.count;
-        }
-        //            NSLog(@"%@",[NSString stringWithFormat:@"name: %@, rate:%f",self.name,self.rate]);
-        NSSortDescriptor *sort=[NSSortDescriptor sortDescriptorWithKey:@"time" ascending:NO];
-        self.arrReview=[[self.arrReview sortedArrayUsingDescriptors:[NSArray arrayWithObject:sort]] mutableCopy];
     }
-    }
+    
     //light
-                //NSLog(@"B");
     if([data objectForKey:@"opening_hours"] !=nil && [[data objectForKey:@"opening_hours"] valueForKey:@"open_now"] !=nil){
-                //NSLog(@"C");
         self.isExistOpeningData=YES;
         if([[[data objectForKey:@"opening_hours"] valueForKey:@"open_now"] intValue]==1){
             self.isOpening=YES;
         }
-        //NSLog(@"%@",[data valueForKey:@"opening_hours"]);
     }else{
         self.isExistOpeningData=NO;
     }
-//loading progress bar
-//    dispatch_async(dispatch_get_main_queue(), ^{
-//        //loading info
-//        if(scrollViewControllerList.totalIndex>0){
-//            double perc=((float)(scrollViewControllerList.createIndex*0.5)/scrollViewControllerList.totalIndex);
-//            [scrollViewControllerList.loading process:perc+0.5 completion:^{
-//            }];
-//            //scrollViewControllerList.loading.lblLoadingInfo.text=[NSString stringWithFormat:@"%.0f %%",floor(scrollViewControllerList.createIndex*100/(scrollViewControllerList.totalIndex))];
-//        }
-//    });
+    
     if(![scrollViewControllerList isExistSortingKey]){
         if(selected.isOnlyShowFavorite && !self.isFavorite){
             return NO;
@@ -509,26 +450,6 @@ double posLeft;
             return NO;
         }
     }
-    if([scrollViewControllerList isExistSortingKey]){
-        self.seq=scrollViewControllerList.itemPrepareDataCount;
-    }
-
-    //finish all thing only sotring;
-    NSLog(@"initial item data:%@",[NSString stringWithFormat:@"%d/%d",scrollViewControllerList.itemPrepareDataCount,scrollViewControllerList.totalIndex]);
-    if(scrollViewControllerList.itemPrepareDataCount>=scrollViewControllerList.totalIndex && scrollViewControllerList.arrRadarResult.count>0){
-        NSLog(@"show list");
-        if([scrollViewControllerList isExistSortingKey]){
-            dispatch_async(dispatch_get_main_queue(), ^{
-                //[scrollViewControllerList.loading stop];
-                [scrollViewControllerList sortingAndFilterArrItemList];
-                [scrollViewControllerList.loading hide];
-            });
-        }
-    }
-    if(scrollViewControllerList.isExistSortingKey){
-        scrollViewControllerList.itemPrepareDataCount+=1;
-    }
-    //exist filter condition createIndex add one
     return YES;
 }
 
@@ -544,9 +465,7 @@ double posLeft;
     if([scrollViewControllerList isExistfilterCondition] && ![scrollViewControllerList isExistSortingKey]){
         self.isShow=YES;
         [scrollViewControllerList.scrollViewList addSubview:self];
-        [self setFrame:CGRectMake(0, 150*scrollViewControllerList.itemPrepareDataCount+40, self.gv.screenW, 150)];
-        self.seq=scrollViewControllerList.itemPrepareDataCount;
-        scrollViewControllerList.itemPrepareDataCount+=1;
+        [self setFrame:CGRectMake(0, 150*self.seq+40, self.gv.screenW, 150)];
         [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
          {
              [self.contentCon setAlpha:1.0f];

@@ -12,6 +12,7 @@
 #import "ListItem.h"
 #import "Util.h"
 #import "AppDelegate.h"
+#import "SocialUtil.h"
 
 @implementation ButtonLike
 @synthesize imgViewFill;
@@ -74,39 +75,11 @@
             NSLog(@"official suggest place:%@",result);
         } queue:self.gv.backgroundThreadManagement];
     }
-
-    NSLog(@"%@",FBSession.activeSession.permissions);
-    
-    // Put together the dialog parameters
-    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
-                                   @"soda", @"name",
-                                   [NSString stringWithFormat:@"%@ add %@ to favorite place by soda",self.gv.fbName, item.name], @"caption",
-                                   @"", @"description",
-                                   [NSString stringWithFormat:@"%@://%@/soda/place.aspx?google_id=%@&google_ref=%@&lang=%@",self.gv.urlProtocol, self.gv.domain,item.googleId,item.googleRef,[DB getSysConfig:@"lang"]], @"link",
-                                   nil];
-    
-    // Make the request
-    [FBRequestConnection startWithGraphPath:@"/me/feed"
-                                 parameters:params
-                                 HTTPMethod:@"POST"
-                          completionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
-                              if (!error) {
-                                  // Link posted successfully to Facebook
-                                  NSLog(@"result: %@", result);
-                              } else {
-                                  // An error occurred, we need to handle the error
-                                  // See: https://developers.facebook.com/docs/ios/errors
-                                  NSLog(@"%@", error.description);
-                              }
-                          }];
-    
-    
     NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(_updateFavorite) object:nil];
     [self.gv.FMDatabaseQueue addOperation:operation];
     [super touchesEnded:touches withEvent:event];
-    
-
 }
+
 -(void) _updateFavorite{
     FMDatabase *db=[DB getShareInstance].db;
     ListItem *item=(ListItem*) self.superview.superview;
@@ -120,6 +93,7 @@
     }else{
         dispatch_async(dispatch_get_main_queue(), ^{
             [self animationToFill];
+            [SocialUtil shareFavoriteWithName:item.name googleId:item.googleId googleRef:item.googleRef];
         });
         [db executeUpdate:[NSString stringWithFormat:@"INSERT INTO favorite (name,google_id,google_type,google_ref,phone,address,lat,lng) VALUES ('%@','%@','%@','%@','%@','%@',%f,%f)",item.lblName.text,item.googleId,item.googleTypes,item.googleRef,item.strPhone,item.address,item.lat,item.lng]];
     }
@@ -132,7 +106,7 @@
 }
 -(void) _checkDB{
     FMDatabase *db=[DB getShareInstance].db;
-    ListItem *item=(ListItem*) self.superview;
+    ListItem *item=(ListItem*) self.superview.superview;
     [db open];
     int countForPlace=[db intForQuery:[NSString stringWithFormat:@"SELECT COUNT(*) FROM favorite where google_id='%@'",item.googleId]];
     if(countForPlace==0){

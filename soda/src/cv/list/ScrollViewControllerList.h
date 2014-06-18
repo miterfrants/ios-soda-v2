@@ -36,6 +36,7 @@
 @property int itemInstanceCreateCount;
 @property int itemPrepareDataCount;
 @property int itemDisplayCount;
+@property int itemAccmulatingLoadCount;
 @property int checkedConditionCount;
 
 @property int totalIndex;
@@ -61,7 +62,7 @@
 -(void)animationShowList;
 -(void)animationHideList;
 -(void)loadListAndInitWithKeyword:(NSString *)keyword type:(NSString *) type dist:(double) dist center:(CLLocationCoordinate2D) center;
--(void)loadNextPageList;
+-(void)loadNextList;
 -(void)refresh;
 -(BOOL)isExistfilterCondition;
 -(BOOL)isExistSortingKey;

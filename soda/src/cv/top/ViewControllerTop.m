@@ -8,6 +8,7 @@
 
 #import "ViewControllerTop.h"
 #import "ViewControllerRoot.h"
+#import "ScrollViewControllerList.h"
 #import "ViewTip.h"
 #import "FMDatabaseAdditions.h"
 #import "Util.h"
@@ -204,6 +205,8 @@
     }
     KeyboardTopInput *keyboardTopInput=(KeyboardTopInput *)self.gv.keyboardTopInput;
     [keyboardTopInput hideKeyboard:nil];
+    ScrollViewControllerList *scrollViewControlllerList = (ScrollViewControllerList *)self.gv.scrollViewControlllerList;
+    [scrollViewControlllerList.viewFunBar.viewPanelForLocation.txtCenterAdderss resignFirstResponder];
     [self animationHideBreadCrumb];
     [GV setGlobalStatus:COMMON];
 }

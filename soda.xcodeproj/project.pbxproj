@@ -109,6 +109,7 @@
 		028FFB32190A68A9007CE44E /* TextComment.m in Sources */ = {isa = PBXBuildFile; fileRef = 028FFB31190A68A9007CE44E /* TextComment.m */; };
 		0291A6C6194EB8AE00B112A5 /* LoadingCircle.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6C5194EB8AE00B112A5 /* LoadingCircle.m */; };
 		0291A6C9194EF7DE00B112A5 /* ButtonMore.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6C8194EF7DE00B112A5 /* ButtonMore.m */; };
+		0291A6CC19517CA300B112A5 /* SocialUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6CB19517CA300B112A5 /* SocialUtil.m */; };
 		029C86EC1945668900740266 /* GooglePlaceAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86EB1945668900740266 /* GooglePlaceAPI.m */; };
 		029C86F5194566EC00740266 /* GooglePlaceAPIPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86F4194566EC00740266 /* GooglePlaceAPIPool.m */; };
 		029C86F8194845CD00740266 /* LoadingBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86F7194845CD00740266 /* LoadingBar.m */; };
@@ -389,6 +390,8 @@
 		0291A6C5194EB8AE00B112A5 /* LoadingCircle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LoadingCircle.m; sourceTree = "<group>"; };
 		0291A6C7194EF7DE00B112A5 /* ButtonMore.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ButtonMore.h; path = listitem/ButtonMore.h; sourceTree = "<group>"; };
 		0291A6C8194EF7DE00B112A5 /* ButtonMore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ButtonMore.m; path = listitem/ButtonMore.m; sourceTree = "<group>"; };
+		0291A6CA19517CA300B112A5 /* SocialUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocialUtil.h; sourceTree = "<group>"; };
+		0291A6CB19517CA300B112A5 /* SocialUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocialUtil.m; sourceTree = "<group>"; };
 		029C86EA1945668900740266 /* GooglePlaceAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GooglePlaceAPI.h; sourceTree = "<group>"; };
 		029C86EB1945668900740266 /* GooglePlaceAPI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GooglePlaceAPI.m; sourceTree = "<group>"; };
 		029C86F3194566EC00740266 /* GooglePlaceAPIPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GooglePlaceAPIPool.h; sourceTree = "<group>"; };
@@ -1074,6 +1077,8 @@
 				02526E6E192E4D8200DE0327 /* LoadingIcon.m */,
 				0291A6C4194EB8AE00B112A5 /* LoadingCircle.h */,
 				0291A6C5194EB8AE00B112A5 /* LoadingCircle.m */,
+				0291A6CA19517CA300B112A5 /* SocialUtil.h */,
+				0291A6CB19517CA300B112A5 /* SocialUtil.m */,
 			);
 			path = m;
 			sourceTree = "<group>";
@@ -1443,6 +1448,7 @@
 				02B6AC4B1920C57000ACCF61 /* ButtonLike.m in Sources */,
 				02526E7B1932F3DB00DE0327 /* ScrollViewDetailMap.m in Sources */,
 				027C335F18EBBB4300D1FC91 /* AppDelegate.m in Sources */,
+				0291A6CC19517CA300B112A5 /* SocialUtil.m in Sources */,
 				02ED98F518F79EDC00B3B839 /* PopupView.m in Sources */,
 				0248E3F41903BE5000ABC9B9 /* LightEdgeLayer.m in Sources */,
 				02526E531929089A00DE0327 /* SliderDistance.m in Sources */,

@@ -44,7 +44,6 @@
         [lblCate setTextColor:[UIColor whiteColor]];
         [lblCate setTextAlignment:NSTextAlignmentLeft];
         [self addSubview:lblCate];
-
     }
     return self;
 }

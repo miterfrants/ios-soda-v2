@@ -58,6 +58,8 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property NSString *controllerSuggestion;
 @property NSString *controllerOfficialSuggestPlace;
 @property NSString *controllerReview;
+@property NSString *controllerMember;
+
 @property NSString *actionGetDefaultCollection;
 @property NSString *actionGetDefaultIcon;
 @property NSString *actionAddSuggestion;
@@ -68,6 +70,7 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property NSString *actionGetReview;
 @property NSString *actionAddReview;
 @property NSString *actionGetReviewSelf;
+@property NSString *actionGetLocalMember;
 
 @property NSString *controllerPlace;
 @property NSString *actionSearchPlace;

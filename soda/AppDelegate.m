@@ -83,6 +83,7 @@
     gv.controllerOfficialSuggestPlace=@"api/soda/official_suggestion_place.aspx";
     gv.controllerReview=@"api/soda/review.aspx";
     gv.controllerPlace=@"api/soda/place.aspx";
+    gv.controllerMember=@"api/soda/member.aspx";
     
     gv.actionGetDefaultCollection=@"default";
     gv.actionGetDefaultIcon=@"default";
@@ -96,6 +97,7 @@
     gv.actionGetReviewSelf=@"get-for-self";
     gv.actionSearchPlace=@"search";
     gv.actionAddPlace=@"add";
+    gv.actionGetLocalMember=@"get_local_user";
     gv.urlProtocol=@"http";
     gv.urlIcon=[NSString stringWithFormat:@"%@://%@/img/soda",gv.urlProtocol,gv.domain];
     
@@ -220,7 +222,7 @@
     // If the session was opened successfully
     if (!error && state == FBSessionStateOpen){
         NSLog(@"Session opened");
-         NSLog(@"facebook accessToken:%@",session.accessTokenData.accessToken);
+         //NSLog(@"facebook accessToken:%@",session.accessTokenData.accessToken);
         // Show the user the logged-in UI
         if(gv==nil){
             self.gv=[GV sharedInstance];
@@ -298,9 +300,10 @@
         NSDictionary<FBGraphUser> *user,
         NSError *error) {
             if (!error) {
-                NSMutableDictionary *dicUserInfo= [Util jsonWithUrl:[NSString stringWithFormat:@"http://%@/controller/mobile/member.aspx?action=get_local_user&source=1&outer_id=%@",gv.domain,user.id]] ;
+                NSMutableDictionary *dicUserInfo= [Util jsonWithUrl:[NSString stringWithFormat:@"%@://%@/%@?action=%@&source=1&outer_id=%@&access_token=%@",gv.urlProtocol ,gv.domain,gv.controllerMember,gv.actionGetLocalMember,user.id,[FBSession activeSession].accessTokenData.accessToken]] ;
+                NSLog(@"%@",[NSString stringWithFormat:@"%@://%@/%@?action=%@&source=1&outer_id=%@&access_token=%@",gv.urlProtocol ,gv.domain,gv.controllerMember,gv.actionGetLocalMember,user.id,[FBSession activeSession].accessTokenData.accessToken]);
+                NSLog(@"%@",dicUserInfo);
                 gv.localUserId=[[[dicUserInfo objectForKey:@"results"] valueForKey:@"user_id"] stringValue];
-
                 gv.localUserName=[[dicUserInfo objectForKey:@"results"] valueForKey:@"user_name"];
                  NSURL *imgURL=[NSURL URLWithString: [NSString stringWithFormat:@"https://graph.facebook.com/%@/picture?width=100&height=100" ,user.id]];
                  NSData *imgData=[NSData dataWithContentsOfURL:imgURL];

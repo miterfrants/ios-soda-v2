@@ -97,6 +97,7 @@
     if(checkExistData==0){
         //remote error set local data
         @try {
+            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"share_review_on_social",@"1"]];
             [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"share_favorite_on_social",@"1"]];
             [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"share_good_on_social",@"1"]];
             [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"share_icon_on_social",@"1"]];

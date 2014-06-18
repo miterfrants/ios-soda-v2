@@ -37,7 +37,7 @@
         [imgViewIcon setFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
         
         lblTitle =[[UILabel alloc]init];
-        UIFont *font=[UIFont fontWithName:@"HelveticaNeue-Light" size:15.0f];
+        UIFont *font=self.gv.fontNormalForHebrew;
         [lblTitle setFont:font];
         [lblTitle setText:title];
         originalTitle=title;

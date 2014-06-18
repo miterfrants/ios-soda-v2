@@ -37,7 +37,7 @@
         [self.btnMore setBackgroundColor:[Util colorWithHexString:@"#8fc9c8ff"]];
 
         [self.btnMore setHidden:YES];
-        [self.btnMore addTarget:self action:@selector(loadNextPageList) forControlEvents:UIControlEventTouchUpInside];
+        [self.btnMore addTarget:self action:@selector(loadNextList) forControlEvents:UIControlEventTouchUpInside];
         [self.scrollViewList addSubview:self.btnMore];
         
         
@@ -347,7 +347,7 @@
     if(selectedButtonForFunctionBar!=nil){
         selectedPanel=(UIView *)[self.viewFunBar.dicViewPanel objectForKey:selectedButtonForFunctionBar.name];
     }
-
+    
     [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
      {
          [self.scrollViewList setAlpha:0.0f];
@@ -396,6 +396,7 @@
     [self hideNoDataCat];
     
     [self.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 40)];
+    [self.loading stop];
     [self.loading setFrame:CGRectMake((self.gv.screenW-30)/2, (150-30)/2+40, 30, 30)];
 
     CLLocationCoordinate2D searchCenter;
@@ -642,6 +643,7 @@
         }else{
             if(!beShown){
                 [item removeFromSuperview];
+                item.isShow=NO;
             }else{
                 self.itemDisplayCount+=1;
                 if([self isExistfilterCondition]){
@@ -650,14 +652,13 @@
                 [self.btnMore setHidden:YES];
                 [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, self.itemDisplayCount*150+40)];
                 [item setAlpha:1.0f];
+                item.isShow=YES;
             }
             int checkMax=(int)self.arrRadarResult.count;
             if(!isFromLocal){
                 checkMax=self.targetIndex;
             }
-            
-            //NSLog(@"%@",[NSString stringWithFormat:@"%d>%d",self.checkedConditionCount,checkMax]);
-            if(self.checkedConditionCount>=checkMax){
+            if(self.checkedConditionCount>checkMax){
                 //finish check condition;
                 if(!isFromLocal){
                     double moreButtonOffset =0;
@@ -763,7 +764,7 @@
     return selected;
 }
 
--(void)loadNextPageList{
+-(void)loadNextList{
     if(self.isEndedForSearchResult){
         return;
     }
@@ -783,7 +784,7 @@
         self.targetIndex=0;
     }
     self.startIndex=itemInstanceCreateCount+1;
-    
+    //self.itemAccmulatingLoadCount=self.itemDisplayCount;
     NSLog(@"page:%d",itemInstanceCreateCount+self.gv.listBufferCount);
     NSLog(@"targetIndex:%d",self.targetIndex);
 
@@ -1029,7 +1030,10 @@
         if(![[subviews objectAtIndex:i] isKindOfClass:[ListItem class]]){
             continue;
         }
-        [sortinListItem addObject:[subviews objectAtIndex:i]];
+        ListItem *item=(ListItem *)[subviews objectAtIndex:i];
+        if(item.isShow){
+            [sortinListItem addObject:[subviews objectAtIndex:i]];
+        }
     }
     
     NSSortDescriptor *sort=[NSSortDescriptor sortDescriptorWithKey:@"seq" ascending:YES];

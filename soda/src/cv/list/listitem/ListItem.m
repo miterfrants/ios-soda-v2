@@ -7,7 +7,7 @@
 #import "ViewReview.h"
 #import "Util.h"
 #import <FacebookSDK/FacebookSDK.h>
-
+#import "SocialUtil.h"
 @implementation ListItem
 @synthesize imgViewBg,blurBg,updateBlurTimer,maskBg,viewTopBorder,viewBottomBorder,lblName,btnFavorite,btnFlag,btnPhone,btnReview,btnShowMap,strPhone,rate,googleId,btnLigth,dicDetailPanel,scrollViewCurrentExpanded,scrollViewDetailBase,scrollViewDetailMap,scrollViewDetailOpening,scrollViewDetailReview,isExpanded,viewGradientBgForName;
 
@@ -332,6 +332,24 @@ double posLeft;
             stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
         }
         self.distance=[stringDist doubleValue];
+    }else{
+        [Util jsonAsyncWithUrl:[NSString stringWithFormat:@"https://maps.googleapis.com/maps/api/distancematrix/json?origins=%.8F,%.8F&destinations=%.8F,%.8F&mode=walk&language=zh-TW&sensor=false",selected.centerLocation.latitude,selected.centerLocation.longitude,self.lat,self.lng] target:self cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:5 completion:^(NSMutableDictionary *data, NSError *connectionError) {
+            NSString *stringDist=@"";
+            if([[data valueForKey:@"status"] isEqualToString:@"OK"]){
+                if([[data objectForKey:@"rows"] count]>0 &&[[[[data objectForKey:@"rows"] objectAtIndex:0] objectForKey:@"elements"] count]>0){
+                    stringDist=[[[[[[data objectForKey:@"rows"] objectAtIndex:0] objectForKey:@"elements"] objectAtIndex:0] objectForKey:@"distance"] objectForKey:@"value"];
+                }
+                NSString *address=[data objectForKey:@"destination_addresses"];
+                if(self.address.length==0){
+                    self.address=address;
+                }
+            }else{
+                CLLocation *destination=[[CLLocation alloc] initWithLatitude:self.lat  longitude:self.lng];
+                CLLocation *oringial=[[CLLocation alloc] initWithLatitude:selected.centerLocation.latitude  longitude:selected.centerLocation.longitude];
+                stringDist=[NSString stringWithFormat:@"%f",[destination distanceFromLocation:oringial]* 0.000621371192*1000];
+            }
+            self.distance=[stringDist floatValue];
+        } queue:self.gv.backgroundThreadManagement];
     }
     
     
@@ -463,7 +481,6 @@ double posLeft;
     }
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList *)self.gv.scrollViewControlllerList;
     if([scrollViewControllerList isExistfilterCondition] && ![scrollViewControllerList isExistSortingKey]){
-        self.isShow=YES;
         [scrollViewControllerList.scrollViewList addSubview:self];
         [self setFrame:CGRectMake(0, 150*self.seq+40, self.gv.screenW, 150)];
         [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
@@ -601,7 +618,7 @@ double posLeft;
     [self generateReview];
     [scrollViewDetailReview setContentOffset:CGPointMake(0, 0)];
     isExpanded=YES;
-
+    
     [self.superview bringSubviewToFront:self];
     if(![detailName isEqual:@"review"]){
         [self.btnComment setFrame:CGRectMake(28-self.gv.screenW, self.btnComment.frame.origin.y, self.btnComment.frame.size.width, self.btnComment.frame.size.height)];
@@ -731,10 +748,7 @@ double posLeft;
         comment=self.btnComment.btnInput.lblShow.text;
     }
     NSString *url=[NSString stringWithFormat:@"%@://%@/%@?action=%@&member_id=%@&google_place_id=%@&rating=%f&comment=%@",self.gv.urlProtocol ,self.gv.domain, self.gv.controllerReview,self.gv.actionAddReview,self.gv.localUserId,googleId,[self.btnComment.voteHeart getRate],comment];
-//    NSLog(@"%@",url);
     [Util jsonAsyncWithUrl:url target:self cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:5 completion:^(NSMutableDictionary *data, NSError *connectionError) {
-//        NSLog(@"%@",data);
-        
         if(connectionError ==nil){
             if([[[data objectForKey:@"results"] valueForKey:@"success"] boolValue]){
                 double rating=[self.btnComment.voteHeart getRate];
@@ -743,6 +757,7 @@ double posLeft;
                 dispatch_async(dispatch_get_main_queue(), ^{
                     [self updateReviewPanelWithComment:comment rating:rating];
                     [self.btnComment contractCommentArea];
+                    [SocialUtil shareReviewWithPlaceName:self.name comment:comment rating:rating googleId:self.googleId googleRef:self.googleRef];
                 });
             }else{
                 NSLog(@"server site error:%@",[data objectForKey:@"results"]);
@@ -888,9 +903,9 @@ double posLeft;
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList*)self.gv.scrollViewControlllerList;
     scrollViewControllerList.scrollViewList.isAutoAnimation=YES;
     if(scrollViewControllerList.isEndedForSearchResult){
-        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, [scrollViewControllerList getListItemCountInnerScrollViewList]*150+40)];
+        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, scrollViewControllerList.itemDisplayCount*150+40)];
     }else{
-        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, [scrollViewControllerList getListItemCountInnerScrollViewList]*150+40+40)];
+        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, scrollViewControllerList.itemDisplayCount*150+40+40)];
     }
     NSArray *arrItemList=scrollViewControllerList.arrItemList;
     [self.btnComment contractCommentArea];
@@ -933,7 +948,7 @@ double posLeft;
                  [item setFrame:CGRectMake(0, item.seq*150+40, self.gv.screenW, 150)];
              }
          }
-         [scrollViewControllerList.btnMore setFrame:CGRectMake(0, (scrollViewControllerList.scrollViewList.subviews.count-3)*150+40, self.gv.screenW, scrollViewControllerList.btnMore.frame.size.height)];
+         [scrollViewControllerList.btnMore setFrame:CGRectMake(0, scrollViewControllerList.itemDisplayCount*150+40, self.gv.screenW, scrollViewControllerList.btnMore.frame.size.height)];
      } completion:^(BOOL finished) {
          if(finished){
              scrollViewControllerList.scrollViewList.isAutoAnimation=NO;

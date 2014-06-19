@@ -278,8 +278,8 @@ double posLeft;
 
                 NSString* encodeJsonString= [jsonString stringByAddingPercentEncodingWithAllowedCharacters:
                                              allowedCharacters];
-
-                NSString *addPlaceToLocalURL =[NSString stringWithFormat:@"%@://%@/%@?action=%@",self.gv.urlProtocol,self.gv.domain,self.gv.controllerPlace,self.gv.actionAddPlace];
+                
+                NSString *addPlaceToLocalURL =[NSString stringWithFormat:@"%@://%@/%@?action=%@&member_id=%@",self.gv.urlProtocol,self.gv.domain,self.gv.controllerPlace,self.gv.actionAddPlace,self.gv.localUserId];
                 [Util stringAsyncWithUrlByPost:addPlaceToLocalURL cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:3 completion:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
                     NSString* addLocalresult = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
                     NSLog(@"%@",addLocalresult);
@@ -902,11 +902,6 @@ double posLeft;
     isExpanded=NO;
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList*)self.gv.scrollViewControlllerList;
     scrollViewControllerList.scrollViewList.isAutoAnimation=YES;
-    if(scrollViewControllerList.isEndedForSearchResult){
-        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, scrollViewControllerList.itemDisplayCount*150+40)];
-    }else{
-        [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, scrollViewControllerList.itemDisplayCount*150+40+40)];
-    }
     NSArray *arrItemList=scrollViewControllerList.arrItemList;
     [self.btnComment contractCommentArea];
     double duration=0.28;
@@ -915,18 +910,26 @@ double posLeft;
     }
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
      {
-
+         if(scrollViewControllerList.isEndedForSearchResult){
+             [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, scrollViewControllerList.itemDisplayCount*150+40)];
+         }else{
+             [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, scrollViewControllerList.itemDisplayCount*150+40+40)];
+         }
         [blurBg setAlpha:1.0];
         [maskBg setAlpha:1.0];
         [self.viewMiddleLigthBorder setAlpha:0.0f];
         [self.viewMiddleDarkBorder setAlpha:0.0f];
         [viewGradientBgForName setFrame:CGRectMake(0, -45, self.gv.screenW, 45)];
         [viewBottomBorder setFrame:CGRectMake(0, 0, self.gv.screenW, 1)];
+         NSLog(@"%d",self.seq);
+         NSLog(@"%f",self.frame.origin.y);
         [self setFrame:CGRectMake(0, self.frame.origin.y, self.gv.screenW, 150)];
          ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList*) self.gv.scrollViewControlllerList;
          [scrollViewControllerList.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 40)];
          [scrollViewControllerList.scrollViewList iniMarker];
-         if(self.seq*150>scrollViewControllerList.scrollViewList.contentSize.height-self.gv.screenH+80){
+         if(scrollViewControllerList.scrollViewList.contentSize.
+            height >self.gv.screenH-80 && self.seq*150+40>scrollViewControllerList.scrollViewList.contentSize.
+            height-self.gv.screenH+80){
              scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, scrollViewControllerList.scrollViewList.contentSize.height-self.gv.screenH+80);
          }else{
              scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, self.seq*150);

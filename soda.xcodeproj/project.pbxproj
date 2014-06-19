@@ -110,6 +110,7 @@
 		0291A6C6194EB8AE00B112A5 /* LoadingCircle.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6C5194EB8AE00B112A5 /* LoadingCircle.m */; };
 		0291A6C9194EF7DE00B112A5 /* ButtonMore.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6C8194EF7DE00B112A5 /* ButtonMore.m */; };
 		0291A6CC19517CA300B112A5 /* SocialUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6CB19517CA300B112A5 /* SocialUtil.m */; };
+		0291A6CF1952979A00B112A5 /* UserInteractionLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6CE1952979A00B112A5 /* UserInteractionLog.m */; };
 		029C86EC1945668900740266 /* GooglePlaceAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86EB1945668900740266 /* GooglePlaceAPI.m */; };
 		029C86F5194566EC00740266 /* GooglePlaceAPIPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86F4194566EC00740266 /* GooglePlaceAPIPool.m */; };
 		029C86F8194845CD00740266 /* LoadingBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86F7194845CD00740266 /* LoadingBar.m */; };
@@ -392,6 +393,8 @@
 		0291A6C8194EF7DE00B112A5 /* ButtonMore.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ButtonMore.m; path = listitem/ButtonMore.m; sourceTree = "<group>"; };
 		0291A6CA19517CA300B112A5 /* SocialUtil.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SocialUtil.h; sourceTree = "<group>"; };
 		0291A6CB19517CA300B112A5 /* SocialUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocialUtil.m; sourceTree = "<group>"; };
+		0291A6CD1952979A00B112A5 /* UserInteractionLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserInteractionLog.h; sourceTree = "<group>"; };
+		0291A6CE1952979A00B112A5 /* UserInteractionLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserInteractionLog.m; sourceTree = "<group>"; };
 		029C86EA1945668900740266 /* GooglePlaceAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GooglePlaceAPI.h; sourceTree = "<group>"; };
 		029C86EB1945668900740266 /* GooglePlaceAPI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GooglePlaceAPI.m; sourceTree = "<group>"; };
 		029C86F3194566EC00740266 /* GooglePlaceAPIPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GooglePlaceAPIPool.h; sourceTree = "<group>"; };
@@ -402,12 +405,12 @@
 		02B6ABA41917723100ACCF61 /* ViewConfig.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewConfig.m; sourceTree = "<group>"; };
 		02B6ABA919178F1500ACCF61 /* ButtonReset.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ButtonReset.h; sourceTree = "<group>"; };
 		02B6ABAA19178F1500ACCF61 /* ButtonReset.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ButtonReset.m; sourceTree = "<group>"; };
-		02B6ABEA1917F4A900ACCF61 /* ButtonLogout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ButtonLogout.h; sourceTree = "<group>"; };
-		02B6ABEB1917F4A900ACCF61 /* ButtonLogout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ButtonLogout.m; sourceTree = "<group>"; };
+		02B6ABEA1917F4A900ACCF61 /* ButtonLogout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ButtonLogout.h; path = ../profile/ButtonLogout.h; sourceTree = "<group>"; };
+		02B6ABEB1917F4A900ACCF61 /* ButtonLogout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ButtonLogout.m; path = ../profile/ButtonLogout.m; sourceTree = "<group>"; };
 		02B6ABEC1917F4A900ACCF61 /* ViewProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewProfile.h; sourceTree = "<group>"; };
 		02B6ABED1917F4A900ACCF61 /* ViewProfile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewProfile.m; sourceTree = "<group>"; };
-		02B6ABEE1917F4A900ACCF61 /* SwitchProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SwitchProfile.h; sourceTree = "<group>"; };
-		02B6ABEF1917F4A900ACCF61 /* SwitchProfile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SwitchProfile.m; sourceTree = "<group>"; };
+		02B6ABEE1917F4A900ACCF61 /* SwitchProfile.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SwitchProfile.h; path = ../profile/SwitchProfile.h; sourceTree = "<group>"; };
+		02B6ABEF1917F4A900ACCF61 /* SwitchProfile.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SwitchProfile.m; path = ../profile/SwitchProfile.m; sourceTree = "<group>"; };
 		02B6ABF71917F91300ACCF61 /* ViewFavorite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewFavorite.h; sourceTree = "<group>"; };
 		02B6ABF81917F91300ACCF61 /* ViewFavorite.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewFavorite.m; sourceTree = "<group>"; };
 		02B6AC001917FD0B00ACCF61 /* ViewGoodsBox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewGoodsBox.h; sourceTree = "<group>"; };
@@ -824,6 +827,10 @@
 		02B6ABA2191771E900ACCF61 /* config */ = {
 			isa = PBXGroup;
 			children = (
+				02B6ABEA1917F4A900ACCF61 /* ButtonLogout.h */,
+				02B6ABEB1917F4A900ACCF61 /* ButtonLogout.m */,
+				02B6ABEE1917F4A900ACCF61 /* SwitchProfile.h */,
+				02B6ABEF1917F4A900ACCF61 /* SwitchProfile.m */,
 				02B6ABA31917723100ACCF61 /* ViewConfig.h */,
 				02B6ABA41917723100ACCF61 /* ViewConfig.m */,
 				02B6ABA919178F1500ACCF61 /* ButtonReset.h */,
@@ -835,12 +842,8 @@
 		02B6ABE91917F4A900ACCF61 /* profile */ = {
 			isa = PBXGroup;
 			children = (
-				02B6ABEA1917F4A900ACCF61 /* ButtonLogout.h */,
-				02B6ABEB1917F4A900ACCF61 /* ButtonLogout.m */,
 				02B6ABEC1917F4A900ACCF61 /* ViewProfile.h */,
 				02B6ABED1917F4A900ACCF61 /* ViewProfile.m */,
-				02B6ABEE1917F4A900ACCF61 /* SwitchProfile.h */,
-				02B6ABEF1917F4A900ACCF61 /* SwitchProfile.m */,
 			);
 			path = profile;
 			sourceTree = "<group>";
@@ -1079,6 +1082,8 @@
 				0291A6C5194EB8AE00B112A5 /* LoadingCircle.m */,
 				0291A6CA19517CA300B112A5 /* SocialUtil.h */,
 				0291A6CB19517CA300B112A5 /* SocialUtil.m */,
+				0291A6CD1952979A00B112A5 /* UserInteractionLog.h */,
+				0291A6CE1952979A00B112A5 /* UserInteractionLog.m */,
 			);
 			path = m;
 			sourceTree = "<group>";
@@ -1525,6 +1530,7 @@
 				02D88A1219016DD300941199 /* File.m in Sources */,
 				028FFB221909182B007CE44E /* ScrollViewExpandPanel.m in Sources */,
 				02D88A0B19016DD300941199 /* ButtonAdd.m in Sources */,
+				0291A6CF1952979A00B112A5 /* UserInteractionLog.m in Sources */,
 				02526E8A1932F59700DE0327 /* ScrollViewDetail.m in Sources */,
 				0248E3FA19050BD000ABC9B9 /* ButtonFb.m in Sources */,
 				02D88A0A19016DD300941199 /* ViewControllerFun.m in Sources */,

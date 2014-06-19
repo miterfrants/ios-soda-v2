@@ -59,6 +59,8 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property NSString *controllerOfficialSuggestPlace;
 @property NSString *controllerReview;
 @property NSString *controllerMember;
+@property NSString *controllerInteraction;
+@property NSString *controllerErrorReport;
 
 @property NSString *actionGetDefaultCollection;
 @property NSString *actionGetDefaultIcon;
@@ -71,10 +73,12 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property NSString *actionAddReview;
 @property NSString *actionGetReviewSelf;
 @property NSString *actionGetLocalMember;
-
+@property NSString *actionAddUsageLog;
+@property NSString *actionGetUsageTime;
 @property NSString *controllerPlace;
 @property NSString *actionSearchPlace;
 @property NSString *actionAddPlace;
+@property NSString *actionAddErrorReport;
 
 @property NSString *urlProtocol;
 @property NSString *urlIcon;
@@ -103,6 +107,8 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property NSString *fbName;
 @property UIImage *imgProfile;
 @property GooglePlaceAPIPool *gpApiPool;
+@property NSDate *appLaunchDate;
+@property NSDate *appExitDate;
 
 //view
 @property UIViewController* viewControllerRoot;
@@ -134,8 +140,12 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property UIFont *fontFuncFavoriteName;
 @property UIFont *fontFuncFavoriteAddress;
 @property UIFont *fontNormalForHebrew;
+@property UIFont *fontDescriptionForHebrew;
 
+//login
 @property LoginType loginType;
+@property NSString *googleAccessToken;
+
 @property NSString *jsonGoods;
 @property NSString *jsonBadges;
 @property NSInteger *intLocalId;
@@ -148,8 +158,6 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property NSOperationQueue *GooglePlaceDetailQueue;
 @property CLLocation *myLocation;
 @property NSDictionary *dicPlaceCate;
-@property NSDate *appLaunchDate;
-@property NSDate *appExitDate;
 @property BOOL isChangeMarkerIndex;
 @property float intTopBarHeight;
 @property int listBufferCount;

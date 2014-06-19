@@ -12,7 +12,7 @@
 @implementation SocialUtil
 +(void)shareReviewWithPlaceName:(NSString *)name comment:(NSString *)comment rating:(double)rating googleId:(NSString *) googleId googleRef:(NSString *) googleRef{
     // Put together the dialog parameters
-    if(![[DB getSysConfig:@"share_review_on_social"] boolValue]){
+    if(![[DB getSysConfig:@"share_review"] boolValue]){
         return;
     }
     GV *gv=[GV sharedInstance];

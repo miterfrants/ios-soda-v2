@@ -5,7 +5,12 @@
 //  Created by Po-Hsiang Huang on 2014/4/2.
 //  Copyright (c) 2014年 ___FULLUSERNAME___. All rights reserved.
 //
-//nextMarker 不會照列表順序跑
+//2.列出所有行為 在資料庫上soda_funcs;
+//3.寫soda profile api
+//4.Local DB initial profile from remote;
+//5.建一個新的資料表soda_usage_log 開啟app的時刻和關閉app的時刻;
+//6.profile 檢查的機制把開啟app的時間送過來，關掉app的時間送過來同時把使用時間送過來，檢查有沒有在可允許誤差範圍;
+
 
 #import "AppDelegate.h"
 #import <GoogleOpenSource/GoogleOpenSource.h>
@@ -14,6 +19,7 @@
 #import "GV.h"
 #import "File.h"
 #import "Util.h"
+#import "UserInteractionLog.h"
 
 @implementation AppDelegate
 @synthesize root,gv,tip;
@@ -68,6 +74,8 @@
     self.keyboardTopInput=[[KeyboardTopInput alloc] initWithFrame:CGRectMake(0, self.gv.screenH, self.gv.screenW, 35)];
     [self.window addSubview:self.keyboardTopInput];
     self.gv.keyboardTopInput=self.keyboardTopInput;
+    
+    self.gv.appLaunchDate=[NSDate date];
     return YES;
 }
 
@@ -84,6 +92,8 @@
     gv.controllerReview=@"api/soda/review.aspx";
     gv.controllerPlace=@"api/soda/place.aspx";
     gv.controllerMember=@"api/soda/member.aspx";
+    gv.controllerInteraction=@"api/soda/interaction.aspx";
+    gv.controllerErrorReport=@"api/soda/error.aspx";
     
     gv.actionGetDefaultCollection=@"default";
     gv.actionGetDefaultIcon=@"default";
@@ -98,6 +108,9 @@
     gv.actionSearchPlace=@"search";
     gv.actionAddPlace=@"add";
     gv.actionGetLocalMember=@"get_local_user";
+    gv.actionAddUsageLog=@"add_usage_log";
+    gv.actionGetUsageTime=@"get_usage_time";
+    gv.actionAddErrorReport=@"add";
     gv.urlProtocol=@"http";
     gv.urlIcon=[NSString stringWithFormat:@"%@://%@/img/soda",gv.urlProtocol,gv.domain];
     
@@ -137,6 +150,7 @@
     gv.lang=[Util getLang];
     gv.listBufferCount=20;
     gv.isBlurModel=NO;
+    gv.localUserId=@"";
     
     //很容易 OVER_REQUEST_LIMIT You have exceeded your daily request quota for this API
     //目前想到一個方法用地點密度的方式在radar search 的時候做local server 地點密度的測試
@@ -177,6 +191,8 @@
     gv.fontFuncFavoriteName=[UIFont fontWithName:@"HelveticaNeue" size:15.0f];
     gv.fontFuncFavoriteAddress=[UIFont fontWithName:@"HelveticaNeue" size:12.0f];
     gv.fontNormalForHebrew=[UIFont fontWithName:@"HelveticaNeue-Light" size:16.0f];
+    gv.fontDescriptionForHebrew=[UIFont fontWithName:@"HelveticaNeue-Light" size:12.0f];
+    
     
     //key
     gv.googleWebKey=@"AIzaSyCYM1UUnXbgP3eD__x2EjIugNOy-vE3McY";
@@ -308,9 +324,6 @@
                  NSURL *imgURL=[NSURL URLWithString: [NSString stringWithFormat:@"https://graph.facebook.com/%@/picture?width=100&height=100" ,user.id]];
                  NSData *imgData=[NSData dataWithContentsOfURL:imgURL];
                  gv.imgProfile=[UIImage imageWithData:imgData];
-                root.viewControllerFun.viewMenu.viewProfile.lblShareFavoriteToSocial.text= [DB getUI:@"share_favorite_on_facebook"];
-                root.viewControllerFun.viewMenu.viewProfile.lblShareGoodToSocial.text= [DB getUI:@"share_good_on_facebook"];
-                root.viewControllerFun.viewMenu.viewProfile.lblShareIconToSocial.text= [DB getUI:@"share_icon_on_facebook"];
                 [root.viewControllerFun changeToLoginStatus];
              }else{
                  NSLog(@"%@",error);
@@ -326,7 +339,7 @@
         GTLServicePlus *service = [[GTLServicePlus alloc] init];
         service.retryEnabled = YES;
         service.authorizer = auth;
-        
+        self.gv.googleAccessToken=auth.accessToken;
         GTLQueryPlus *query = [GTLQueryPlus queryForPeopleGetWithUserId:@"me"];
         query.completionBlock = ^(GTLServiceTicket *ticket, id object, NSError *error) {
             if (error == nil) {
@@ -343,10 +356,10 @@
                     GTMLoggerError(@"Error: %@", error);
                 } else {
                     gv.loginType=Google;
-                    NSMutableDictionary *dicUserInfo= [Util jsonWithUrl:[NSString stringWithFormat:@"http://%@/controller/mobile/member.aspx?action=get_local_user&source=2&outer_id=%@",self.gv.domain,person.identifier]] ;
-                    NSLog(@"%@",[NSString stringWithFormat:@"http://%@/controller/mobile/member.aspx?action=get_local_user&source=2&outer_id=%@",self.gv.domain,person.identifier]);
+                NSMutableDictionary *dicUserInfo= [Util jsonWithUrl:[NSString stringWithFormat:@"%@://%@/%@?action=%@&source=4&outer_id=%@&access_token=%@",gv.urlProtocol ,gv.domain,gv.controllerMember,gv.actionGetLocalMember,person.identifier,auth.accessToken]];
+                    NSLog(@"%@",[NSString stringWithFormat:@"%@://%@/%@?action=%@&source=4&outer_id=%@&access_token=%@",gv.urlProtocol ,gv.domain,gv.controllerMember,gv.actionGetLocalMember,person.identifier,auth.accessToken]);
                     gv.localUserId=[[[dicUserInfo objectForKey:@"results"] valueForKey:@"user_id"] stringValue];
-                    
+                    NSLog(@"%@",gv.localUserId);
                     gv.localUserName=[[dicUserInfo objectForKey:@"results"] valueForKey:@"user_name"];
                     
                     NSURL *imgURL=[NSURL URLWithString: person.image.url];
@@ -354,9 +367,6 @@
                     gv.imgProfile=[UIImage imageWithData:imgData];
                     [root.viewControllerFun changeToLoginStatus];
                     [GV setLoginStatus:LOGINED];
-                    root.viewControllerFun.viewMenu.viewProfile.lblShareFavoriteToSocial.text= [DB getUI:@"share_favorite_on_google"];
-                    root.viewControllerFun.viewMenu.viewProfile.lblShareGoodToSocial.text= [DB getUI:@"share_good_on_google"];
-                    root.viewControllerFun.viewMenu.viewProfile.lblShareIconToSocial.text= [DB getUI:@"share_icon_on_google"];
                     /*NSString *description = [NSString stringWithFormat:
                      @"%@\n%@", person.displayName,
                      person.aboutMe];*/
@@ -378,28 +388,42 @@
 
 - (void)applicationWillResignActive:(UIApplication *)application
 {
+    NSLog(@"applicationWillResignActive");
     // Sent when the application is about to move from active to inactive state. This can occur for certain types of temporary interruptions (such as an incoming phone call or SMS message) or when the user quits the application and it begins the transition to the background state.
     // Use this method to pause ongoing tasks, disable timers, and throttle down OpenGL ES frame rates. Games should use this method to pause the game.
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
-    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later. 
+    self.gv.appExitDate=[NSDate date];
+    NSLog(@"applicationDidEnterBackground");
+    // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
     // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
 }
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
+
+    NSLog(@"applicationWillEnterForeground");
     // Called as part of the transition from the background to the inactive state; here you can undo many of the changes made on entering the background.
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
+    [UserInteractionLog sendUsageTimeWithStartTime:self.gv.appLaunchDate eTime:self.gv.appExitDate];
+    if([GV getGlobalStatus]==MENU && self.gv.localUserId.length>0){
+        [root.viewControllerFun.viewMenu.viewProfile loadUsageTime];
+    }
+    self.gv.appLaunchDate=[NSDate date];
+    NSLog(@"applicationDidBecomeActive");
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
 }
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
+    NSDate *endTime = [NSDate date];
+    [UserInteractionLog sendUsageTimeWithStartTime:self.gv.appLaunchDate eTime:endTime];
+    NSLog(@"applicationWillTerminate");
     // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
 }
 
@@ -438,12 +462,12 @@
     root.viewControllerFun.viewMenu.viewConfig.lblTitle.text=[DB getUI:@"config"];
     root.viewControllerFun.viewMenu.viewSuggestion.lblTitle.text=[DB getUI:@"suggestion"];
     root.viewControllerFun.viewMenu.viewProfile.lblTitle.text=[DB getUI:@"profile"];
-    root.viewControllerFun.viewMenu.viewProfile.lblShareFavoriteToSocial.text=[DB getUI:@"share_favorite_on_facebook"];
-    root.viewControllerFun.viewMenu.viewProfile.lblShareGoodToSocial.text=[DB getUI:@"share_good_on_facebook"];
-    root.viewControllerFun.viewMenu.viewProfile.lblShareIconToSocial.text=[DB getUI:@"share_icon_on_facebook"];
-    root.viewControllerFun.viewMenu.viewProfile.lblOperatingTip.text=[DB getUI:@"operating_tip"];
-    root.viewControllerFun.viewMenu.viewProfile.lblNotificationForDiscover.text=[DB getUI:@"notification_for_discover"];
-    root.viewControllerFun.viewMenu.viewProfile.btnLogout.lblTitle.text=[DB getUI:@"logout"];
+    root.viewControllerFun.viewMenu.viewConfig.lblShareFavoriteToSocial.text=[DB getUI:@"share_favorite"];
+    root.viewControllerFun.viewMenu.viewConfig.lblShareGoodToSocial.text=[DB getUI:@"share_good"];
+    root.viewControllerFun.viewMenu.viewConfig.lblShareIconToSocial.text=[DB getUI:@"share_icon"];
+    root.viewControllerFun.viewMenu.viewConfig.lblOperatingTip.text=[DB getUI:@"tip"];
+    root.viewControllerFun.viewMenu.viewConfig.lblNotificationForDiscover.text=[DB getUI:@"notification"];
+    root.viewControllerFun.viewMenu.viewConfig.btnLogout.lblTitle.text=[DB getUI:@"logout"];
     
     root.viewControllerFun.viewMenu.viewConfig.btnRest.lblTitle.text=[DB getUI:@"reset"];
     root.viewControllerFun.viewMenu.viewConfig.lblLang.text=[DB getUI:@"lang"];

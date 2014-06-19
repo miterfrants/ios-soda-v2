@@ -28,6 +28,7 @@
     myInstance.db=db;
 }
 
+//porfile,goods,secret icon都只有remote 端有資料
 +(BOOL) iniSysConfig{
     //create database
     NSString *path = [NSString stringWithFormat:@"%@/database.sqlite",[GV sharedInstance].pathDB];
@@ -97,13 +98,14 @@
     if(checkExistData==0){
         //remote error set local data
         @try {
-            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"share_review_on_social",@"1"]];
-            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"share_favorite_on_social",@"1"]];
-            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"share_good_on_social",@"1"]];
-            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"share_icon_on_social",@"1"]];
-            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"operating_tip",@"1"]];
-            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"notification_for_discover",@"1"]];
+            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"share_review",@"1"]];
+            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"share_favorite",@"1"]];
+            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"share_good",@"1"]];
+            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"share_icon",@"1"]];
+            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"tip",@"1"]];
+            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"notification",@"1"]];
             [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"lang",[Util getLang]]];
+            //coin 先不實作
         }
         @catch (NSException *exception) {
             NSLog(@"exception:insertRemoteUI");
@@ -113,6 +115,17 @@
         }
     }
     
+    //check soda func remote sync per 60 secs/ dispose app
+//    [db executeUpdate:@"CREATE TABLE IF NOT EXISTS func(name TEXT, is_deprecating BOOLEAN, is_sync BOOLEAN, count INTEGER)"];
+//    [db executeUpdate:@"CREATE INDEX IF NOT EXISTS index_func_name ON func(name);"];
+//    checkExistData=[db intForQuery:@"SELECT COUNT(*) FROM func"];
+//    //no data then setting with remote data;
+//    //else insert check remote data.
+//    if(checkExistData==0){
+//        [self insertFuncFromRemote];
+//    }else{
+//        [self syncFuncFromRemote];
+//    }
 
     [db close];
     return true;
@@ -261,12 +274,14 @@ NSString *sysConfigResult=@"";
 }
 NSString *uiResult;
 +(NSString *)getUI:(NSString *)key{
-    uiResult=[key stringByReplacingOccurrencesOfString:@"_" withString:@" "];
     NSMutableDictionary *dicParam=[[NSMutableDictionary alloc] init];
     [dicParam setValue:[DB getSysConfig:@"lang"] forKey:@"lang"];
     [dicParam setValue:key forKey:@"key"];
     NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(_getUI:) object:dicParam];
     [[GV sharedInstance].FMDatabaseQueue addOperations:[NSArray arrayWithObjects:operation,nil] waitUntilFinished:YES];
+    if(!uiResult){
+        return [key stringByReplacingOccurrencesOfString:@"_" withString:@" "];
+    }
     return uiResult;
 }
 +(void)_getUI:(NSDictionary *)dicParam{

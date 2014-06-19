@@ -14,4 +14,5 @@
 -(void)start;
 -(void)stop;
 -(void)hide;
+- (id)initWithFrameAndThick:(CGRect)frame thick:(double)thick;
 @end

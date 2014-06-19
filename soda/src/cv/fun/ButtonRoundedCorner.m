@@ -20,7 +20,7 @@
         lblTitle.text=buttonTitle;
         [lblTitle setFont:self.gv.contentFont];
         [lblTitle setTextColor:[Util colorWithHexString:@"#419291FF"]];
-        [lblTitle setFrame:CGRectMake(0, 0, 130, 30)];
+        [lblTitle setFrame:CGRectMake(0, 0, frame.size.width, 30)];
         [lblTitle setTextAlignment:NSTextAlignmentCenter];
         [self addSubview:lblTitle];
         

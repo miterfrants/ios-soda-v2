@@ -11,154 +11,107 @@
 #import "Util.h"
 #import "ButtonLogout.h"
 #import "DB.h"
+#import "UserInteractionLog.h"
+#import <FacebookSDK/FacebookSDK.h>
+
 @implementation ViewProfile
-@synthesize btnLogout,lblShareFavoriteToSocial,lblShareGoodToSocial,
-lblShareIconToSocial,lblOperatingTip,
-switchShareFavoriteToSocial,
-switchShareGoodToSocial,
-switchOperatingTip,lblNotificationForDiscover,
-switchNotificationForDiscover,
-switchShareIconToSocial,lblTitle;
-
-
 - (id)initWithFrame:(CGRect)frame
 {
     self = [super initWithFrame:frame];
     if (self) {
         self.name=@"profile";
-        GV *gv=[GV sharedInstance];
         
+        self.lblTitle=[[UILabel alloc] init];
+        self.lblTitle.text=[DB getUI:@"profile"];
+        [self.lblTitle setFont:[GV sharedInstance].fontMenuTitle];
+        [self.lblTitle setTextColor:[UIColor whiteColor]];
+        [self.lblTitle setFrame:CGRectMake(85, 20, 200, 40)];
+        [self addSubview:self.lblTitle];
+        
+        self.lblName =[[UILabel alloc]initWithFrame:CGRectMake(85, 43, self.frame.size.width-85-1, 30)];
+        [self.lblName setFont:self.gv.fontDescriptionForHebrew];
+        [self.lblName setTextColor:[UIColor darkGrayColor]];
+        [self addSubview:self.lblName];
+        
+        self.lblUsageTitle=[[UILabel alloc] initWithFrame:CGRectMake(15, 87.5, 130, 30)];
+        [self.lblUsageTitle setTextColor:[UIColor whiteColor]];
+        [self.lblUsageTitle setFont:self.gv.fontNormalForHebrew];
+        [self addSubview:self.lblUsageTitle];
+        self.lblUsageTitle.text=[NSString stringWithFormat:@"%@:",[DB getUI:@"usage_time"]];
+        CGSize expectedUsageSize=[self.lblUsageTitle sizeThatFits:CGSizeMake(130, 30)];
+        [self.lblUsageTitle setFrame:CGRectMake(self.lblUsageTitle.frame.origin.x, self.lblUsageTitle.frame.origin.y, expectedUsageSize.width, expectedUsageSize.height)];
         double padding=22;
         
-        lblTitle=[[UILabel alloc] init];
-        lblTitle.text=[DB getUI:@"profile"];
-        [lblTitle setFont:[GV sharedInstance].fontMenuTitle];
-        [lblTitle setTextColor:[UIColor whiteColor]];
-        [lblTitle setFrame:CGRectMake(85, 30, 200, 40)];
-        [self addSubview:lblTitle];
-        
-        
-        lblShareFavoriteToSocial = [[UILabel alloc]initWithFrame:CGRectMake(15,87.5,101,40)];
-        [lblShareFavoriteToSocial setTextColor:[UIColor whiteColor]];
-        [lblShareFavoriteToSocial setFont:gv.fontSettingTitle];
-        [lblShareFavoriteToSocial setLineBreakMode:NSLineBreakByWordWrapping];
-        [lblShareFavoriteToSocial setMultipleTouchEnabled:YES];
-        [lblShareFavoriteToSocial setNumberOfLines:3];
-        //[lblShareFavoriteToSocial setBackgroundColor:[UIColor redColor]];
-        [self addSubview:lblShareFavoriteToSocial];
-        
-        switchShareFavoriteToSocial=[[SwitchProfile alloc] initWithFrame:CGRectMake(
-                                                                        lblShareFavoriteToSocial.frame.origin.x+115.5,
-                                                                           lblShareFavoriteToSocial.frame.origin.y+7, 51, 31)];
-        [switchShareFavoriteToSocial setOnTintColor:[Util colorWithHexString:@"#419291FF"]];
+        self.lblBuildedPlaceCount=[[UILabel alloc] initWithFrame:CGRectMake(self.lblUsageTitle.frame.origin.x, self.lblUsageTitle.frame.origin.y+self.lblUsageTitle.frame.size.height+padding,frame.size.width-self.lblUsageTitle.frame.origin.x , self.lblUsageTitle.frame.size.height)];
+        [self.lblBuildedPlaceCount setTextColor:[UIColor whiteColor]];
+        [self.lblBuildedPlaceCount setFont:self.gv.fontNormalForHebrew];
+        [self.lblBuildedPlaceCount setText:[NSString stringWithFormat:@"%@:",[DB getUI:@"builded_place"]]];
+        [self addSubview:self.lblBuildedPlaceCount];
 
-        if([[DB getSysConfig:@"share_favorite_on_social"] isEqual:@"1"]){
-            [switchShareFavoriteToSocial setOn:YES];
-        }
-        switchShareFavoriteToSocial.name=@"share_favorite_on_social";
-        [self addSubview:switchShareFavoriteToSocial];
-        
-        
-        lblShareGoodToSocial = [[UILabel alloc]initWithFrame:CGRectMake(
-                                                                      15,lblShareFavoriteToSocial.frame.origin.y+lblShareFavoriteToSocial.frame.size.height+padding,
-                                                                      101,
-                                                                      40)];
-        [lblShareGoodToSocial setTextColor:[UIColor whiteColor]];
-        [lblShareGoodToSocial setFont:gv.fontSettingTitle];
-        [lblShareGoodToSocial setLineBreakMode:NSLineBreakByWordWrapping];
-        [lblShareGoodToSocial setMultipleTouchEnabled:YES];
-        [lblShareGoodToSocial setNumberOfLines:3];
-        [self addSubview:lblShareGoodToSocial];
-        
-        switchShareGoodToSocial=[[SwitchProfile alloc] initWithFrame:CGRectMake(
-                                                                         lblShareGoodToSocial.frame.origin.x+115.5,
-                                                                         lblShareGoodToSocial.frame.origin.y+7, 51, 31)];
-        [switchShareGoodToSocial setOnTintColor:[Util colorWithHexString:@"#419291FF"]];
-        if([[DB getSysConfig:@"share_good_on_social"] isEqual:@"1"]){
-            [switchShareGoodToSocial setOn:YES];
-        }
-        switchShareGoodToSocial.name=@"share_good_on_social";
-        [self addSubview:switchShareGoodToSocial];
-        
-
-        lblShareIconToSocial = [[UILabel alloc]initWithFrame:CGRectMake(
-                                                                        15,lblShareGoodToSocial.frame.origin.y+lblShareGoodToSocial.frame.size.height+padding,
-                                                                        101,
-                                                                        40)];
-        [lblShareIconToSocial setTextColor:[UIColor whiteColor]];
-        [lblShareIconToSocial setFont:gv.fontSettingTitle];
-        [lblShareIconToSocial setLineBreakMode:NSLineBreakByWordWrapping];
-        [lblShareIconToSocial setMultipleTouchEnabled:YES];
-        [lblShareIconToSocial setNumberOfLines:3];
-        [self addSubview:lblShareIconToSocial];
-        
-        switchShareIconToSocial=[[SwitchProfile alloc] initWithFrame:CGRectMake(
-                                                                           lblShareIconToSocial.frame.origin.x+115.5,
-                                                                           lblShareIconToSocial.frame.origin.y+7, 51, 31)];
-        [switchShareIconToSocial setOnTintColor:[Util colorWithHexString:@"#419291FF"]];
-        if([[DB getSysConfig:@"share_icon_on_social"] isEqual:@"1"]){
-            [switchShareIconToSocial setOn:YES];
-        }
-        switchShareIconToSocial.name=@"share_icon_on_social";
-        [self addSubview:switchShareIconToSocial];
-        
-        
-        
-        
-        lblOperatingTip = [[UILabel alloc]initWithFrame:CGRectMake(
-                                                                        15,lblShareIconToSocial.frame.origin.y+lblShareIconToSocial.frame.size.height+padding,
-                                                                        101,
-                                                                        40)];
-        [lblOperatingTip setTextColor:[UIColor whiteColor]];
-        [lblOperatingTip setFont:gv.fontSettingTitle];
-        [lblOperatingTip setLineBreakMode:NSLineBreakByWordWrapping];
-        [lblOperatingTip setMultipleTouchEnabled:YES];
-        [lblOperatingTip setNumberOfLines:3];
-        lblOperatingTip.text= [DB getUI:@"operating_tip"];
-        [self addSubview:lblOperatingTip];
-        
-        switchOperatingTip=[[SwitchProfile alloc] initWithFrame:CGRectMake(
-                                                                           lblOperatingTip.frame.origin.x+115.5,
-                                                                           lblOperatingTip.frame.origin.y+7, 51, 31)];
-        [switchOperatingTip setOnTintColor:[Util colorWithHexString:@"#419291FF"]];
-        if([[DB getSysConfig:@"operating_tip"] isEqual:@"1"]){
-            [switchOperatingTip setOn:YES];
-        }
-        switchOperatingTip.name=@"operating_tip";
-        [self addSubview:switchOperatingTip];
-
-        
-        lblNotificationForDiscover = [[UILabel alloc]initWithFrame:CGRectMake(
-                                                                   15,lblOperatingTip.frame.origin.y+lblOperatingTip.frame.size.height+padding,
-                                                                   101,
-                                                                   40)];
-        [lblNotificationForDiscover setTextColor:[UIColor whiteColor]];
-        [lblNotificationForDiscover setFont:gv.fontSettingTitle];
-        [lblNotificationForDiscover setLineBreakMode:NSLineBreakByWordWrapping];
-        [lblNotificationForDiscover setMultipleTouchEnabled:YES];
-        [lblNotificationForDiscover setNumberOfLines:3];
-        lblNotificationForDiscover.text= [DB getUI:@"notification_for_discover"];
-        [self addSubview:lblNotificationForDiscover];
-        
-        switchNotificationForDiscover=[[SwitchProfile alloc] initWithFrame:CGRectMake(
-                                                                      lblNotificationForDiscover.frame.origin.x+115.5,
-                                                                      lblNotificationForDiscover.frame.origin.y+7, 51, 31)];
-        [switchNotificationForDiscover setOnTintColor:[Util colorWithHexString:@"#419291FF"]];
-        if([[DB getSysConfig:@"notification_for_discover"] isEqual:@"1"]){
-            [switchNotificationForDiscover setOn:YES];
-        }
-        switchNotificationForDiscover.name=@"notification_for_discover";
-        [self addSubview:switchNotificationForDiscover];
-
-        
-        btnLogout=[[ButtonLogout alloc]initWithFrame:CGRectMake(lblNotificationForDiscover.frame.origin.x,
-                                                            lblNotificationForDiscover.frame.origin.y+lblNotificationForDiscover.frame.size.height+padding+10,
-                                                            130, 30) buttonTitle:[DB getUI:@"logout" ]];
-
-        [self addSubview:btnLogout];
-
-        
     }
     return self;
 }
+-(void) initProfile{
+    [self loadProfile];
+    self.lblName.text=self.gv.localUserName;
+}
+
+
+-(void) loadProfile{
+    [self.timer invalidate];
+    self.timer=nil;
+    self.lblUsageTitle.text=[NSString stringWithFormat:@"%@:",[DB getUI:@"usage_time"]];
+    if(self.loadingForUsage){
+        [self.loadingForUsage stop];
+    }
+    CGSize expectedUsageSize=[self.lblUsageTitle sizeThatFits:CGSizeMake(130, 30)];
+    [self.lblUsageTitle setFrame:CGRectMake(self.lblUsageTitle.frame.origin.x, self.lblUsageTitle.frame.origin.y, expectedUsageSize.width, expectedUsageSize.height)];
+    self.loadingForUsage=[[LoadingCircle alloc] initWithFrameAndThick:CGRectMake(self.lblUsageTitle.frame.origin.x+self.lblUsageTitle.frame.size.width+10, self.lblUsageTitle.frame.origin.y, self.lblUsageTitle.frame.size.height, self.lblUsageTitle.frame.size.height)  thick:1];
+    [self addSubview:self.loadingForUsage];
+    [self.loadingForUsage start];
+    NSString *accessToken=@"";
+    if(self.gv.loginType==Facebook){
+        accessToken=[FBSession activeSession].accessTokenData.accessToken;
+    }else if(self.gv.loginType==Google){
+        accessToken=self.gv.googleAccessToken;
+    }
+    [UserInteractionLog getAsyncProfile:self.gv.localUserId accessToken:accessToken completion:^(NSMutableDictionary *data, NSError *connectionError) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.loadingForUsage stop];
+            self.totalSecondsFromRemote=[[[data valueForKey:@"result"] valueForKey:@"usage_time"] intValue];
+            int buildedPlaceCount=[[[data valueForKey:@"result"] valueForKey:@"builded_count"] intValue];
+            self.lblUsageTitle.text=[NSString stringWithFormat:@"%@:  %@",[DB getUI:@"usage_time" ],[self calculateTimeWithSec:self.totalSecondsFromRemote]];
+            CGSize expectedUsageSize=[self.lblUsageTitle sizeThatFits:CGSizeMake(self.frame.size.width-self.lblUsageTitle.frame.origin.x, 30)];
+            [self.lblUsageTitle setFrame:CGRectMake(self.lblUsageTitle.frame.origin.x, self.lblUsageTitle.frame.origin.y, expectedUsageSize.width, expectedUsageSize.height)];
+
+            self.lblBuildedPlaceCount.text=[NSString stringWithFormat:@"%@:  %d",[DB getUI:@"builded_count"],buildedPlaceCount];
+            CGSize expectedBuildedCount=[self.lblBuildedPlaceCount sizeThatFits:CGSizeMake(self.frame.size.width-self.lblUsageTitle.frame.origin.x, 30)];
+            [self.lblBuildedPlaceCount setFrame:CGRectMake(self.lblBuildedPlaceCount.frame.origin.x, self.lblBuildedPlaceCount.frame.origin.y, expectedBuildedCount.width, expectedBuildedCount.height)];
+            
+            self.timer=[NSTimer scheduledTimerWithTimeInterval:1 target:self selector:@selector(timerStart) userInfo:nil repeats:YES];
+            
+            
+        });
+    }];
+}
+
+-(void)timerStart{
+    self.gv.appExitDate=[NSDate date];
+    NSTimeInterval secondsBetween = [self.gv.appExitDate timeIntervalSinceDate:self.gv.appLaunchDate];
+    NSString *record=[self calculateTimeWithSec:secondsBetween+self.totalSecondsFromRemote];
+    self.lblUsageTitle.text=[NSString stringWithFormat:@"%@:  %@",[DB getUI:@"usage_time" ],record];
+}
+-(void)timerStop{
+    [self.timer invalidate];
+    self.timer =nil;
+}
+
+-(NSString *)calculateTimeWithSec:(int) secs{
+    NSString *sec=[NSString stringWithFormat:@"%02d",secs%60];
+    NSString *mins=[NSString stringWithFormat:@"%d",(int) floorf(secs/60)];
+    NSString *min=[NSString stringWithFormat:@"%02d",[mins intValue]%60];
+    NSString *hour=[NSString stringWithFormat:@"%02d",(int) floorf([mins intValue]/60)];
+    return [NSString stringWithFormat:@"%@:%@:%@",hour,min,sec];
+}
+
 @end

@@ -53,11 +53,11 @@
                                                    object:nil];
         
         //profile switch change
-        [viewMenu.viewProfile.switchNotificationForDiscover addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
-        [viewMenu.viewProfile.switchOperatingTip addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
-        [viewMenu.viewProfile.switchShareFavoriteToSocial addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
-        [viewMenu.viewProfile.switchShareGoodToSocial addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
-        [viewMenu.viewProfile.switchShareIconToSocial addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
+        [viewMenu.viewConfig.switchNotificationForDiscover addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
+        [viewMenu.viewConfig.switchOperatingTip addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
+        [viewMenu.viewConfig.switchShareFavoriteToSocial addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
+        [viewMenu.viewConfig.switchShareGoodToSocial addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
+        [viewMenu.viewConfig.switchShareIconToSocial addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
         
     }
     return self;
@@ -151,6 +151,7 @@
     if([GV getGlobalStatus]==EDIT_WITH_KEYBOARD || [GV getGlobalStatus]==EDIT_WITHOUT_KEYBOARD){
         return;
     }
+    [self.viewMenu.viewProfile timerStop];
     [self resetViewFunSize];
     [self animationSlideOutMenu];
     [GV setGlobalStatus:[GV sharedInstance].previousStatusForMenu];
@@ -287,6 +288,9 @@ clickedButtonAtIndex:(NSInteger)buttonIndex{
                 if([name isEqual:@"favorite"]){
                     ViewFavorite *viewFavorite= (ViewFavorite *) scrollViewExpandPanel;
                     [viewFavorite generateFavoriteItem];
+                }else if([name isEqual:@"profile"]){
+                    ViewProfile *viewProfile= (ViewProfile *) scrollViewExpandPanel;
+                    [viewProfile initProfile];
                 }
                 [scrollViewExpandPanel setHidden:NO];
             }else{

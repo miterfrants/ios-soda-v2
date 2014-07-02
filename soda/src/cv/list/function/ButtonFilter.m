@@ -7,11 +7,11 @@
 //
 
 #import "ButtonFilter.h"
-
+#import "DB.h"
 @implementation ButtonFilter
 - (id)initWithFrame:(CGRect)frame
 {
-    self = [super initWithFrameAndName:frame title:@"Filter"];
+    self = [super initWithFrameAndName:frame title:[DB getUI:@"filter"]];
     if (self) {
     }
     return self;

@@ -7,11 +7,14 @@
 //
 
 #import <Foundation/Foundation.h>
-
+#import "Util.h"
 @interface UserInteractionLog : NSObject
 //async
 +(void)sendUsageTimeWithStartTime:(NSDate *) sDate eTime:(NSDate *) eDate;
 +(void)sendFuncCountWIthActionName:(NSString *)name;
 +(void)sendErrorReportWithUrl:(NSString *)url errMsg:(NSString *) errMsg;
 +(void)getAsyncProfile:(NSString *)localUserId accessToken:(NSString *)accessToken completion:(void(^)(NSMutableDictionary *data, NSError *connectionError)) completion;
++(int)getUsageSecondsFromDB;
++(void)sendLaunchLog;
++(void)showTip:(id)target titleKey:(NSString *)titleKey tipKey:(NSString *)tipKey;
 @end

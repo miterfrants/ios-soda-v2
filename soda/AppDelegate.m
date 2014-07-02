@@ -5,12 +5,16 @@
 //  Created by Po-Hsiang Huang on 2014/4/2.
 //  Copyright (c) 2014年 ___FULLUSERNAME___. All rights reserved.
 //
-//2.列出所有行為 在資料庫上soda_funcs;
-//3.寫soda profile api
-//4.Local DB initial profile from remote;
-//5.建一個新的資料表soda_usage_log 開啟app的時刻和關閉app的時刻;
-//6.profile 檢查的機制把開啟app的時間送過來，關掉app的時間送過來同時把使用時間送過來，檢查有沒有在可允許誤差範圍;
-
+//1.profile 檢查的機制把開啟app的時間送過來，關掉app的時間送過來同時把使用時間送過來，檢查有沒有在可允許誤差範圍;
+//from local 處理資料庫
+//3.checkSecretIcon  share 到 facebook 會block 住main thread
+//4.新增new category scroll view 會過長
+//5.整合同時播放得到audio
+//6.得到icon 的 popup
+//9.icon scroll bar有點衝突修正
+//13.沒有設定email的人會出現exception;
+//14.如果沒有filter condition list item會疊在一起;
+//16.如果是loading 停用tip
 
 #import "AppDelegate.h"
 #import <GoogleOpenSource/GoogleOpenSource.h>
@@ -26,16 +30,16 @@
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+    
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     [self.window makeKeyAndVisible];
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
     
-
     //fb login
     if (FBSession.activeSession.state == FBSessionStateCreatedTokenLoaded) {
 
         // If there's one, just open the session silently, without showing the user the login UI
-        [FBSession openActiveSessionWithReadPermissions:@[@"basic_info,publish_actions"]
+        [FBSession openActiveSessionWithReadPermissions:@[@"basic_info"]
                                            allowLoginUI:NO
                                       completionHandler:^(FBSession *session, FBSessionState state, NSError *error) {
                                           // Handler for session state changes
@@ -83,7 +87,7 @@
     gv=[GV sharedInstance];
     
     //ini url
-    gv.domain=@"36.224.4.27";
+    gv.domain=@"36.224.20.235";
     gv.controllerCollection=@"api/soda/collection.aspx";
     gv.controllerUI=@"api/soda/ui.aspx";
     gv.controllerIcon=@"api/soda/icon.aspx";
@@ -94,6 +98,8 @@
     gv.controllerMember=@"api/soda/member.aspx";
     gv.controllerInteraction=@"api/soda/interaction.aspx";
     gv.controllerErrorReport=@"api/soda/error.aspx";
+    gv.controllerAboutUs=@"api/soda/about_us.aspx";
+    gv.controllerLaunchLog=@"api/soda/launch.aspx";
     
     gv.actionGetDefaultCollection=@"default";
     gv.actionGetDefaultIcon=@"default";
@@ -111,6 +117,9 @@
     gv.actionAddUsageLog=@"add_usage_log";
     gv.actionGetUsageTime=@"get_usage_time";
     gv.actionAddErrorReport=@"add";
+    gv.actionAddDownloadSecretIconLog=@"add_download_log";
+    gv.actionAddLaunchLog=@"add";
+    
     gv.urlProtocol=@"http";
     gv.urlIcon=[NSString stringWithFormat:@"%@://%@/img/soda",gv.urlProtocol,gv.domain];
     
@@ -191,19 +200,22 @@
     gv.fontFuncFavoriteName=[UIFont fontWithName:@"HelveticaNeue" size:15.0f];
     gv.fontFuncFavoriteAddress=[UIFont fontWithName:@"HelveticaNeue" size:12.0f];
     gv.fontNormalForHebrew=[UIFont fontWithName:@"HelveticaNeue-Light" size:16.0f];
-    gv.fontDescriptionForHebrew=[UIFont fontWithName:@"HelveticaNeue-Light" size:12.0f];
-    
+    gv.fontHintForHebrew=[UIFont fontWithName:@"HelveticaNeue-Light" size:12.0f];
+    gv.fontArticleForHerbrew=[UIFont fontWithName:@"HelveticaNeue-Light" size:14.0f];
     
     //key
     gv.googleWebKey=@"AIzaSyCYM1UUnXbgP3eD__x2EjIugNOy-vE3McY";
     
     //get aysnc background thread
     gv.backgroundThreadManagement=[[NSOperationQueue alloc] init];
+    gv.AudioQueue=[[NSOperationQueue alloc] init];
     gv.FMDatabaseQueue =[[NSOperationQueue alloc]init];
     [gv.FMDatabaseQueue setMaxConcurrentOperationCount:1];
     gv.GooglePlaceDetailQueue =[[NSOperationQueue alloc]init];
     [gv.GooglePlaceDetailQueue setMaxConcurrentOperationCount:1];
+    [gv.AudioQueue setMaxConcurrentOperationCount:1];
     NSLog(@"finish initail conifg");
+    [UserInteractionLog sendLaunchLog];
 }
 
 - (BOOL)application:(UIApplication *)application
@@ -412,8 +424,10 @@
 {
     [UserInteractionLog sendUsageTimeWithStartTime:self.gv.appLaunchDate eTime:self.gv.appExitDate];
     if([GV getGlobalStatus]==MENU && self.gv.localUserId.length>0){
-        [root.viewControllerFun.viewMenu.viewProfile loadUsageTime];
+        [root.viewControllerFun.viewMenu.viewProfile loadProfile];
     }
+    
+    
     self.gv.appLaunchDate=[NSDate date];
     NSLog(@"applicationDidBecomeActive");
     // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
@@ -433,10 +447,11 @@
     ScrollViewCate *scrollViewCate=(ScrollViewCate *)root.scrollViewControllerCate.scrollViewCate;
     int childLen=(int)scrollViewCate.subviews.count;
     NSArray *subViews=scrollViewCate.subviews;
+    NSMutableDictionary *dicOfCateButton=[[NSMutableDictionary alloc]init];
     for(int i=0;i<childLen;i++){
         if([[subViews objectAtIndex:i] isKindOfClass:[ButtonCate class]]){
             ButtonCate *btn=(ButtonCate *)[subViews objectAtIndex:i];
-            [btn removeFromSuperview];
+            [dicOfCateButton setValue:btn forKeyPath:btn.name];
         }
     }
     NSString *lang=[DB getSysConfig:@"lang"];
@@ -444,14 +459,22 @@
     [db open];
     FMResultSet *results=[db executeQuery:[NSString stringWithFormat:@"SELECT * FROM collection WHERE lang='%@' ORDER BY sort",lang]];
     int i=0;
+    
+    //把新抓的資料更新，再把界面換成其他語言
     while([results next]){
         NSString *title=[results stringForColumn:@"title"];
         NSString *name=[results stringForColumn:@"name"];
         NSString *keyword=[results stringForColumn:@"keyword"];
         NSString *icon=[results stringForColumn:@"icon"];
         int iden=[results intForColumn:@"id"];
-        ButtonCate *buttonCate= [[ButtonCate alloc] initWithIconName:icon frame:CGRectMake(i%2*116+52, floor(i/2)*132, 100, 94) title:title name:name lang:lang keyword:keyword iden:iden];
-        [scrollViewCate addSubview:buttonCate];
+        ButtonCate *cate=(ButtonCate *) [dicOfCateButton objectForKey:name];
+        cate.name=name;
+        cate.titleLabel.text=title;
+        cate.keyword=keyword;
+        cate.imgViewIcon=[[UIImageView alloc] initWithImage:[UIImage imageNamed:icon]];
+        cate.iconName=icon;
+        cate.iden=iden;
+        [cate updateCollection];
         i+=1;
     }
     [results close];
@@ -460,7 +483,7 @@
     root.scrollViewControllerCate.viewIconEditPeanel.viewEditKeyword.lblDisplayTitle.text=[DB getUI:@"edit_keyword"];
     root.scrollViewControllerCate.viewIconEditPeanel.viewEditTitle.lblDisplayTitle.text=[DB getUI:@"edit_title"];
     root.viewControllerFun.viewMenu.viewConfig.lblTitle.text=[DB getUI:@"config"];
-    root.viewControllerFun.viewMenu.viewSuggestion.lblTitle.text=[DB getUI:@"suggestion"];
+    root.viewControllerFun.viewMenu.viewSuggestion.lblTitle.text=[DB getUI:@"about_us"];
     root.viewControllerFun.viewMenu.viewProfile.lblTitle.text=[DB getUI:@"profile"];
     root.viewControllerFun.viewMenu.viewConfig.lblShareFavoriteToSocial.text=[DB getUI:@"share_favorite"];
     root.viewControllerFun.viewMenu.viewConfig.lblShareGoodToSocial.text=[DB getUI:@"share_good"];
@@ -472,7 +495,6 @@
     root.viewControllerFun.viewMenu.viewConfig.btnRest.lblTitle.text=[DB getUI:@"reset"];
     root.viewControllerFun.viewMenu.viewConfig.lblLang.text=[DB getUI:@"lang"];
     
-    root.viewControllerFun.viewMenu.viewSuggestion.btnSend.lblTitle.text=[DB getUI:@"send"];
     root.viewControllerFun.viewMenu.viewFavorite.lblTitle.text=[DB getUI:@"favorite"];
     root.viewControllerFun.viewMenu.viewSecret.lblTitle.text=[DB getUI:@"icon_collection"];
     root.viewControllerFun.viewMenu.viewGoodsBox.lblTitle.text=[DB getUI:@"goods_box"];

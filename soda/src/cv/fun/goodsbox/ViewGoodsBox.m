@@ -19,7 +19,7 @@
         lblTitle.text=[DB getUI:@"goods_box"];
         [lblTitle setFont:[GV sharedInstance].fontMenuTitle];
         [lblTitle setTextColor:[UIColor whiteColor]];
-        [lblTitle setFrame:CGRectMake(85, 30, 200, 40)];
+        [lblTitle setFrame:CGRectMake(68, 30, 200, 40)];
         [self addSubview:lblTitle];
     }
     return self;

@@ -21,7 +21,7 @@
         lblTitle.text=[DB getUI:@"icon_collection"];
         [lblTitle setFont:[GV sharedInstance].fontMenuTitle];
         [lblTitle setTextColor:[UIColor whiteColor]];
-        [lblTitle setFrame:CGRectMake(85, 30, 200, 40)];
+        [lblTitle setFrame:CGRectMake(68, 30, 200, 40)];
         [self addSubview:lblTitle];
         
         scrollViewSecret=[[ScrollViewProtoType alloc] initWithFrame:CGRectMake(0,80,frame.size.width,self.gv.screenH)];
@@ -36,7 +36,8 @@
            ButtonSecretIcon *icon= (ButtonSecretIcon *)[scrollViewSecret.subviews objectAtIndex:i];
             if([icon.tip isEqual:tip] && !icon.isGet){
                 NSLog(@"ViewSecret.checkSecretByCondition:%@ download icon",icon.name);
-                
+                //peter modify  3秒內只播一次 
+                [icon playAudio];
                 [icon downloadSecretIcon];
             }
         }

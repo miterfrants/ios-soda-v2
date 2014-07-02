@@ -15,4 +15,6 @@
 @property NSString *tip;
 @property int icon_id;
 @property NSString *secretId;
+@property NSString *updatedTime;
+@property int sort;
 @end

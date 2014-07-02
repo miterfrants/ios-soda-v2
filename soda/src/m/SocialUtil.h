@@ -14,4 +14,6 @@
 @interface SocialUtil : NSObject
 +(void)shareReviewWithPlaceName:(NSString *)name comment:(NSString *)comment rating:(double)rating googleId:(NSString *) googleId googleRef:(NSString *) googleRef;
 +(void)shareFavoriteWithName:(NSString *)name googleId:(NSString *) googleId googleRef:(NSString *)googleRef;
+
++(void)shareNewSecretIconToFacebookWithIconId:(NSString *)name iconId:(int) iconId;
 @end

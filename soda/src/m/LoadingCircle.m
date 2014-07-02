@@ -31,7 +31,7 @@
     return self;
 }
 
-- (id)initWithFrameAndThick:(CGRect)frame thick:(double)thick
+- (id)initWithFrameAndThick:(CGRect)frame thick:(double)pThick
 {
     self = [super initWithFrame:frame];
     if (self) {
@@ -39,24 +39,25 @@
         CAShapeLayer *bgLayer=[CAShapeLayer layer];
         UIBezierPath *bgPath = [UIBezierPath bezierPath];
         double thida=120;
-        double width=thick;
+        double width=pThick;
         double outerR=self.frame.size.width/2;
         double innerR=self.frame.size.width/2-width;
         [bgPath moveToPoint:CGPointMake(frame.size.width/2+innerR*cos(thida*M_PI/180), frame.size.width/2+innerR*sin(thida*M_PI/180))];
-        [bgPath addArcWithCenter:CGPointMake(frame.size.width/2, frame.size.width/2) radius:frame.size.width/2-thick startAngle:thida*M_PI/180 endAngle:0 clockwise:YES];
+        [bgPath addArcWithCenter:CGPointMake(frame.size.width/2, frame.size.width/2) radius:frame.size.width/2-pThick startAngle:thida*M_PI/180 endAngle:0 clockwise:YES];
         [bgPath addLineToPoint:CGPointMake(frame.size.width, frame.size.width/2)];
         [bgPath addArcWithCenter:CGPointMake(frame.size.width/2, frame.size.width/2) radius:outerR startAngle:0 endAngle:thida*M_PI/180 clockwise:NO];
         bgLayer.fillColor=[UIColor whiteColor].CGColor;
         bgLayer.path=bgPath.CGPath;
         [self.layer addSublayer:bgLayer];
+        self.thick=pThick;
     }
     return self;
 }
 
-
 -(void)start{
     [self.animationTimer invalidate];
     self.animationTimer =nil;
+    [self setHidden:NO];
     self.animationTimer=[NSTimer scheduledTimerWithTimeInterval:0.01 target:self selector:@selector(_start) userInfo:nil repeats:YES];
 }
 -(void)stop{

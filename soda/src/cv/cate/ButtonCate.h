@@ -37,4 +37,5 @@
 -(void)toTouchStatus;
 -(void)changeIcon:(NSString *) iconName;
 -(void)changeOverIcon:(NSString *) pIconName;
+-(void)updateCollection;
 @end

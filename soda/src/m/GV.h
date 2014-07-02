@@ -61,6 +61,8 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property NSString *controllerMember;
 @property NSString *controllerInteraction;
 @property NSString *controllerErrorReport;
+@property NSString *controllerAboutUs;
+@property NSString *controllerLaunchLog;
 
 @property NSString *actionGetDefaultCollection;
 @property NSString *actionGetDefaultIcon;
@@ -79,6 +81,8 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property NSString *actionSearchPlace;
 @property NSString *actionAddPlace;
 @property NSString *actionAddErrorReport;
+@property NSString *actionAddDownloadSecretIconLog;
+@property NSString *actionAddLaunchLog;
 
 @property NSString *urlProtocol;
 @property NSString *urlIcon;
@@ -140,7 +144,8 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property UIFont *fontFuncFavoriteName;
 @property UIFont *fontFuncFavoriteAddress;
 @property UIFont *fontNormalForHebrew;
-@property UIFont *fontDescriptionForHebrew;
+@property UIFont *fontHintForHebrew;
+@property UIFont *fontArticleForHerbrew;
 
 //login
 @property LoginType loginType;
@@ -155,6 +160,7 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property NSString *listWidth;
 @property NSOperationQueue *backgroundThreadManagement;
 @property NSOperationQueue *FMDatabaseQueue;
+@property NSOperationQueue *AudioQueue;
 @property NSOperationQueue *GooglePlaceDetailQueue;
 @property CLLocation *myLocation;
 @property NSDictionary *dicPlaceCate;

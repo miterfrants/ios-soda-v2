@@ -8,11 +8,12 @@
 
 #import "ButtonLocation.h"
 #import "Util.h"
+#import "DB.h"
 @implementation ButtonLocation
 
 - (id)initWithFrame:(CGRect)frame
 {
-    self = [super initWithFrameAndName:frame title:@"Location"];
+    self = [super initWithFrameAndName:frame title:[DB getUI:@"location"]];
     if (self) {
     }
     return self;

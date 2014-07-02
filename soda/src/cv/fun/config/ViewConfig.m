@@ -31,7 +31,7 @@ switchShareIconToSocial;
         lblTitle.text=[DB getUI:@"config"];
         [lblTitle setFont:[GV sharedInstance].fontMenuTitle];
         [lblTitle setTextColor:[UIColor whiteColor]];
-        [lblTitle setFrame:CGRectMake(85, 30, 200, 40)];
+        [lblTitle setFrame:CGRectMake(68, 30, 200, 40)];
         [self addSubview:lblTitle];
         
         self.scrollView=[[ScrollViewProtoType alloc] initWithFrame:CGRectMake(0, 80, frame.size.width,self.gv.screenH-80)];
@@ -213,7 +213,6 @@ clickedButtonAtIndex:(NSInteger)buttonIndex{
     NSLog(@"%@",alertView);
     if (buttonIndex == 1) {
         NSLog(@"YES, change language");
-
         NSArray *keys=gv.dicLang.allKeys;
         NSString *lang=[keys objectAtIndex:[pickLang selectedRowInComponent:0]];
         [DB changeLang:lang];

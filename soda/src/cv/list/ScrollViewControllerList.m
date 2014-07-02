@@ -41,7 +41,8 @@
         [self.scrollViewList addSubview:self.btnMore];
         
         
-        self.loading=[[LoadingCircle alloc] initWithFrame:CGRectMake((self.gv.screenW-30)/2, (150-30)/2+40,30, 30)];
+
+        self.loading=[[LoadingCircle alloc] initWithFrameAndThick:CGRectMake((self.gv.screenW-40)/2, (150-40)/2+40,40, 40)  thick:2];
         [self.view addSubview:self.loading];
         [self.loading setHidden:YES];
         
@@ -312,6 +313,7 @@
 }
 
 -(void) animationHideList{
+     [self.loading stop];
     [viewFunBar.viewPanelForLocation.txtCenterAdderss stopObserver];
     [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
      {
@@ -321,7 +323,7 @@
              //remove
              NSLog(@"clear and stop loading");
              [self clearList];
-             //[self.loading stop];
+
              arrItemList=[[NSMutableArray alloc] init];
              [viewFunBar contractAllWithoutAnimation];
              [viewFunBar rebackAllButtonWithoutAnimation];
@@ -336,6 +338,7 @@
     [self statusToList];
     self.isCancelCurrentLoadItemListMarker=YES;
     [self.gv.GooglePlaceDetailQueue cancelAllOperations];
+    [self.loading stop];
     ButtonFunction *selectedButtonForFunctionBar=nil;
     for(NSString *key in self.viewFunBar.dicButtonFunction){
         ButtonFunction *tempButton=(ButtonFunction *)[self.viewFunBar.dicButtonFunction objectForKey:key];
@@ -397,10 +400,9 @@
     
     [self.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 40)];
     [self.loading stop];
-    [self.loading setFrame:CGRectMake((self.gv.screenW-30)/2, (150-30)/2+40, 30, 30)];
 
     CLLocationCoordinate2D searchCenter;
-    if(center.latitude>0 && center.longitude>0){
+    if(center.latitude!=0 && center.longitude!=0){
         searchCenter=CLLocationCoordinate2DMake(center.latitude, center.longitude);
     }else{
         locationManager = [[CLLocationManager alloc] init];
@@ -438,6 +440,7 @@
         NSLog(@"google result:%d",(int)arrFromGoogle.count);
         NSLog(@"local result:%d",(int)arrFromLocal.count);
         BOOL isFromLocal =NO;
+        //如果是local 然後又沒有rating key 和 condition 就把loading停掉
         if(arrFromLocal.count==0 && arrFromGoogle.count==0){
             NSLog(@"NO DATA");
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -448,9 +451,14 @@
         }else if(arrFromLocal.count<arrFromGoogle.count){
             self.arrRadarResult=arrFromGoogle;
         }else if(arrFromLocal.count>=arrFromGoogle.count){
-            self.arrRadarResult=arrFromGoogle;
-//            isFromLocal =YES;
-//            self.arrRadarResult=arrFromLocal;
+            isFromLocal =YES;
+            self.arrRadarResult=arrFromLocal;
+        }
+        
+        if(![self isExistSortingKey]){
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self.loading stop];
+            });
         }
         
         self.totalIndex=(int) [arrRadarResult count]-1;
@@ -585,6 +593,7 @@
 
     NSMutableDictionary *dicDataItem= [arrRadarResult objectAtIndex:i];
     //要不要 distance
+
     if(isFromLocal){
         item.googleId=[[dicDataItem objectForKey:@"result"] valueForKey:@"id"];
         item.lat=[[[[[dicDataItem objectForKey:@"result"] objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lat"] doubleValue];
@@ -597,6 +606,7 @@
         item.lng=[[[[dicDataItem objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lng"] doubleValue];
         item.googleRef=[dicDataItem valueForKey:@"reference"];
     }
+
     [arrItemList addObject:item];
     itemInstanceCreateCount=i;
     
@@ -743,6 +753,7 @@
         [item displaySelf];
         item.seq=sortingCreateIndex;
         item.isShow=YES;
+        self.itemDisplayCount+=1;
         sortingCreateIndex+=1;
     }
     [scrollViewList setContentSize:CGSizeMake(self.gv.screenW, 150*(sortingCreateIndex)+40)];
@@ -792,7 +803,6 @@
     self.isLoadingList=YES;
 
     if([self isExistfilterCondition]){
-        [self.loading setFrame:CGRectMake((self.gv.screenW-30)/2, self.gv.screenH-30-80-6, 30, 30)];
         [self.loading start];
         [self.loading setHidden:NO];
         [UIView animateWithDuration:0.28 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
@@ -832,12 +842,7 @@
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
     //if status is edit selected button
     UITouch* touch=[[event allTouches]anyObject];
-    NSLog(@"list:%@",NSStringFromClass(touch.view.class));
-    if([touch.view isKindOfClass:[ListItem class]]){
-        ListItem *item=(ListItem *)touch.view;
-        NSLog(@"%d",item.seq);
-    }
-    
+    NSLog(@"list:%@",NSStringFromClass(touch.view.class));    
 
     if([GV getGlobalStatus] == LIST_EXPAND &&
         [touch.view isKindOfClass:[LabelForComment class]]
@@ -960,9 +965,13 @@
     }
     [UIView animateWithDuration:0.28 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
         if([originalExpandedName isEqual:@"review"] && ![willExpandDetailName isEqual:@"review"]){
+            [item.viewArrow setFrame:CGRectMake(item.btnShowMap.frame.origin.x+(item.btnShowMap.frame.size.width-item.viewArrow.frame.size.width)/2, item.viewArrow.frame.origin.y, item.viewArrow.frame.size.width, item.viewArrow.frame.size.height)];
+
             [item.lblIForComment setFrame:CGRectMake(self.gv.screenW+item.lblIForComment.frame.origin.x, item.lblIForComment.frame.origin.y, item.lblIForComment.frame.size.width, item.lblIForComment.frame.size.height)];
             [item.btnComment setFrame:CGRectMake(self.gv.screenW+item.btnComment.frame.origin.x, item.btnComment.frame.origin.y, item.btnComment.frame.size.width, item.btnComment.frame.size.height)];
         }else if([willExpandDetailName isEqual:@"review"]){
+           [item.viewArrow setFrame:CGRectMake(item.btnReview.frame.origin.x+(item.btnReview.frame.size.width-item.viewArrow.frame.size.width)/2, item.viewArrow.frame.origin.y, item.viewArrow.frame.size.width, item.viewArrow.frame.size.height)];
+            
             [item.lblIForComment setFrame:CGRectMake(20, item.lblIForComment.frame.origin.y, item.lblIForComment.frame.size.width, item.lblIForComment.frame.size.height)];
             [item.btnComment setFrame:CGRectMake(28, item.btnComment.frame.origin.y, item.btnComment.frame.size.width, item.btnComment.frame.size.height)];
         }

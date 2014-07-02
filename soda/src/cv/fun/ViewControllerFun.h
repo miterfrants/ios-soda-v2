@@ -10,13 +10,16 @@
 #import "ViewControllerProtoType.h"
 #import "ViewMenu.h"
 #import "ButtonGear.h"
+#import <MessageUI/MessageUI.h>
 
-@interface ViewControllerFun : ViewControllerProtoType 
+@interface ViewControllerFun : ViewControllerProtoType <MFMailComposeViewControllerDelegate>
 @property ButtonGear *btnGear;
 @property ViewMenu *viewMenu;
 @property NSMutableArray *arrSecretIcon;
+@property MFMailComposeViewController *mail;
 -(void)statusMenuToPreviousStatus;
 -(void)statusCurrentToMenu;
--(void) changeToLoginStatus;
--(void) changeToUnloginStatus;
+-(void)changeToLoginStatus;
+-(void)changeToUnloginStatus;
+-(void)sendMail;
 @end

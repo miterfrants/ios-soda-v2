@@ -15,4 +15,5 @@
 @property NSString *name;
 -(id)initWithFrameAndName:(CGRect) frame title:(NSString *) title;
 -(void)toUnHighLightStatus;
+-(void)toHighLightStatus;
 @end

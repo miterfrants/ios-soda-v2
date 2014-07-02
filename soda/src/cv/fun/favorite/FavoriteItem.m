@@ -70,7 +70,7 @@
                              range:NSMakeRange(0, name.length)];
     
     [attributedString addAttribute:NSFontAttributeName
-                             value:self.gv.fontFuncFavoriteName
+                             value:self.gv.fontNormalForHebrew
                              range:NSMakeRange(0, name.length)];
 
     [attributedString addAttribute:NSForegroundColorAttributeName
@@ -134,7 +134,7 @@ bool isDelete=NO;
                              range:NSMakeRange(0, address.length)];
     
     [attributedString addAttribute:NSFontAttributeName
-                             value:self.gv.fontFuncFavoriteAddress
+                             value:self.gv.fontHintForHebrew
                              range:NSMakeRange(0, address.length)];
     
     [attributedString addAttribute:NSForegroundColorAttributeName

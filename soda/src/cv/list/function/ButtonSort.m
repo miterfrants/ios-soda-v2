@@ -7,11 +7,11 @@
 //
 
 #import "ButtonSort.h"
-
+#import "DB.h"
 @implementation ButtonSort
 - (id)initWithFrame:(CGRect)frame
 {
-    self = [super initWithFrameAndName:frame title:@"Sort"];
+    self = [super initWithFrameAndName:frame title:[DB getUI:@"sort"]];
     if (self) {
     }
     return self;

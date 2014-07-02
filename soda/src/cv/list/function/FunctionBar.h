@@ -23,6 +23,7 @@
 @property ViewPanelForSort *viewPanelForSort;
 @property UIView *currentShowPanel;
 @property BOOL isExpanded;
+@property BOOL isAnimation;
 @property NSMutableDictionary *dicViewPanel;
 @property NSMutableDictionary *dicButtonFunction;
 -(void)switchViewPanelWithTargetButton:(ButtonFunction *) btn;

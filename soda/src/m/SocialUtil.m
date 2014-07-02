@@ -88,4 +88,28 @@
 }
 +(void)shareFavoriteToGoogleWithPlaceName:(NSString *)name googleId:(NSString *) googleId googleRef:(NSString *)googleRef{
 }
+
++(void)shareNewSecretIconToFacebookWithIconId:(NSString *)name iconId:(int) iconId{
+    GV *gv=[GV sharedInstance];
+    NSMutableDictionary *params = [NSMutableDictionary dictionaryWithObjectsAndKeys:
+                                   @"I get new secret icon", @"caption",
+                                   [NSString stringWithFormat:@"%@://%@/soda/secret_icon.aspx?id=%d&lang=%@",gv.urlProtocol, gv.domain,iconId,[DB getSysConfig:@"lang"]], @"link",
+                                   nil];
+    
+    // Make the request
+    [FBRequestConnection startWithGraphPath:@"/me/feed"
+                                 parameters:params
+                                 HTTPMethod:@"POST"
+                          completionHandler:^(FBRequestConnection *connection, id result, NSError *error) {
+                              if (!error) {
+                                  // Link posted successfully to Facebook
+                                  NSLog(@"result: %@", result);
+                              } else {
+                                  // An error occurred, we need to handle the error
+                                  // See: https://developers.facebook.com/docs/ios/errors
+                                  NSLog(@"%@", error.description);
+                              }
+                          }];
+}
+
 @end

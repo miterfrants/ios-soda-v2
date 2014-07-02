@@ -69,6 +69,10 @@
 		02526E991934FA5500DE0327 /* chat_over.png in Resources */ = {isa = PBXBuildFile; fileRef = 02526E971934FA5500DE0327 /* chat_over.png */; };
 		02526E9A1934FA5500DE0327 /* chat.png in Resources */ = {isa = PBXBuildFile; fileRef = 02526E981934FA5500DE0327 /* chat.png */; };
 		02526E9D1936279D00DE0327 /* ViewVoteHeart.m in Sources */ = {isa = PBXBuildFile; fileRef = 02526E9C1936279D00DE0327 /* ViewVoteHeart.m */; };
+		026DFB62195BC0A4001177BA /* ViewArrow.m in Sources */ = {isa = PBXBuildFile; fileRef = 026DFB61195BC0A4001177BA /* ViewArrow.m */; };
+		026DFB671962F034001177BA /* get_sound_effect.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 026DFB661962F034001177BA /* get_sound_effect.mp3 */; };
+		026DFB691962F1B6001177BA /* get_sound_effect.ogg in Resources */ = {isa = PBXBuildFile; fileRef = 026DFB681962F1B6001177BA /* get_sound_effect.ogg */; };
+		026DFB6B1962F202001177BA /* get_sound_effect.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 026DFB6A1962F202001177BA /* get_sound_effect.m4a */; };
 		027C334F18EBBB4300D1FC91 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 027C334E18EBBB4300D1FC91 /* Foundation.framework */; };
 		027C335118EBBB4300D1FC91 /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 027C335018EBBB4300D1FC91 /* CoreGraphics.framework */; };
 		027C335318EBBB4300D1FC91 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 027C335218EBBB4300D1FC91 /* UIKit.framework */; };
@@ -111,6 +115,9 @@
 		0291A6C9194EF7DE00B112A5 /* ButtonMore.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6C8194EF7DE00B112A5 /* ButtonMore.m */; };
 		0291A6CC19517CA300B112A5 /* SocialUtil.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6CB19517CA300B112A5 /* SocialUtil.m */; };
 		0291A6CF1952979A00B112A5 /* UserInteractionLog.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6CE1952979A00B112A5 /* UserInteractionLog.m */; };
+		0291A6D21954A1ED00B112A5 /* ButtonMail.m in Sources */ = {isa = PBXBuildFile; fileRef = 0291A6D11954A1ED00B112A5 /* ButtonMail.m */; };
+		0291A6D51954A31200B112A5 /* mail_over.png in Resources */ = {isa = PBXBuildFile; fileRef = 0291A6D31954A31200B112A5 /* mail_over.png */; };
+		0291A6D61954A31200B112A5 /* mail.png in Resources */ = {isa = PBXBuildFile; fileRef = 0291A6D41954A31200B112A5 /* mail.png */; };
 		029C86EC1945668900740266 /* GooglePlaceAPI.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86EB1945668900740266 /* GooglePlaceAPI.m */; };
 		029C86F5194566EC00740266 /* GooglePlaceAPIPool.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86F4194566EC00740266 /* GooglePlaceAPIPool.m */; };
 		029C86F8194845CD00740266 /* LoadingBar.m in Sources */ = {isa = PBXBuildFile; fileRef = 029C86F7194845CD00740266 /* LoadingBar.m */; };
@@ -335,6 +342,11 @@
 		02526E981934FA5500DE0327 /* chat.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = chat.png; sourceTree = "<group>"; };
 		02526E9B1936279D00DE0327 /* ViewVoteHeart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewVoteHeart.h; sourceTree = "<group>"; };
 		02526E9C1936279D00DE0327 /* ViewVoteHeart.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewVoteHeart.m; sourceTree = "<group>"; };
+		026DFB60195BC0A4001177BA /* ViewArrow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ViewArrow.h; sourceTree = "<group>"; };
+		026DFB61195BC0A4001177BA /* ViewArrow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ViewArrow.m; sourceTree = "<group>"; };
+		026DFB661962F034001177BA /* get_sound_effect.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = get_sound_effect.mp3; sourceTree = "<group>"; };
+		026DFB681962F1B6001177BA /* get_sound_effect.ogg */ = {isa = PBXFileReference; lastKnownFileType = file; path = get_sound_effect.ogg; sourceTree = "<group>"; };
+		026DFB6A1962F202001177BA /* get_sound_effect.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = get_sound_effect.m4a; sourceTree = "<group>"; };
 		027C334B18EBBB4300D1FC91 /* soda.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = soda.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		027C334E18EBBB4300D1FC91 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		027C335018EBBB4300D1FC91 /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -395,6 +407,10 @@
 		0291A6CB19517CA300B112A5 /* SocialUtil.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SocialUtil.m; sourceTree = "<group>"; };
 		0291A6CD1952979A00B112A5 /* UserInteractionLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UserInteractionLog.h; sourceTree = "<group>"; };
 		0291A6CE1952979A00B112A5 /* UserInteractionLog.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = UserInteractionLog.m; sourceTree = "<group>"; };
+		0291A6D01954A1ED00B112A5 /* ButtonMail.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ButtonMail.h; sourceTree = "<group>"; };
+		0291A6D11954A1ED00B112A5 /* ButtonMail.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ButtonMail.m; sourceTree = "<group>"; };
+		0291A6D31954A31200B112A5 /* mail_over.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mail_over.png; sourceTree = "<group>"; };
+		0291A6D41954A31200B112A5 /* mail.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mail.png; sourceTree = "<group>"; };
 		029C86EA1945668900740266 /* GooglePlaceAPI.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GooglePlaceAPI.h; sourceTree = "<group>"; };
 		029C86EB1945668900740266 /* GooglePlaceAPI.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GooglePlaceAPI.m; sourceTree = "<group>"; };
 		029C86F3194566EC00740266 /* GooglePlaceAPIPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GooglePlaceAPIPool.h; sourceTree = "<group>"; };
@@ -694,6 +710,16 @@
 			path = listitem;
 			sourceTree = "<group>";
 		};
+		026DFB651962F034001177BA /* audio */ = {
+			isa = PBXGroup;
+			children = (
+				026DFB6A1962F202001177BA /* get_sound_effect.m4a */,
+				026DFB681962F1B6001177BA /* get_sound_effect.ogg */,
+				026DFB661962F034001177BA /* get_sound_effect.mp3 */,
+			);
+			path = audio;
+			sourceTree = "<group>";
+		};
 		027C334218EBBB4300D1FC91 = {
 			isa = PBXGroup;
 			children = (
@@ -795,6 +821,7 @@
 		027C337D18EBBBF700D1FC91 /* res */ = {
 			isa = PBXGroup;
 			children = (
+				026DFB651962F034001177BA /* audio */,
 				02ED984D18F5854000B3B839 /* img */,
 			);
 			path = res;
@@ -820,6 +847,8 @@
 				028FFB2D190A6851007CE44E /* ViewSuggestion.m */,
 				028FFB30190A68A9007CE44E /* TextComment.h */,
 				028FFB31190A68A9007CE44E /* TextComment.m */,
+				0291A6D01954A1ED00B112A5 /* ButtonMail.h */,
+				0291A6D11954A1ED00B112A5 /* ButtonMail.m */,
 			);
 			path = suggestion;
 			sourceTree = "<group>";
@@ -1084,6 +1113,8 @@
 				0291A6CB19517CA300B112A5 /* SocialUtil.m */,
 				0291A6CD1952979A00B112A5 /* UserInteractionLog.h */,
 				0291A6CE1952979A00B112A5 /* UserInteractionLog.m */,
+				026DFB60195BC0A4001177BA /* ViewArrow.h */,
+				026DFB61195BC0A4001177BA /* ViewArrow.m */,
 			);
 			path = m;
 			sourceTree = "<group>";
@@ -1091,6 +1122,8 @@
 		02ED984D18F5854000B3B839 /* img */ = {
 			isa = PBXGroup;
 			children = (
+				0291A6D31954A31200B112A5 /* mail_over.png */,
+				0291A6D41954A31200B112A5 /* mail.png */,
 				028DB11D193F23E000B872FC /* phone_over.png */,
 				0244A35C193ECE4000EA22BF /* previous_over.png */,
 				0244A35D193ECE4000EA22BF /* previous.png */,
@@ -1349,6 +1382,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				02526E711930D11B00DE0327 /* lazy_cat.png in Resources */,
+				026DFB6B1962F202001177BA /* get_sound_effect.m4a in Resources */,
 				02B6AC29191F5B6000ACCF61 /* official_flag.png in Resources */,
 				02B6AC14191A1D4800ACCF61 /* secreticon_disable.png in Resources */,
 				02526E9A1934FA5500DE0327 /* chat.png in Resources */,
@@ -1366,6 +1400,8 @@
 				028FFB0D1906265B007CE44E /* favorite_disable.png in Resources */,
 				02B6AC27191D0FF200ACCF61 /* remove_over.png in Resources */,
 				02B6AC551921BA5900ACCF61 /* direction.png in Resources */,
+				0291A6D51954A31200B112A5 /* mail_over.png in Resources */,
+				026DFB691962F1B6001177BA /* get_sound_effect.ogg in Resources */,
 				02B6AC481920A91500ACCF61 /* phone.png in Resources */,
 				0244A35B193ECA3900EA22BF /* next.png in Resources */,
 				02B6ACA31925EA0100ACCF61 /* list_function_arr.png in Resources */,
@@ -1386,6 +1422,7 @@
 				02B6ACC81926116700ACCF61 /* GoogleMaps.bundle in Resources */,
 				02B6AC3A191F844E00ACCF61 /* home.png in Resources */,
 				02B6AC25191D0E0B00ACCF61 /* remove.png in Resources */,
+				026DFB671962F034001177BA /* get_sound_effect.mp3 in Resources */,
 				02526E591929F6E100DE0327 /* add_over.png in Resources */,
 				0248E3E51903AC6500ABC9B9 /* google.png in Resources */,
 				02ED990D18F7F50300B3B839 /* temp.png in Resources */,
@@ -1397,6 +1434,7 @@
 				02B6AC5B1921C49400ACCF61 /* heart_fill.png in Resources */,
 				02526E5F192AF0BA00DE0327 /* pin_over.png in Resources */,
 				0248E3D61903AC5800ABC9B9 /* config_over.png in Resources */,
+				0291A6D61954A31200B112A5 /* mail.png in Resources */,
 				02B6AC10191A1D4000ACCF61 /* lock.png in Resources */,
 				02B6AC591921BF9400ACCF61 /* heart.png in Resources */,
 				02B6AC641922268B00ACCF61 /* light_fill.png in Resources */,
@@ -1488,6 +1526,7 @@
 				028FFAE31905F9F1007CE44E /* ButtonGoogle.m in Sources */,
 				02ED98A418F69BE500B3B839 /* FMDatabase.m in Sources */,
 				02526E961934F32100DE0327 /* ButtonComment.m in Sources */,
+				026DFB62195BC0A4001177BA /* ViewArrow.m in Sources */,
 				02526E90193483B900DE0327 /* ReviewHeart.m in Sources */,
 				02B6AC0E191A1C6400ACCF61 /* ViewSecret.m in Sources */,
 				02B6AC21191D022900ACCF61 /* ButtonRemoveCate.m in Sources */,
@@ -1522,6 +1561,7 @@
 				02D88A1119016DD300941199 /* DB.m in Sources */,
 				02526E8D1933410700DE0327 /* ViewReview.m in Sources */,
 				02D889FE19016DD300941199 /* ButtonCate.m in Sources */,
+				0291A6D21954A1ED00B112A5 /* ButtonMail.m in Sources */,
 				028FFB05190623C5007CE44E /* ButtonForPersonal.m in Sources */,
 				02ED98F918F79EDC00B3B839 /* VariableStore.m in Sources */,
 				02B6AC31191F648700ACCF61 /* ScrollViewControllerList.m in Sources */,

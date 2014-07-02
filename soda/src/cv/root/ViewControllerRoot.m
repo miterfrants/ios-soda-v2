@@ -122,6 +122,7 @@
              ){
         NSLog(@"root condition 5");
         [viewControllerTop animationShowBreadCrumb:@"search.png" name:viewControllerTop.txtSearch.text];
+        [self.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"search"];
         [scrollViewControllerCate animationHideCate];
         [scrollViewControllerList animationShowList];
         scrollViewControllerCate.selectedButtonCate.keyword=viewControllerTop.txtSearch.text;

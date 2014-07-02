@@ -21,50 +21,88 @@
         [self addSubview:viewArrowBorder];
         lblMsg =[[UILabel alloc] init];
         lblTitle=[[UILabel alloc]init];
-        [lblTitle setFont:gv.tipTitleFont];
-        [lblMsg setFont:gv.tipMsgFont];
-        [lblTitle setTextColor:[Util colorWithHexString:@"#FFFFFFFF"]];
-        [lblMsg setTextColor:[Util colorWithHexString:@"#FFFFFFFF"]];
+        [lblTitle setFont:gv.fontNormalForHebrew];
+        [lblMsg setFont:gv.fontHintForHebrew];
+        [lblTitle setTextColor:[UIColor whiteColor]];
+        [lblMsg setTextColor:[UIColor darkGrayColor]];
         viewBorder =[[UIView alloc] init];
         [self addSubview:viewBorder];
         [self addSubview:lblTitle];
         [self addSubview:lblMsg];
-
+        [self setBackgroundColor:[UIColor redColor]];
+        [self setFrame:CGRectMake(0, 0, self.gv.screenW, 200)];
+        [self setHidden:YES];
     }
     return self;
 }
 
--(void)initWithUIView:(UIView *) target title:(NSString *) title msg:(NSString*)msg{
+//return up or down
+-(BOOL)initWithUIView:(UIView *) target title:(NSString *) title msg:(NSString*)msg{
+    [self setHidden:NO];
     CGPoint point = [target convertPoint:target.bounds.origin toView:self.window];
-    //CGSize msgSize=[msg sizeWithAttributes: @{NSFontAttributeName:font}];
-
-    CGRect msgRect=[msg boundingRectWithSize:CGSizeMake(197, 400) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:gv.tipMsgFont} context:nil];
-    CGRect titleRect=[msg boundingRectWithSize:CGSizeMake(197, 400) options:NSStringDrawingUsesLineFragmentOrigin attributes:@{NSFontAttributeName:gv.tipTitleFont} context:nil];
-    
-    double padding=15;
-    [lblTitle setFrame:CGRectMake(padding, padding/2, 197, titleRect.size.height)];
-    [lblMsg setFrame:CGRectMake(padding, titleRect.size.height+17, msgRect.size.width, msgRect.size.height)];
-    
-
     [lblTitle setText:title];
     [lblMsg setText:msg];
+    double padding=5;
+    double borderTopBottomPadding=8;
+    double borderLeftRightPadding=15;
+    double edgePadding=10;
+    CGSize expectedSizeOfTitle=[lblTitle sizeThatFits:CGSizeMake(self.gv.screenW-40, self.gv.screenH-20)];
+    CGSize expectedSizeOfMsg=[lblMsg sizeThatFits:CGSizeMake(self.gv.screenW-40, self.gv.screenH-expectedSizeOfTitle.height-padding-40)];
+    double maxWidth=expectedSizeOfTitle.width;
+    if(maxWidth<expectedSizeOfMsg.width){
+        maxWidth=expectedSizeOfMsg.width;
+    }
+    CGPoint pointOfCenter=CGPointMake(point.x+target.frame.size.width/2, point.y+target.frame.size.height/2);
     
-    CGPoint destPoint=CGPointMake(point.x+target.frame.size.width+padding, point.y+target.frame.size.height/2);
+    //tip origin x
+    double tipOriginX=0;
+    double tipOriginY=0;
     
-    CGSize destSize=CGSizeMake(0, padding+titleRect.size.height+padding+msgRect.size.height+padding);
-    [self setFrame:CGRectMake(destPoint.x-22.5, destPoint.y-destSize.height/2, 197, destSize.height)];
-    //[self setBackgroundColor:[Util colorWithHexString:@"#8dc7c6FF"]];
+    //arror
+    double arrorOriginX=0;
+    double arrorOriginY=0;
     
-    [self addArrowBorder];
+    //對話框超過螢幕
+    if(pointOfCenter.x+maxWidth/2+borderLeftRightPadding>self.gv.screenW){
+        tipOriginX=self.gv.screenW-maxWidth-edgePadding-borderLeftRightPadding*2;
+    }else if(pointOfCenter.x-maxWidth/2-borderLeftRightPadding<0){
+        tipOriginX=edgePadding;
+    }else{
+        tipOriginX=pointOfCenter.x-maxWidth/2-borderLeftRightPadding;
+    }
+    BOOL isUp=NO;
+    if(point.y+target.frame.size.height/2>self.gv.screenH/2){
+        //對畫框在物件上方
+        tipOriginY=point.y+target.frame.size.height/2-expectedSizeOfTitle.height-expectedSizeOfMsg.height-padding-borderTopBottomPadding*2;
+        isUp=YES;
+    }else{
+        //對畫框在物件下方
+        tipOriginY=point.y+target.frame.size.height/2;
+    }
+    arrorOriginX=point.x+target.frame.size.width/2-tipOriginX;
+    arrorOriginY=tipOriginY;
+    
+    [self setFrame:CGRectMake(tipOriginX, tipOriginY, maxWidth+borderLeftRightPadding*2, padding+borderTopBottomPadding*2+expectedSizeOfMsg.height+expectedSizeOfTitle.height)];
+    
+    [lblTitle setFrame:CGRectMake(borderLeftRightPadding, borderTopBottomPadding, expectedSizeOfTitle.width,expectedSizeOfTitle.height)];
+    [lblMsg setFrame:CGRectMake(borderLeftRightPadding, expectedSizeOfTitle.height+borderTopBottomPadding+padding, expectedSizeOfMsg.width, expectedSizeOfMsg.height)];
+    
+    [self addArrowBorder:CGPointMake(arrorOriginX, arrorOriginY) size:self.frame.size isUp:isUp];
+    return isUp;
 }
 
 -(void)animationPopUp:(UIView *)target title:(NSString*)title msg:(NSString*)msg{
     [self setAlpha:0];
-    [self initWithUIView:target title:title msg:msg];
+    BOOL isUp=[self initWithUIView:target title:title msg:msg];
+    self.originY=self.frame.origin.y;
     [UIView animateWithDuration:0.28 delay:0.0 options:(UIViewAnimationOptionCurveEaseInOut) animations:^
      {
          [self setAlpha:1];
-         [self setFrame:CGRectMake(self.frame.origin.x+15, self.frame.origin.y, self.frame.size.width, self.frame.size.height)];
+         double animationOffset=15;
+         if(isUp){
+             animationOffset=-15;
+         }
+         [self setFrame:CGRectMake(self.frame.origin.x, self.frame.origin.y+animationOffset, self.frame.size.width, self.frame.size.height)];
      } completion:^(BOOL finished) {
          if (finished)
          {
@@ -75,10 +113,34 @@
 
 -(void)statusPreviousStatusToTip:(UIView *)target title:(NSString*)title msg:(NSString*)msg{
     gv.previousStatusForTip=[GV getGlobalStatus];
+    self.targetRef=target;
+    @try {
+        UIView *targetView=(UIView *)target;
+        if([targetView.superview isKindOfClass:[UIScrollView class]]){
+            [((UIScrollView *)targetView.superview) setScrollEnabled:NO];
+        }
+    }
+    @catch (NSException *exception) {
+        NSLog(@"%@",exception.description);
+    }
+    @finally {
+    }
     [self animationPopUp:target title:title msg:msg];
     [GV setGlobalStatus:TIP];
 }
 -(void)statusTipToPreviousStatus{
+    @try {
+        UIView *targetView=(UIView *)self.targetRef;
+        if([targetView.superview isKindOfClass:[UIScrollView class]]){
+            [((UIScrollView *)targetView.superview) setScrollEnabled:YES];
+        }
+    }
+    @catch (NSException *exception) {
+        NSLog(@"%@",exception.description);
+    }
+    @finally {
+        self.targetRef=nil;
+    }
     [self animationHide];
     [GV setGlobalStatus:gv.previousStatusForTip];
 }
@@ -87,7 +149,7 @@
     [UIView animateWithDuration:0.4 delay:0.0 options:(UIViewAnimationOptionCurveEaseInOut) animations:^
      {
          [self setAlpha:0];
-         [self setFrame:CGRectMake(self.frame.origin.x-15, self.frame.origin.y, self.frame.size.width, self.frame.size.height)];
+         [self setFrame:CGRectMake(self.frame.origin.x, self.originY, self.frame.size.width, self.frame.size.height)];
      } completion:^(BOOL finished) {
          if (finished)
          {
@@ -97,22 +159,41 @@
 
 }
 
--(void)addArrowBorder{
+-(void)addArrowBorder:(CGPoint) pointStart size:(CGSize)size isUp:(BOOL) isUp{
     viewBorder.layer.sublayers=nil;
     CAShapeLayer *layer= [CAShapeLayer layer];
     UIBezierPath *path=[UIBezierPath bezierPath];
-    [path moveToPoint:CGPointMake(0, self.frame.size.height/2)];
-    [path addLineToPoint:CGPointMake(7.5, self.frame.size.height/2-7.5)];
-    [path addLineToPoint:CGPointMake(7.5, 5)];
-    [path addCurveToPoint:CGPointMake(12.5, 0) controlPoint1:CGPointMake(7.5, 2.5) controlPoint2:CGPointMake(10, 0)];
-    [path addLineToPoint:CGPointMake(self.frame.size.width-5, 0)];
-    [path addCurveToPoint:CGPointMake(self.frame.size.width, 5) controlPoint1:CGPointMake(self.frame.size.width-2.5, 0) controlPoint2:CGPointMake(self.frame.size.width, 2.5)];
-    [path addLineToPoint:CGPointMake(self.frame.size.width, self.frame.size.height-5)];
-    [path addCurveToPoint:CGPointMake(self.frame.size.width-5, self.frame.size.height) controlPoint1:CGPointMake(self.frame.size.width, self.frame.size.height-2.5) controlPoint2:CGPointMake(self.frame.size.width-2.5, self.frame.size.height)];
-    [path addLineToPoint:CGPointMake(12.5, self.frame.size.height)];
-    [path addCurveToPoint:CGPointMake(7.5, self.frame.size.height-5) controlPoint1:CGPointMake(10, self.frame.size.height) controlPoint2:CGPointMake(7.5, self.frame.size.height-2.5)];
-    [path addLineToPoint:CGPointMake(7.5, self.frame.size.height/2+7.5)];
-    [path addLineToPoint:CGPointMake(0, self.frame.size.height/2)];
+    NSLog(@"%f",pointStart.x);
+    double radius=2.5;
+    if(isUp){
+        [path moveToPoint:CGPointMake(pointStart.x, size.height+8)];
+        [path addLineToPoint:CGPointMake(pointStart.x+8, size.height)];
+        [path addLineToPoint:CGPointMake(size.width-radius, size.height)];
+        [path addArcWithCenter:CGPointMake(size.width-radius, size.height-radius) radius:radius startAngle:M_PI_2 endAngle:0 clockwise:NO];
+        [path addLineToPoint:CGPointMake(size.width, radius)];
+        [path addArcWithCenter:CGPointMake(size.width-radius, radius) radius:radius startAngle:0 endAngle:M_PI+M_PI_2 clockwise:NO];
+        [path addLineToPoint:CGPointMake(radius, 0)];
+        [path addArcWithCenter:CGPointMake(radius, radius) radius:radius startAngle:M_PI+M_PI_2 endAngle:M_PI clockwise:NO];
+        [path addLineToPoint:CGPointMake(0, size.height-radius)];
+        [path addArcWithCenter:CGPointMake(radius, size.height-radius) radius:radius startAngle:M_PI endAngle:M_PI_2 clockwise:NO];
+        [path addLineToPoint:CGPointMake(pointStart.x-8, size.height)];
+        [path closePath];
+    }else{
+        [path moveToPoint:CGPointMake(pointStart.x, -8)];
+        [path addLineToPoint:CGPointMake(pointStart.x+8, 0)];
+        [path addLineToPoint:CGPointMake(size.width-radius, 0)];
+        [path addArcWithCenter:CGPointMake(size.width-radius, radius) radius:radius startAngle:M_PI_2+M_PI endAngle:0 clockwise:YES];
+        [path addLineToPoint:CGPointMake(size.width, size.height-radius)];
+        [path addArcWithCenter:CGPointMake(size.width-radius, size.height-radius) radius:radius startAngle:0 endAngle:M_PI_2 clockwise:YES];
+        [path addLineToPoint:CGPointMake(radius, size.height)];
+        [path addArcWithCenter:CGPointMake(radius, size.height-radius) radius:radius startAngle:M_PI_2 endAngle:M_PI clockwise:YES];
+        [path addLineToPoint:CGPointMake(0, radius)];
+        [path addArcWithCenter:CGPointMake(radius, radius) radius:radius startAngle:M_PI endAngle:M_PI+M_PI_2 clockwise:YES];
+        [path addLineToPoint:CGPointMake(pointStart.x-8, 0)];
+        [path closePath];
+    }
+    
+    
     layer.lineWidth=1.0f;
     layer.strokeColor=[UIColor whiteColor].CGColor;
     layer.fillColor=[Util colorWithHexString:@"#8dc7c6FF"].CGColor;

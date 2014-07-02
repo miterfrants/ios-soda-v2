@@ -57,7 +57,7 @@
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
     if(isDisable && [GV getGlobalStatus]!=TIP && [GV getGlobalStatus]!=TIP_SHOWED){
         ViewTip *tip=(ViewTip *)self.gv.viewTip;
-        [tip statusPreviousStatusToTip:self title:[DB getUI:@"operating_tip"] msg:[DB getUI:@"please_login"]];
+        [tip statusPreviousStatusToTip:self title:[DB getUI:@"operation_hint"] msg:[DB getUI:@"please_login"]];
     }
     [self.highlightTimer invalidate];
     self.highlightTimer=nil;

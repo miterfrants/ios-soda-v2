@@ -11,6 +11,7 @@
 @interface LoadingCircle : UIView
 @property NSTimer *animationTimer;
 @property BOOL isHiding;
+@property double thick;
 -(void)start;
 -(void)stop;
 -(void)hide;

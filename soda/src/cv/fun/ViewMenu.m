@@ -50,9 +50,9 @@
     [viewSecret setBackgroundColor:[Util colorWithHexString:@"#8dc7c640"]];
     [self addSubview:viewSecret];
     
-    viewGoodsBox=[[ViewGoodsBox alloc] initWithFrame:CGRectMake(0, 0, 211, gv.screenH)];
-    [viewGoodsBox setBackgroundColor:[Util colorWithHexString:@"#8dc7c640"]];
-    [self addSubview:viewGoodsBox];
+//    viewGoodsBox=[[ViewGoodsBox alloc] initWithFrame:CGRectMake(0, 0, 211, gv.screenH)];
+//    [viewGoodsBox setBackgroundColor:[Util colorWithHexString:@"#8dc7c640"]];
+//    [self addSubview:viewGoodsBox];
     
     
     [self addSubview:viewEdge];
@@ -71,22 +71,27 @@
     btnFavorite=[[ButtonForPersonal alloc] initWithFrame:CGRectMake(211+7.5, 184.5, 44, 44) name:@"favorite"];
     [self addSubview:btnFavorite];
     
-    btnGoodsBox=[[ButtonForPersonal alloc] initWithFrame:CGRectMake(211+7.5, 231, 44, 44) name:@"goodsbox"];
-    [self addSubview:btnGoodsBox];
+//    btnGoodsBox=[[ButtonForPersonal alloc] initWithFrame:CGRectMake(211+7.5, 231, 44, 44) name:@"goodsbox"];
+//    [self addSubview:btnGoodsBox];
     
-    btnCollection=[[ButtonForPersonal alloc] initWithFrame:CGRectMake(211+7.5, 277.5, 44, 44) name:@"secreticon"];
+//    btnCollection=[[ButtonForPersonal alloc] initWithFrame:CGRectMake(211+7.5, 277.5, 44, 44) name:@"secreticon"];
+    btnCollection=[[ButtonForPersonal alloc] initWithFrame:CGRectMake(211+7.5, 231, 44, 44) name:@"secreticon"];
     [self addSubview:btnCollection];
     
-    [self addEdgeByY:329];
+//    [self addEdgeByY:329];
+    [self addEdgeByY:282.5];
     
-    btnSuggestion=[[ButtonMenu alloc] initWithFrame:CGRectMake(211+7.5, 336.5, 44, 44) name:@"suggestion"];
+//    btnSuggestion=[[ButtonMenu alloc] initWithFrame:CGRectMake(211+7.5, 336.5, 44, 44) name:@"suggestion"];
+    btnSuggestion=[[ButtonMenu alloc] initWithFrame:CGRectMake(211+7.5, 290, 44, 44) name:@"suggestion"];
     [self addSubview:btnSuggestion];
     
-    btnConfig=[[ButtonMenu alloc] initWithFrame:CGRectMake(211+7.5, 383, 44, 44) name:@"config"];
+//    btnConfig=[[ButtonMenu alloc] initWithFrame:CGRectMake(211+7.5, 383, 44, 44) name:@"config"];
+    btnConfig=[[ButtonMenu alloc] initWithFrame:CGRectMake(211+7.5, 336.5, 44, 44) name:@"config"];
     [self addSubview:btnConfig];
     
     
-    [self addEdgeByY:434.5];
+//    [self addEdgeByY:434.5];
+    [self addEdgeByY:388];
     [self addGearBorder];
     [self addSubview:viewBorder];
 }
@@ -146,10 +151,13 @@
     [btnFavorite changeToLogin];
     [btnGoodsBox changeToLogin];
     [self moveUpOffsetByButton:btnFavorite toTop:138];
-    [self moveUpOffsetByButton:btnGoodsBox toTop:184];
-    [self moveUpOffsetByButton:btnCollection toTop:231];
-    [self moveUpOffsetByButton:btnSuggestion toTop:290];
-    [self moveUpOffsetByButton:btnConfig toTop:336.5];
+//    [self moveUpOffsetByButton:btnGoodsBox toTop:184];
+//    [self moveUpOffsetByButton:btnCollection toTop:231];
+//    [self moveUpOffsetByButton:btnSuggestion toTop:290];
+//    [self moveUpOffsetByButton:btnConfig toTop:336.5];
+    [self moveUpOffsetByButton:btnCollection toTop:184];
+    [self moveUpOffsetByButton:btnSuggestion toTop:243];
+    [self moveUpOffsetByButton:btnConfig toTop:290];
     [self moveUpOffsetByButton:viewEdge toTop:-46.5];
     [self clearBorder];
     [self addLineBorder];
@@ -195,10 +203,14 @@
     }
     
     [self moveUpOffsetByButton:btnFavorite toTop:184.5];
-    [self moveUpOffsetByButton:btnGoodsBox toTop:231];
-    [self moveUpOffsetByButton:btnCollection toTop:277.5];
-    [self moveUpOffsetByButton:btnSuggestion toTop:336.5];
-    [self moveUpOffsetByButton:btnConfig toTop:383];
+//    [self moveUpOffsetByButton:btnGoodsBox toTop:231];
+//    [self moveUpOffsetByButton:btnCollection toTop:277.5];
+//    [self moveUpOffsetByButton:btnSuggestion toTop:336.5];
+//    [self moveUpOffsetByButton:btnConfig toTop:383];
+    [self moveUpOffsetByButton:btnCollection toTop:231];
+    [self moveUpOffsetByButton:btnSuggestion toTop:290];
+    [self moveUpOffsetByButton:btnConfig toTop:336.5];
+
     [self moveUpOffsetByButton:viewEdge toTop:0];
     
     viewBorder.layer.sublayers=nil;

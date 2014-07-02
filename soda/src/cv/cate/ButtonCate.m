@@ -10,7 +10,7 @@
 #import "Util.h"
 #import "ScrollViewControllerCate.h"
 #import "ViewControllerRoot.h"
-
+#import "DB.h"
 
 @implementation ButtonCate
 @synthesize imgViewIcon,lblTitle,viewColorOverlay
@@ -125,5 +125,32 @@
     UIImage *imgIcon=[UIImage imageWithContentsOfFile:[self pathOfOverImage]];
     [imgViewIcon setImage:imgIcon];
 }
-
+//only change lange
+-(void)updateCollection{
+    NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(_updateCollection) object:nil];
+    [self.gv.FMDatabaseQueue addOperations:[NSArray arrayWithObjects:operation, nil] waitUntilFinished:YES];
+}
+-(void)_updateCollection{
+    FMDatabase *db=[DB getShareInstance].db;
+    [db open];
+    int intOnlyShowPhone=0;
+    int intOnlyOpening=0;
+    int intOnlyFavorite=0;
+    int intOnlyOfficialSuggest=0;
+    if(self.isOnlyShowPhone){
+        intOnlyShowPhone=1;
+    }
+    if(self.isOnlyShowOpening){
+        intOnlyOpening=1;
+    }
+    if(self.isOnlyShowFavorite){
+        intOnlyFavorite=1;
+    }
+    if(self.isOnlyShowOfficialSuggest){
+        intOnlyOfficialSuggest=1;
+    }
+    
+    [db executeUpdate:[NSString stringWithFormat:@"UPDATE collection SET distance=%f,center_lat=%f,center_lng=%f,is_only_phone=%d,is_only_opening=%d,is_only_favorite=%d,rating=%f,is_only_official_suggest=%d,sorting_key='%@' where id=%d",self.distance,self.centerLocation.latitude,self.centerLocation.longitude,intOnlyShowPhone,intOnlyOpening,intOnlyFavorite,self.rating,intOnlyOfficialSuggest,self.sortingKey,self.iden]];
+    [db close];
+}
 @end

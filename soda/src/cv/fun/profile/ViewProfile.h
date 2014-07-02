@@ -12,14 +12,20 @@
 #import "LoadingCircle.h"
 @interface ViewProfile : ViewExpandedPanel
 @property UILabel *lblName;
-@property UILabel *lblBuildedPlaceCount;
+
 @property UILabel *lblUsageTitle;
 @property LoadingCircle *loadingForUsage;
+
+@property UILabel *lblBuildedPlaceCount;
+@property LoadingCircle *loadingForBuildedPlace;
+
+@property UILabel *lblReviewCount;
+@property LoadingCircle *loadingForReviewCount;
+
 @property NSTimer *timer;
-@property LoadingCircle *loadingForCoin;
+
 @property int totalSecondsFromRemote;
-@property int totalSecondsFromLocal;
--(void) loadUsageTime;
+-(void) loadProfile;
 -(void)timerStop;
 -(void) initProfile;
 @end

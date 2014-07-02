@@ -9,11 +9,15 @@
 #import "ViewExpandedPanel.h"
 #import "ButtonSendSuggestion.h"
 #import "TextComment.h"
+#import "LoadingCircle.h"
+#import "ScrollViewProtoType.h"
+#import "ButtonMail.h"
 
 @interface ViewSuggestion :ViewExpandedPanel
-@property TextComment *txtComment;
-@property ButtonSendSuggestion *btnSend;
--(void) changeToSendingStatus;
--(void) changeToCommonStatus;
--(void) changeToFinish;
+
+@property UILabel *lblAboutUs;
+@property LoadingCircle *loading;
+@property ScrollViewProtoType *scrollView;
+@property ButtonMail *btnMail;
+-(void)getAboutUs;
 @end

@@ -42,15 +42,6 @@
         [self resetViewFunSize];
         //[self.view setBackgroundColor:[UIColor redColor]];
         
-        //keyboard observer
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(keyboardWillShow:)
-                                                     name:UIKeyboardWillShowNotification
-                                                   object:nil];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(keyboardWillHide:)
-                                                     name:UIKeyboardWillHideNotification
-                                                   object:nil];
         
         //profile switch change
         [viewMenu.viewConfig.switchNotificationForDiscover addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
@@ -58,7 +49,6 @@
         [viewMenu.viewConfig.switchShareFavoriteToSocial addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
         [viewMenu.viewConfig.switchShareGoodToSocial addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
         [viewMenu.viewConfig.switchShareIconToSocial addTarget:self action:@selector(profileSwitch:) forControlEvents:UIControlEventValueChanged];
-        
     }
     return self;
 }
@@ -107,37 +97,41 @@
     }else if([GV getGlobalStatus]==COMMON){
         [self.view.superview bringSubviewToFront:self.view];
         [self statusCurrentToMenu];
-    }else if([GV getGlobalStatus]==LIST){
+    }else if([GV getGlobalStatus]==LIST || [GV getGlobalStatus]==LIST_EXPAND ){
         [self.view.superview bringSubviewToFront:self.view];
         [self statusCurrentToMenu];
     }else if([touch.view isKindOfClass:[ButtonLogout class]]){
         [self logout];
-    }else if([touch.view isKindOfClass:[ButtonSendSuggestion class]]){
-        [self sendSuggestion:viewMenu.viewSuggestion.txtComment.text];
-    }else{
-        [self.viewMenu.viewSuggestion.txtComment resignFirstResponder];
+    }else if([touch.view isKindOfClass:[ButtonMail class]]){
+        [self sendMail];
     }
     [super touchesEnded:touches withEvent:event];
 }
 
--(void)keyboardWillShow:(NSNotification *)note{
-    if([GV getGlobalStatus]==MENU){
-        CGSize keyboardSize = [[[note userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
-        double duration=[note.userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-        int curve=[note.userInfo[UIKeyboardAnimationCurveUserInfoKey] intValue] << 16;
-        [self animationShrinkSuggestionWithKeyboardSize:keyboardSize duraction:duration curve:curve];
-    }
+-(void)sendMail{
+    self.mail = [[MFMailComposeViewController alloc]init];
+    self.mail.mailComposeDelegate = self;
+    [self.mail setToRecipients:[NSArray arrayWithObjects:@"miterfrants@gmail.com",nil]];
+    [self.mail setCcRecipients:[NSArray arrayWithObjects:@"miterfrants@hotmail.com",@"dream.devil@msa.hinet.net",nil]];
+    [self.mail setSubject:[DB getUI:@"offer_soda_some_suggestion"]];
+    [self.mail setMessageBody:[DB getUI:@""] isHTML:NO];
+    [self presentViewController:self.mail animated:YES completion:^{
+    }];
 }
 
-- (void)keyboardWillHide:(NSNotification*)note
-{
-    if([GV getGlobalStatus]==MENU){
-        CGSize keyboardSize = [[[note userInfo] objectForKey:UIKeyboardFrameBeginUserInfoKey] CGRectValue].size;
-        double duration=[note.userInfo[UIKeyboardAnimationDurationUserInfoKey] doubleValue];
-        int curve=[note.userInfo[UIKeyboardAnimationCurveUserInfoKey] intValue] << 16;
-        [self animationExpandSuggestionWithKeyboardSize:keyboardSize duraction:duration curve:curve];
+-(void)mailComposeController:(MFMailComposeViewController *)controller
+         didFinishWithResult:(MFMailComposeResult)result error:(NSError *)error{
+    if (result) {
+        [viewMenu.viewSecret checkSecretByCondition:@"suggestion"];
     }
+    if (error) {
+        NSLog(@"Error : %@",error);
+    }
+    [self dismissViewControllerAnimated:YES completion:^{
+        [self.view setFrame:CGRectMake(0, 0, 211+51.5, self.gv.screenH)];
+    }];
 }
+
 -(void) statusCurrentToMenu{
     if([GV getGlobalStatus]==EDIT_WITH_KEYBOARD || [GV getGlobalStatus]==EDIT_WITHOUT_KEYBOARD){
         return;
@@ -160,7 +154,6 @@
 
 - (void)alertView:(UIAlertView *)alertView
 clickedButtonAtIndex:(NSInteger)buttonIndex{
-    NSLog(@"%@",alertView);
     if (buttonIndex == 1) {
         NSLog(@"YES, reset");
         AppDelegate *app=(AppDelegate *)[[UIApplication sharedApplication] delegate];
@@ -212,7 +205,6 @@ clickedButtonAtIndex:(NSInteger)buttonIndex{
      }];
     [UIView animateWithDuration:0.17 delay:0.17 options:UIViewAnimationOptionAllowUserInteraction animations:^
      {
-
          [btnGear setFrame:CGRectMake(29.5, 27, btnGear.frame.size.width, btnGear.frame.size.height)];
      } completion:^(BOOL finished) {
          if (finished)
@@ -260,6 +252,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex{
     [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
      {
          [viewMenu setFrame:CGRectMake(-262.5+51.5, 0, 262.5, viewMenu.frame.size.height)];
+         [btnGear setFrame:CGRectMake(29.5, btnGear.frame.origin.y, btnGear.frame.size.width, btnGear.frame.size.height)];
      } completion:^(BOOL finished) {
          if (finished)
          {
@@ -291,6 +284,9 @@ clickedButtonAtIndex:(NSInteger)buttonIndex{
                 }else if([name isEqual:@"profile"]){
                     ViewProfile *viewProfile= (ViewProfile *) scrollViewExpandPanel;
                     [viewProfile initProfile];
+                }else if([name isEqual:@"suggestion"]){
+                    ViewSuggestion *viewSuggestion= (ViewSuggestion *) scrollViewExpandPanel;
+                    [viewSuggestion getAboutUs];
                 }
                 [scrollViewExpandPanel setHidden:NO];
             }else{
@@ -302,6 +298,7 @@ clickedButtonAtIndex:(NSInteger)buttonIndex{
 
     [UIView animateWithDuration:0.34 delay:0.0 options:(UIViewAnimationOptionCurveEaseInOut) animations:^{
         [viewMenu setFrame:CGRectMake(gv.screenW-viewMenu.frame.size.width-58, 0, viewMenu.frame.size.width, viewMenu.frame.size.height)];
+        [btnGear setFrame:CGRectMake(12, self.btnGear.frame.origin.y, self.btnGear.frame.size.width, self.btnGear.frame.size.height)];
         [self.view setFrame:CGRectMake(0, 0, 211+51.5, gv.screenH)];
     } completion:^(BOOL finished) {
         if(finished){
@@ -309,34 +306,6 @@ clickedButtonAtIndex:(NSInteger)buttonIndex{
     }];
 }
 
--(void)animationShrinkSuggestionWithKeyboardSize:(CGSize) keyboardSize duraction:(double) duraction curve:(int) curve{
-    [UIView animateWithDuration:duraction delay:0.0 options:(curve<<16) animations:^{
-        TextComment *txtComment=(TextComment *) viewMenu.viewSuggestion.txtComment;
-        ButtonSendSuggestion *btnSend=(ButtonSendSuggestion *) viewMenu.viewSuggestion.btnSend;
-        double padding=20;
-        if(gv.screenH-keyboardSize.height<btnSend.frame.origin.y+btnSend.frame.size.height){
-            [btnSend setFrame:CGRectMake(btnSend.frame.origin.x, gv.screenH- keyboardSize.height-padding-btnSend.frame.size.height, btnSend.frame.size.width, btnSend.frame.size.height)];
-            
-            [txtComment setFrame:CGRectMake(txtComment.frame.origin.x,txtComment.frame.origin.y,txtComment.frame.size.width,gv.screenH- keyboardSize.height-padding*2-btnSend.frame.size.height-txtComment.frame.origin.y)];
-
-        }
-    } completion:^(BOOL finished) {
-        if(finished){
-        }
-    }];
-}
-
--(void)animationExpandSuggestionWithKeyboardSize:(CGSize) keyboardSize duraction:(double) duraction curve:(int) curve{
-    [UIView animateWithDuration:duraction delay:0.0 options:(curve<<16) animations:^{
-        TextComment *txtComment=(TextComment *) viewMenu.viewSuggestion.txtComment;
-        ButtonSendSuggestion *btnSend=(ButtonSendSuggestion *) viewMenu.viewSuggestion.btnSend;
-        [txtComment setFrame:txtComment.originFrame];
-        [btnSend setFrame:btnSend.originFrame];
-    } completion:^(BOOL finished) {
-        if(finished){
-        }
-    }];
-}
 
 //handle button click
 
@@ -390,17 +359,6 @@ clickedButtonAtIndex:(NSInteger)buttonIndex{
     [GV setLoginStatus:LOGOUTED];
 }
 
--(void) sendSuggestion:(NSString *) comment{
-    [viewMenu.viewSuggestion changeToSendingStatus];
-    NSString *url=[NSString stringWithFormat:@"%@://%@/%@?action=%@&comment=%@&machine_id=%@",gv.urlProtocol,gv.domain,gv.controllerSuggestion,gv.actionAddSuggestion,comment,[Util getUDID]];
-    [Util stringAsyncWithUrl:url cachePolicy:NSURLRequestReloadIgnoringCacheData timeout:3 completion:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [viewMenu.viewSuggestion changeToFinish];
-            [viewMenu.viewSecret checkSecretByCondition:@"suggestion"];
-        });
-    } queue:gv.backgroundThreadManagement];
-}
-
 -(void)profileSwitch:(id) sender{
     SwitchProfile *target=(SwitchProfile*) sender;
     if(target.on){
@@ -414,125 +372,110 @@ clickedButtonAtIndex:(NSInteger)buttonIndex{
     [viewMenu.viewSecret.gifLoading setHidden:YES];
     //clear scrollViewCollection
     [DB getSecretIconFromRemote:^(NSMutableDictionary *data, NSError *connectionError) {
-        [self generateSecretIconByDic:data];
+        //check local secret icon is expired;
+        //and build self.arrSecretIcon;
+        [self renewExpiredSecretIconOnLocalDB:data];
+        //use self.arrSecretIcon to generate secret icon view;
+        [self generateSecretIconByDic];
     }];
 
     [viewMenu changeToLoginView];
     [btnGear changeToLoginView];
 }
+
+
+
 -(void) changeToUnloginStatus{
     [viewMenu changeToUnloginView:NO];
     [btnGear changeToUnloginView];
 }
 
--(void) generateSecretIconByDic:(NSMutableDictionary *) dic{
-    //check local secret icon
-    arrSecretIcon= [[NSMutableArray alloc]init];
-    NSMutableArray *arrLocalSecretIcon= [[NSMutableArray alloc]init];
+-(void)renewExpiredSecretIconOnLocalDB:(NSMutableDictionary *)dicSecretItemFromRemote{
+    NSLog(@"%@",@"renewExpiredSecretIconOnLocalDB");
+    NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(_renewExpiredSecretIconOnLocalDB:) object:dicSecretItemFromRemote];
+    [self.gv.FMDatabaseQueue addOperations:[NSArray arrayWithObjects:operation, nil] waitUntilFinished:YES];
+}
+
+-(void)_renewExpiredSecretIconOnLocalDB:(NSMutableDictionary *)dicSecretItemFromRemote{
+    NSLog(@"_renewExpiredSecretIconOnLocalDB");
     FMDatabase *db=[DB getShareInstance].db;
     [db open];
-    FMResultSet * result=[db executeQuery:@"SELECT * FROM secret_icon"];
-    NSLog(@"generateSecretIconByDic start:len is %d",(int) [[dic objectForKey:@"results"] count]);
-    
-    while ([result next]) {
-        SecretIcon *icon=[[SecretIcon alloc]init];
-        icon.name=[result stringForColumn:@"name"];
-        icon.icon_id=[result intForColumn:@"icon_id"];
-        icon.isGet=[result boolForColumn:@"is_get"];
-        icon.isSync=[result boolForColumn:@"is_sync"];
-        icon.tip=[result stringForColumn:@"tip"];
-        icon.secretId=[result stringForColumn:@"secret_id"];
-        [arrLocalSecretIcon addObject:icon];
+    FMResultSet *result=[db executeQuery:@"SELECT * FROM secret_icon"];
+    NSMutableArray *arrSecretFromLocal=[[NSMutableArray alloc]init];
+    //檢查本機端資料是否過期 過期把舊資料更新 檔案刪除
+    while([result next]){
+        SecretIcon *secretIcon=[[SecretIcon alloc] init];
+        secretIcon.name=[result stringForColumn:@"name"];
+        secretIcon.icon_id=[[result stringForColumn:@"icon_id"] intValue];
+        secretIcon.tip=[result stringForColumn:@"tip"];
+        secretIcon.updatedTime=[result stringForColumn:@"created_time"];
+        secretIcon.sort=[[result stringForColumn:@"sort"] intValue];
+        secretIcon.isGet=[result boolForColumn:@"is_get"];
+        [arrSecretFromLocal addObject:secretIcon];
     }
-
-    //no data from dic in principle
-    for(int i=0;i<[[dic objectForKey:@"results"] count];i++){
-        BOOL checkLocalExists=NO;
-        NSString *secretId=[Util getUDID];
-        for(int j=0;j<arrLocalSecretIcon.count;j++){
-            if(((SecretIcon *)[arrLocalSecretIcon objectAtIndex:j]).icon_id==[[[[dic objectForKey:@"results"] objectAtIndex:i] valueForKey:@"id"] intValue]){
-                secretId=[result stringForColumn:@"secret_id"];
-                checkLocalExists=YES;
-                break;
-            }
-        }
-        //local data exist
-        //lock a transaction
-        @try {
-            [db beginTransaction];
-            //md5 UDID+created_date
-
-            if(checkLocalExists){
-                NSLog(@"%@ already exist",[[[dic objectForKey:@"results"] objectAtIndex:i] valueForKey:@"name"]);
-
-            }else{
-                [db executeUpdate:[NSString stringWithFormat:@"INSERT INTO secret_icon (name,tip,is_get,is_sync,icon_id,secret_id,sort) VALUES ('%@','%@',0,0,'%@','%@',%d)",
-                                   [[[dic objectForKey:@"results"] objectAtIndex:i] valueForKey:@"name"],
-                                   [[[dic objectForKey:@"results"] objectAtIndex:i] valueForKey:@"tip"],
-                                   [[[dic objectForKey:@"results"] objectAtIndex:i] valueForKey:@"id"],
-                                   secretId,
-                                   [[[[dic objectForKey:@"results"] objectAtIndex:i] valueForKey:@"sort"] intValue]
+    NSMutableArray *arrSecretFromRemote=[[dicSecretItemFromRemote objectForKey:@"results"] mutableCopy];
+    for(int i=0;i<arrSecretFromRemote.count;i++){
+        BOOL isOnlyExistsOnRemote=YES;
+        for(int j=0;j<arrSecretFromLocal.count;j++){
+            SecretIcon *secretIcon=(SecretIcon *)[arrSecretFromLocal objectAtIndex:j];
+            if([[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"id"] intValue] ==secretIcon.icon_id){
+                [db executeUpdate:[NSString stringWithFormat:@"UPDATE secret_icon SET is_get=%d,tip='%@',sort=%d,name='%@',created_time='%@' WHERE icon_id=%d",
+                                   [[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"is_get"] intValue],
+                                    [[arrSecretFromRemote objectAtIndex:i] valueForKey:@"tip"],
+                                   [[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"sort"] intValue],
+                                   [[arrSecretFromRemote objectAtIndex:i] valueForKey:@"name"],
+                                   [[arrSecretFromRemote objectAtIndex:i] valueForKey:@"updated_time"],
+                                   [[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"id"] intValue]
                                    ]];
+                secretIcon.tip=[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"tip"];
+                secretIcon.sort=[[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"sort"] intValue];
+                secretIcon.name=[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"name"];
+                secretIcon.updatedTime=[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"updated_time"];
+                secretIcon.icon_id=[[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"id"] intValue];
+                secretIcon.isGet=[[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"is_get"] boolValue];
+                isOnlyExistsOnRemote=NO;
+                continue;
             }
-
-            NSMutableDictionary *jsonInsertSecretIconForMemberResult=[Util jsonWithUrl:[NSString stringWithFormat:@"%@://%@/%@?action=%@&member_id=%@&secret_id=%@&icon_id=%@&creator_ip=%@",
-                gv.urlProtocol ,
-                gv.domain,
-                gv.controllerIcon,
-                @"create_secret_icon_for_member",
-                gv.localUserId,
-                secretId,
-                [[[dic objectForKey:@"results"] objectAtIndex:i] valueForKey:@"id"],
-                [Util getIPAddress]
-            ]];
-
-            if(![[[jsonInsertSecretIconForMemberResult objectForKey:@"results"] valueForKey:@"status"] isEqualToString:@"OK"]){
-                NSException *e = [NSException
-                                  exceptionWithName:@"Remote Error"
-                                  reason:[[jsonInsertSecretIconForMemberResult objectForKey:@"results"] valueForKey:@"msg"]
-                                  userInfo:nil];
-                @throw e;
-            }
-            [db commit];
         }
-        @catch (NSException *exception) {
-            NSLog(@"generateSecretIconByDic error:%@",exception.reason);
-            [db rollback];
-        }
-        @finally {
-            
+        //沒有local 端的資料 但remote 有資料
+        if(isOnlyExistsOnRemote){
+            [db executeUpdate:[NSString stringWithFormat:@"INSERT INTO secret_icon (name,tip,is_get,icon_id,sort,created_time) VALUES ('%@','%@',%d,'%@',%d,'%@')",
+                               [[arrSecretFromRemote objectAtIndex:i] valueForKey:@"name"],
+                               [[arrSecretFromRemote objectAtIndex:i] valueForKey:@"tip"],
+                               [[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"is_get"] intValue],
+                               [[arrSecretFromRemote objectAtIndex:i] valueForKey:@"id"],
+                               [[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"sort"] intValue],
+                               [[arrSecretFromRemote objectAtIndex:i] valueForKey:@"updated_time"]
+                               ]];
+            SecretIcon *secretIcon=[[SecretIcon alloc]init];
+            secretIcon.name=[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"name"];
+            secretIcon.icon_id=[[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"id"] intValue];
+            secretIcon.tip=[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"tip"];
+            secretIcon.updatedTime=[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"updated_time"];
+            secretIcon.sort=[[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"sort"] intValue];
+            secretIcon.isGet=[[[arrSecretFromRemote objectAtIndex:i] valueForKey:@"is_get"] boolValue];
+            [arrSecretFromLocal addObject:secretIcon];
         }
     }
+    self.arrSecretIcon =[arrSecretFromLocal mutableCopy];
     [result close];
     [db close];
-    NSLog(@"gererateSecretIconByDic end");
-    //generate view
-    [db open];
-    result=[db executeQuery:@"SELECT * FROM secret_icon ORDER BY sort"];
-    while ([result next]) {
-        SecretIcon *icon=[[SecretIcon alloc]init];
-        icon.name=[result stringForColumn:@"name"];
-        icon.icon_id=[result intForColumn:@"icon_id"];
-        icon.isGet=[result boolForColumn:@"is_get"];
-        icon.isSync=[result boolForColumn:@"is_sync"];
-        icon.tip=[result stringForColumn:@"tip"];
-        icon.secretId=[result stringForColumn:@"secret_id"];
-        [arrSecretIcon addObject:icon];
-    }
-    [result close];
-    [db close];
-    //invoke main thread
+}
+
+-(void) generateSecretIconByDic{
+    NSSortDescriptor *sort=nil;
+    sort=[NSSortDescriptor sortDescriptorWithKey:@"sort" ascending:YES];
+    [self.arrSecretIcon sortUsingDescriptors:[NSArray arrayWithObject:sort]];
     dispatch_async(dispatch_get_main_queue(), ^{
         NSLog(@"ViewControllerFun.generateSecretIconByDic add subview");
-        for(int i=0;i<arrSecretIcon.count;i++){
-            ButtonSecretIcon *icon=[[ButtonSecretIcon alloc] initWithSecretIcon:[arrSecretIcon objectAtIndex:i] frame:CGRectMake(i%2*100, floor(i/2)*110+5, 100, 94)];
+        for(int i=0;i<self.arrSecretIcon.count;i++){
+            ButtonSecretIcon *icon=[[ButtonSecretIcon alloc] initWithSecretIcon:[self.arrSecretIcon objectAtIndex:i] frame:CGRectMake(i%2*100, floor(i/2)*110+5, 100, 94)];
             [viewMenu.viewSecret.scrollViewSecret addSubview:icon];
         }
         [viewMenu.viewSecret.scrollViewSecret setContentSize:CGSizeMake(viewMenu.viewSecret.scrollViewSecret.frame.size.width, arrSecretIcon.count/2*110+5+94+30)];
         [viewMenu.viewSecret.gifLoading setHidden:YES];
         //change secret icon status by login
         [viewMenu.viewSecret checkSecretByCondition:@"user_login"];
-
     });
 }
 @end

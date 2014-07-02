@@ -11,6 +11,8 @@
 #import "ButtonProtoType.h"
 #import "AsyncImgView.h"
 #import "ViewProtoType.h"
+#import "LoadingCircle.h"
+
 @interface ButtonSecretIcon : ButtonProtoType
 @property AsyncImgView *imgViewIcon;
 @property UILabel *lblName;
@@ -21,7 +23,9 @@
 @property NSString *tip;
 @property NSString *name;
 @property NSString *iconName;
+@property LoadingCircle *loading;
 
 -(id)initWithSecretIcon:(SecretIcon *) secretIcon frame:(CGRect) frame;
 -(void)downloadSecretIcon;
+- (void)playAudio;
 @end

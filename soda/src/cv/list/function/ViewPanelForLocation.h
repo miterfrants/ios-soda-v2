@@ -25,7 +25,7 @@
 @property UIView *viewBGForTxtCenterAddress;
 @property UILabel *lblCenter;
 @property ButtonPin *btnPin;
--(void) updateCameraCenterAndDB;
+-(void) updateCameraCenterAndDB:(BOOL) isUpdateDB;
 -(void) updateCamera:(CLLocationCoordinate2D)cameraCenter;
 -(void)initialDistanceAndCenter:(ButtonCate *)selected;
 -(void)animationShowOtherCenter;

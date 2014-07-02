@@ -23,19 +23,36 @@
         lblTitle.text=[DB getUI:@"favorite"];
         [lblTitle setFont:[GV sharedInstance].fontMenuTitle];
         [lblTitle setTextColor:[UIColor whiteColor]];
-        [lblTitle setFrame:CGRectMake(85, 30, 200, 40)];
+        [lblTitle setFrame:CGRectMake(68, 30, 200, 40)];
         [self addSubview:lblTitle];
         self.scrollViewFavorite=[[ScrollViewProtoType alloc] initWithFrame:CGRectMake(0,80,frame.size.width,self.gv.screenH)];
         [self addSubview:self.scrollViewFavorite];
         
+        self.lblEmptyInfo=[[UILabel alloc] init];
+        [self.lblEmptyInfo setFont:self.gv.fontNormalForHebrew];
+        [self.lblEmptyInfo setTextColor:[UIColor whiteColor]];
+        [self.lblEmptyInfo setFrame:CGRectMake((frame.size.width-200)/2, 120, 200, 40)];
+        [self.lblEmptyInfo setText:[DB getUI:@"no_data"]];
+        [self.lblEmptyInfo setTextAlignment:NSTextAlignmentCenter];
+        [self.lblEmptyInfo setHidden:YES];
+        [self addSubview:self.lblEmptyInfo];
         self.arrFavoriteItem=[[NSMutableArray alloc] init];
     }
     return self;
 }
 
+-(void)showEmptyInformation{
+    
+}
+
 -(void)generateFavoriteItem{
     NSMutableArray *arrResult=[self getFavoriteDataFromDB];
     double currPos=10;
+    if(arrResult.count==0){
+        [self.lblEmptyInfo setHidden:NO];
+    }else{
+        [self.lblEmptyInfo setHidden:YES];
+    }
     for(int i=0;i<arrResult.count;i++){
         DataFavoriteItem *dataItem=(DataFavoriteItem *)[arrResult objectAtIndex:i];
         FavoriteItem *favoriteItem=[[FavoriteItem alloc]initWithFrame:CGRectMake(0, currPos, self.frame.size.width, 25)];

@@ -11,6 +11,7 @@
 #import "FMDatabaseAdditions.h"
 #import "Util.h"
 #import "GV.h"
+#import <FacebookSDK/FacebookSDK.h>
 
 @implementation DB
 @synthesize db;
@@ -51,7 +52,7 @@
     //從server 的secret_collection 要到資料
     //然後從client 端對server 建立 secret_icon 的資料
     //建完 is_get 設定為 YES
-    [db executeUpdate:@"CREATE TABLE IF NOT EXISTS secret_icon(name TEXT, tip TEXT, is_get BOOLEAN, is_sync BOOLEAN, icon_id INTEGER, secret_id TEXT, sort INTEGER)"];
+    [db executeUpdate:@"CREATE TABLE IF NOT EXISTS secret_icon(name TEXT, tip TEXT, is_get BOOLEAN, is_sync BOOLEAN, icon_id INTEGER, secret_id TEXT, sort INTEGER, created_time TEXT)"];
     
 
     //sys config
@@ -61,6 +62,10 @@
     
     [db executeUpdate:@"CREATE TABLE IF NOT EXISTS ui(name text, title text, icon text, lang text)"];
     [db executeUpdate:@"CREATE INDEX IF NOT EXISTS index_ui_name_lang ON ui(name, lang);"];
+    
+    //usage_log
+    [db executeUpdate:@"CREATE TABLE IF NOT EXISTS usage_log(id INTEGER PRIMARY KEY AUTOINCREMENT,s_date text, e_date text)"];
+    
     
     //check collection data if exist then user click sync server or reset check again;
     int checkExistData=[db intForQuery:[NSString stringWithFormat:@"SELECT COUNT(*) FROM collection WHERE lang='%@'",[Util getLang]]];
@@ -132,12 +137,30 @@
 }
 
 +(void)getSecretIconFromRemote:(void(^)(NSMutableDictionary *data, NSError *connectionError)) completion{
+    //clear local secret data in condition that is expired;
     GV *gv=[GV sharedInstance];
-    NSString *urlGetSecretIcon=[NSString stringWithFormat:@"http://%@/%@?action=%@&member_id=%@", gv.domain, gv.controllerIcon, @"get_secret",gv.localUserId];
+//    NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(_removeAllSecretIcon) object:nil];
+//    [gv.FMDatabaseQueue addOperations:[NSArray arrayWithObjects:operation, nil] waitUntilFinished:YES];
+    
+    NSString *accessToken=@"";
+    if(gv.loginType==Facebook){
+        accessToken=[FBSession activeSession].accessTokenData.accessToken;
+    }else{
+        accessToken=gv.googleAccessToken;
+    }
+    NSString *urlGetSecretIcon=[NSString stringWithFormat:@"http://%@/%@?action=%@&member_id=%@&access_token=%@", gv.domain, gv.controllerIcon, @"get_secret",gv.localUserId,accessToken];
     NSLog(@"%@",urlGetSecretIcon);
     [Util jsonAsyncWithUrl:urlGetSecretIcon target:self cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:3 completion:completion queue:gv.backgroundThreadManagement];
     
 }
+
++(void)_removeAllSecretIcon{
+    FMDatabase *db=[DB getShareInstance].db;
+    [db open];
+    [db executeUpdate:@"DELETE from secret_icon"];
+    [db close];
+}
+
 +(void)getIconFromRemote{
     
 }
@@ -180,7 +203,7 @@ NSString *sysConfigResult=@"";
         [[GV sharedInstance].FMDatabaseQueue addOperations:[NSArray arrayWithObjects:operation,nil] waitUntilFinished:YES];
     }
     @catch (NSException *exception) {
-        NSLog(@"%@",exception.description);
+        NSLog(@"error:%@",exception.description);
         result=NO;
     }
     @finally {
@@ -188,7 +211,7 @@ NSString *sysConfigResult=@"";
     }
     return result;
 }
--(void)_setSysconfig:(NSDictionary *) dicParameters{
++(void)_setSysconfig:(NSDictionary *) dicParameters{
     FMDatabase *dba=[DB getShareInstance].db;
     [dba open];
     [dba executeUpdate:[NSString stringWithFormat:@"UPDATE sys_config set content='%@' WHERE name='%@'",[dicParameters valueForKey:@"value"],[dicParameters valueForKey:@"key"]]];
@@ -264,6 +287,7 @@ NSString *sysConfigResult=@"";
         [db close];
     }
     @catch (NSException *exception) {
+        NSLog(@"error:%@",exception.description);
         return false;
     }
     @finally {

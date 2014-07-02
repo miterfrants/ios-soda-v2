@@ -8,6 +8,8 @@
 #import "Util.h"
 #import <FacebookSDK/FacebookSDK.h>
 #import "SocialUtil.h"
+#import "ViewControllerRoot.h"
+
 @implementation ListItem
 @synthesize imgViewBg,blurBg,updateBlurTimer,maskBg,viewTopBorder,viewBottomBorder,lblName,btnFavorite,btnFlag,btnPhone,btnReview,btnShowMap,strPhone,rate,googleId,btnLigth,dicDetailPanel,scrollViewCurrentExpanded,scrollViewDetailBase,scrollViewDetailMap,scrollViewDetailOpening,scrollViewDetailReview,isExpanded,viewGradientBgForName;
 
@@ -148,8 +150,16 @@ double posLeft;
         [self.btnComment addTarget:self.btnComment action:@selector(switchCommentArea) forControlEvents:UIControlEventTouchUpInside];
         
         //circle
-        self.loadingCircle =[[LoadingCircle alloc]initWithFrame:CGRectMake((320-30)/2, (150-30)/2, 30, 30)];
+        //self.loadingCircle =[[LoadingCircle alloc]initWithFrame:CGRectMake((320-30)/2, (150-30)/2, 30, 30)];
+        self.loadingCircle =[[LoadingCircle alloc]initWithFrameAndThick:CGRectMake((320-40)/2, (150-40)/2, 40, 40) thick:2];
         [self addSubview:self.loadingCircle];
+        
+        
+        //arrow
+        self.viewArrow=[[ViewArrow alloc] initWithFrame:CGRectMake(btnReview.frame.origin.x+(44-20)/2,144, 20, 5)];
+        [self addSubview:self.viewArrow];
+        [self.viewArrow setAlpha:0.0f];
+        self.viewArrow.userInteractionEnabled=NO;
     }
     return self;
 }
@@ -364,8 +374,13 @@ double posLeft;
         self.isOfficialSuggest=[[[data objectForKey:@"results"] valueForKey:@"official_suggest"] boolValue];
     }
     //phone;
-    strPhone=[data valueForKey:@"formatted_phone_number"];
+    if([data objectForKey:@"international_phone_number"] !=nil && [data objectForKey:@"international_phone_number"] !=[NSNull null]){
+        strPhone=[data objectForKey:@"international_phone_number"];
+    }else if([data objectForKey:@"formatted_phone_number"] !=nil && [data objectForKey:@"formatted_phone_number"] !=[NSNull null]){
+        strPhone=[data objectForKey:@"formatted_phone_number"];
+    }
     strPhone=[strPhone stringByReplacingOccurrencesOfString:@" " withString:@""];
+    
     
     //address;
     self.address=[data valueForKey:@"formatted_address"];
@@ -627,6 +642,9 @@ double posLeft;
         [self.btnComment setFrame:CGRectMake(28, self.btnComment.frame.origin.y, self.btnComment.frame.size.width, self.btnComment.frame.size.height)];
         [self.lblIForComment setFrame:CGRectMake(20, self.lblIForComment.frame.origin.y, self.lblIForComment.frame.size.width, self.lblIForComment.frame.size.height)];
     }
+    
+    
+    
     for(NSString *key in self.dicDetailPanel){
         if(key != detailName){
             [[self.dicDetailPanel objectForKey:key] setFrame:CGRectMake(-self.gv.screenW, 150, self.gv.screenW, self.gv.screenH-40-150)];
@@ -650,6 +668,7 @@ double posLeft;
 
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionCurveEaseInOut animations:^
         {
+
             //這邊要修改成 再scrollViewList裡頭做掉 要不然scroll 再轉的時候會變更viewFunBar的高度
             if(self.imgViewBg.image==nil && self.seq>0){
                 scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, self.seq*150-1+40) ;
@@ -660,8 +679,12 @@ double posLeft;
             [[dicDetailPanel objectForKey:detailName] setFrame:CGRectMake(0, 150, self.gv.screenW, self.gv.screenH-80-150)];
             [self.viewMiddleLigthBorder setAlpha:1.0f];
             [self.viewMiddleDarkBorder setAlpha:1.0f];
+            [self.viewArrow setAlpha:1.0f];
             if([detailName isEqual:@"review"]){
               [self.btnComment setAlpha:1.0f];
+              [self.viewArrow setFrame:CGRectMake(self.btnReview.frame.origin.x+(self.btnReview.frame.size.width-self.viewArrow.frame.size.width)/2, self.viewArrow.frame.origin.y, self.viewArrow.frame.size.width, self.viewArrow.frame.size.height)];
+            }else{
+              [self.viewArrow setFrame:CGRectMake(self.btnShowMap.frame.origin.x+(self.btnShowMap.frame.size.width-self.viewArrow.frame.size.width)/2, self.viewArrow.frame.origin.y, self.viewArrow.frame.size.width, self.viewArrow.frame.size.height)];
             }
             [self setFrame:CGRectMake(0, self.frame.origin.y, self.gv.screenW, self.gv.screenH-80)];
             [viewBottomBorder setFrame:CGRectMake(0, self.gv.screenH-80-150, self.gv.screenW, 1)];
@@ -743,6 +766,20 @@ double posLeft;
 }
 
 -(void)saveReview{
+    //加一個loading;
+    self.loadingForSendReview=nil;
+    CGPoint point = [self.btnComment.btnSave convertPoint:self.btnComment.btnSave.bounds.origin toView:self.window];
+    self.loadingForSendReview=[[LoadingCircle alloc] initWithFrameAndThick:CGRectMake(point.x+(self.btnComment.btnSave.frame.size.width-20)/2, point.y-80+(self.btnComment.btnSave.frame.size.height-20)/2-8, 20, 20) thick:1.5];
+    [self addSubview:self.loadingForSendReview];
+    [self.loadingForSendReview start];
+    [UIView animateWithDuration:0.28 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+        [self.btnComment.btnSave setAlpha:0.0f];
+    } completion:^(BOOL finished) {
+        if(finished) {
+        }
+    }];
+    
+    
     NSString *comment=@"";
     if(self.btnComment.btnInput.lblShow.text!=nil){
         comment=self.btnComment.btnInput.lblShow.text;
@@ -758,13 +795,26 @@ double posLeft;
                     [self updateReviewPanelWithComment:comment rating:rating];
                     [self.btnComment contractCommentArea];
                     [SocialUtil shareReviewWithPlaceName:self.name comment:comment rating:rating googleId:self.googleId googleRef:self.googleRef];
+                    [self.loadingForSendReview stop];
                 });
+                ViewControllerRoot* root= (ViewControllerRoot *)self.gv.viewControllerRoot;
+                [root.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"vote_place"];
+
             }else{
                 NSLog(@"server site error:%@",[data objectForKey:@"results"]);
             }
         }else{
             NSLog(@"%@",url);
             NSLog(@"connection error:%@",connectionError.description);
+            [self.loadingForSendReview stop];
+            [UIView animateWithDuration:0.28 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
+                [self.btnComment.btnSave setAlpha:1.0f];
+            } completion:^(BOOL finished) {
+                if(finished) {
+                    UIAlertView *calert = [[UIAlertView alloc]initWithTitle:@"Alert" message:@"Connection error, please, send again." delegate:nil cancelButtonTitle:@"ok" otherButtonTitles:nil, nil];
+                    [calert show];
+                }
+            }];
         }
         
     } queue:self.gv.backgroundThreadManagement];
@@ -910,6 +960,7 @@ double posLeft;
     }
     [UIView animateWithDuration:duration delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
      {
+        [self.viewArrow setAlpha:0.0f];
          if(scrollViewControllerList.isEndedForSearchResult){
              [scrollViewControllerList.scrollViewList setContentSize:CGSizeMake(self.gv.screenW, scrollViewControllerList.itemDisplayCount*150+40)];
          }else{
@@ -921,8 +972,6 @@ double posLeft;
         [self.viewMiddleDarkBorder setAlpha:0.0f];
         [viewGradientBgForName setFrame:CGRectMake(0, -45, self.gv.screenW, 45)];
         [viewBottomBorder setFrame:CGRectMake(0, 0, self.gv.screenW, 1)];
-         NSLog(@"%d",self.seq);
-         NSLog(@"%f",self.frame.origin.y);
         [self setFrame:CGRectMake(0, self.frame.origin.y, self.gv.screenW, 150)];
          ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList*) self.gv.scrollViewControlllerList;
          [scrollViewControllerList.viewFunBar setFrame:CGRectMake(0, 0, self.gv.screenW, 40)];

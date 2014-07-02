@@ -113,7 +113,7 @@
         }else{
             [self animationHideOtherCenter];
         }
-        [self updateCameraCenterAndDB];
+        [self updateCameraCenterAndDB:YES];
     }else if([touch.view isKindOfClass:[ButtonPin class]]){
         [switchLocation turnOn:YES];
         if(txtCenterAdderss.text.length>0){
@@ -150,16 +150,17 @@
                     NSDictionary *dicLocation=[[[[data objectForKey:@"results"] objectAtIndex:0] objectForKey:@"geometry"] objectForKey:@"location"];
                     CLLocationCoordinate2D tempLocation=CLLocationCoordinate2DMake([[dicLocation valueForKey:@"lat"] floatValue], [[dicLocation valueForKey:@"lng"] floatValue]);
                     selected.centerLocation=tempLocation;
+                    NSLog(@"%f",selected.centerLocation.longitude);
                 }else{
                     return;
                 }
-                [self updateCameraCenterAndDB];
+                [self updateCameraCenterAndDB:YES];
             });
         }else{
             NSLog(@"ZERO_RESULTS");
             dispatch_async(dispatch_get_main_queue(), ^{
                 ViewTip *tip=(ViewTip *)self.gv.viewTip;
-                [tip statusPreviousStatusToTip:self title:[DB getUI:@"operating_tip"] msg:[DB getUI:@"cant_find_address"]];
+                [tip statusPreviousStatusToTip:self title:[DB getUI:@"operation_hint"] msg:[DB getUI:@"cant_find_address"]];
             });
         }
     } queue:self.gv.backgroundThreadManagement];
@@ -173,7 +174,7 @@
     ButtonCate *selected =scrollViewControllerCate.selectedButtonCate;
     selected.centerLocation=coordinate;
     [self.txtCenterAdderss resignFirstResponder];
-    [self updateCameraCenterAndDB];
+    [self updateCameraCenterAndDB:YES];
     [self convertCoordinateToAddress];
 }
 
@@ -238,7 +239,7 @@
     [sliderDist setValue:x];
     [circle setRadius:x];
     [self sliderChange:nil];
-    if(selected.centerLocation.latitude>0 && selected.centerLocation.longitude>0){
+    if(selected.centerLocation.latitude!=0 && selected.centerLocation.longitude!=0){
         [circle setPosition:selected.centerLocation];
         GMSCameraPosition *camera= [GMSCameraPosition cameraWithLatitude:selected.centerLocation.latitude
                                                                longitude:selected.centerLocation.longitude
@@ -268,7 +269,8 @@
     [db close];
 }
 
--(void) updateCameraCenterAndDB{
+-(void) updateCameraCenterAndDB:(BOOL) isUpdateDB{
+    NSLog(@"ViewPanelForLocation.updateCameraCenterAndDB");
     ScrollViewControllerCate *scrollViewControllerCate =(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
     ButtonCate *selected =scrollViewControllerCate.selectedButtonCate;
     NSMutableDictionary *dicParameter=[[NSMutableDictionary alloc] init];
@@ -288,8 +290,10 @@
         [dicParameter setValue:@"0" forKey:@"lng"];
     }
     [dicParameter setValue:[NSString stringWithFormat:@"%d",selected.iden] forKey:@"id"];
-    NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(_updateDBCollectionCenter:) object:dicParameter];
-    [self.gv.FMDatabaseQueue addOperation:operation];
+    if(isUpdateDB){
+        NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(_updateDBCollectionCenter:) object:dicParameter];
+        [self.gv.FMDatabaseQueue addOperation:operation];
+    }
 }
 
 -(void) updateCamera:(CLLocationCoordinate2D)cameraCenter{

@@ -732,6 +732,8 @@ int animationObjectFinishCount=0;
         }
     }
     isSaveData=YES;
+    ViewControllerRoot *root=(ViewControllerRoot *) self.gv.viewControllerRoot;
+    [root.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"change_icon"];
     [self statusEditToCommon];
 }
 

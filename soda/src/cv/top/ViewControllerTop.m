@@ -103,26 +103,26 @@
     }else if([touch.view isEqual:btnSearch] && [GV getGlobalStatus]==COMMON){
         if(txtSearch.text.length==0){
             ViewTip *tip=(ViewTip *)self.gv.viewTip;
-            [tip statusPreviousStatusToTip:txtSearch title:[DB getUI:@"operating_tip"] msg:[DB getUI:@"no_search_key"]];
-            return;
+            [tip statusPreviousStatusToTip:txtSearch title:[DB getUI:@"operation_hint"] msg:[DB getUI:@"please_type_search_keyword"]];
+        }else{
+            NSLog(@"top condition:4");
+            ScrollViewControllerCate *scrollViewControllerCate=(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
+            scrollViewControllerCate.selectedButtonCate=scrollViewControllerCate.buttonCateForSearch;
+            [self statusCommonToList];
         }
-        NSLog(@"top condition:4");
-        ScrollViewControllerCate *scrollViewControllerCate=(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
-        scrollViewControllerCate.selectedButtonCate=scrollViewControllerCate.buttonCateForSearch;
-        [self statusCommonToList];
     }else if([touch.view isEqual:btnSearch] && [GV getGlobalStatus]==SEARCH){
         if(txtSearch.text.length==0){
             ViewTip *tip=(ViewTip *)self.gv.viewTip;
-            [tip statusPreviousStatusToTip:txtSearch title:[DB getUI:@"operating_tip"] msg:[DB getUI:@"no_search_key"]];
-            return;
+            [tip statusPreviousStatusToTip:txtSearch title:[DB getUI:@"operation_hint"] msg:[DB getUI:@"please_type_search_keyword"]];
+        }else{
+            NSLog(@"top condition:5");
+            ScrollViewControllerCate *scrollViewControllerCate=(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
+            scrollViewControllerCate.selectedButtonCate=scrollViewControllerCate.buttonCateForSearch;
+            NSLog(@"%@",scrollViewControllerCate.buttonCateForSearch);
+            [self statusSearchToCommon];
+            [self statusCommonToList];
+            NSLog(@"%@",scrollViewControllerCate.selectedButtonCate);
         }
-        NSLog(@"top condition:5");
-        ScrollViewControllerCate *scrollViewControllerCate=(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
-        scrollViewControllerCate.selectedButtonCate=scrollViewControllerCate.buttonCateForSearch;
-        NSLog(@"%@",scrollViewControllerCate.buttonCateForSearch);
-        [self statusSearchToCommon];
-        [self statusCommonToList];
-        NSLog(@"%@",scrollViewControllerCate.selectedButtonCate);
     }else if(![touch.view isEqual:breadCrumbView.btnHome] && [GV getGlobalStatus]==LIST){
         NSLog(@"top condition:6");
         return;
@@ -135,27 +135,32 @@
     }
     [super touchesEnded:touches withEvent:event];
 }
-
+int iden=0;
+int collectionLen=0;
 -(void)addNewSearchCate{
     if(txtSearch.text.length==0){
         ViewTip *tip=(ViewTip *)self.gv.viewTip;
-        [tip statusPreviousStatusToTip:btnAdd title:[DB getUI:@"operating_tip"] msg:[DB getUI:@"no_search_key"]];
+        [tip statusPreviousStatusToTip:btnAdd title:[DB getUI:@"operation_hint"] msg:[DB getUI:@"please_type_search_keyword"]];
         return;
     }
-    FMDatabase *db=[DB getShareInstance].db;
-    [db open];
-
-    [db executeUpdate:[NSString stringWithFormat:@"INSERT INTO collection (name,google_types,title,keyword,icon,lang,other_source,is_default,sort) VALUES ('%@','%@','%@','%@','%@',(SELECT content FROM sys_config WHERE name='lang'),'',0,(select (sort+0)/2 from collection order by sort limit 1))",txtSearch.text,@"",txtSearch.text,txtSearch.text,@""]];
-    int iden=(int) [db lastInsertRowId];
-    int collectionLen=[db intForQuery:@"SELECT COUNT(*) FROM collection WHERE lang=(SELECT CONTENT from sys_config WHERE name='lang' LIMIT 1)"];
-    [db close];
+    NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(_addNewSearchCate) object:nil];
+    [self.gv.FMDatabaseQueue addOperations:[NSArray arrayWithObjects:operation, nil] waitUntilFinished:YES];
+    
+    if(iden==0){
+        NSException *e = [NSException
+                          exceptionWithName:@"DB Error"
+                          reason:@"insert fail"
+                          userInfo:nil];
+        @throw e;
+    }
+    
     ViewControllerRoot *root=(ViewControllerRoot *) self.gv.viewControllerRoot;
     ButtonCate *newButtonCate=[[ButtonCate alloc] initWithIconName:@"" frame:CGRectMake(-100, 0, 100, 94) title:@"" name:@"" lang:[DB getSysConfig:@"lang"] keyword:@"" iden:iden];
     newButtonCate.lblTitle.text=txtSearch.text;
     newButtonCate.keyword=txtSearch.text;
     newButtonCate.originalTitle=txtSearch.text;
     newButtonCate.originalKeyword=txtSearch.text;
-
+    newButtonCate.distance=300;
     //這個應該要搬一下 搬到 scrollViewCate底下
     root.scrollViewControllerCate.selectedButtonCate=newButtonCate;
     [root.scrollViewControllerCate.scrollViewCate addSubview:newButtonCate];
@@ -164,6 +169,15 @@
     [root.scrollViewControllerCate.scrollViewCate bringSubviewToFront:root.scrollViewControllerCate.scrollViewCate.btnRemoveCate];
     [root.scrollViewControllerCate animationCateSlide];
     [root.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"pin"];
+}
+
+-(void)_addNewSearchCate{
+    FMDatabase *db=[DB getShareInstance].db;
+    [db open];
+    [db executeUpdate:[NSString stringWithFormat:@"INSERT INTO collection (name,google_types,title,keyword,icon,lang,other_source,is_default,sort,distance) VALUES ('%@','%@','%@','%@','%@',(SELECT content FROM sys_config WHERE name='lang'),'',0,(select (sort+0)/2 from collection order by sort limit 1),300)",txtSearch.text,@"",txtSearch.text,txtSearch.text,@""]];
+    iden=(int) [db lastInsertRowId];
+    collectionLen=[db intForQuery:@"SELECT COUNT(*) FROM collection WHERE lang=(SELECT CONTENT from sys_config WHERE name='lang' LIMIT 1)"];
+    [db close];
 }
 
 -(void)statusCommonToSearch{

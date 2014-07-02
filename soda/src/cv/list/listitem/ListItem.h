@@ -21,6 +21,7 @@
 #import "ScrollViewDetailOpening.h"
 #import "ScrollViewDetailReview.h"
 #import "LoadingCircle.h"
+#import "ViewArrow.h"
 
 @interface ListItem : ViewProtoType
 @property AsyncImgView *imgViewBg;
@@ -68,7 +69,9 @@
 @property UIView *viewMiddleLigthBorder;
 @property UIView *viewMiddleDarkBorder;
 @property LoadingCircle *loadingCircle;
+@property LoadingCircle *loadingForSendReview;
 @property UIView *contentCon;
+@property ViewArrow *viewArrow;
 //for review
 @property UILabel *lblIForComment;
 @property UIView *viewTopBgForComment;

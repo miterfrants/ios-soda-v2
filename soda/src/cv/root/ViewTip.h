@@ -13,6 +13,8 @@
 @property UILabel *lblTitle;
 @property UILabel *lblMsg;
 @property UIView *viewBorder;
+@property double originY;
+@property id targetRef;
 @property GV *gv;
 -(void) addArrowBorder;
 -(void)statusPreviousStatusToTip:(UIView *)target title:(NSString*)title msg:(NSString*)msg;

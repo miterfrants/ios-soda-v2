@@ -69,9 +69,9 @@
             action=self.gv.actionDelOfficialSuggestPlace;
         }
         NSString *url=[NSString stringWithFormat:@"%@://%@/%@?action=%@&google_id=%@&access_token=%@&member_id=%@",self.gv.urlProtocol,self.gv.domain,self.gv.controllerOfficialSuggestPlace,action,item.googleId,[FBSession activeSession].accessTokenData.accessToken,self.gv.localUserId];
-
+        
         [Util stringAsyncWithUrl:url cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:4 completion:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-            NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding] ;
+            NSString *result = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
             NSLog(@"official suggest place:%@",result);
         } queue:self.gv.backgroundThreadManagement];
     }
@@ -94,6 +94,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
             [self animationToFill];
             [SocialUtil shareFavoriteWithName:item.name googleId:item.googleId googleRef:item.googleRef];
+            NSLog(@"%@",[NSString stringWithFormat:@"%@:%@",item.name,item.googleRef]);
         });
         [db executeUpdate:[NSString stringWithFormat:@"INSERT INTO favorite (name,google_id,google_type,google_ref,phone,address,lat,lng) VALUES ('%@','%@','%@','%@','%@','%@',%f,%f)",item.lblName.text,item.googleId,item.googleTypes,item.googleRef,item.strPhone,item.address,item.lat,item.lng]];
     }

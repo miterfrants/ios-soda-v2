@@ -54,6 +54,13 @@
 }
 
 -(void)switchViewPanelWithTargetButton:(ButtonFunction *) btn{
+    if(self.isAnimation){
+        return;
+    }
+    if([self.dicViewPanel objectForKey:btn.name]==nil){
+        return;
+    }
+    NSLog(@"FunctionBar.switchViewPanelWithTargetButton");
     //get viewpanel by button property : name
     //clear all button select;
     for(NSString *key in dicButtonFunction){
@@ -63,13 +70,21 @@
             [offButton toUnHighLightStatus];
         }
     }
-    if([self.dicViewPanel objectForKey:btn.name]==nil){
-        return;
-    }
+
     UIView *target=(UIView *)[self.dicViewPanel objectForKey:btn.name];
+    self.isAnimation=YES;
     if(btn.isSelected){
+        btn.isSelected=NO;
+        [btn toUnHighLightStatus];
         [self contractTarget:target];
     }else{
+        btn.isSelected=YES;
+        [btn toHighLightStatus];
+        if([btn.name isEqualToString:@"location"]){
+            ViewPanelForLocation *viewPanelForLocaiton=(ViewPanelForLocation *) target;
+            //非操作 所以不更新資料來源
+            [viewPanelForLocaiton updateCameraCenterAndDB:NO];
+        }
         if(self.isExpanded){
             [self slidOn:target offTarget:self.currentShowPanel];
         }else{
@@ -91,6 +106,7 @@
          [offTarget setFrame:CGRectMake(self.gv.screenW, 40, self.gv.screenW, self.gv.screenH-40-80 )];
      } completion:^(BOOL finished) {
          if (finished){
+             self.isAnimation=NO;
              self.currentShowPanel=target;
              [offTarget setHidden:YES];
              [offTarget setFrame:CGRectMake(0, 40, self.gv.screenW, 0)];
@@ -110,12 +126,14 @@
     }else{
         [viewPanelForLocation.txtCenterAdderss stopObserver];
     }
+    
     [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
      {
          [self setFrame:CGRectMake(0, 0, self.gv.screenW, self.gv.screenH-80)];
          [target setFrame:CGRectMake(0, 40, self.gv.screenW, self.gv.screenH-40-80 )];
      } completion:^(BOOL finished) {
          if (finished){
+             self.isAnimation=NO;
              self.isExpanded=YES;
          }
      }];
@@ -132,6 +150,7 @@
      } completion:^(BOOL finished) {
          if (finished){
              [target setHidden:YES];
+             self.isAnimation=NO;
              self.isExpanded=NO;
          }
      }];

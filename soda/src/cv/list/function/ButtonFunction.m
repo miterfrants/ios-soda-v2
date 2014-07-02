@@ -42,8 +42,14 @@
 
 -(void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
+    //這邊不做toHighLightStatus
+    //是因為要展開和顯示同步
+    [super touchesBegan:touches withEvent:event];
+}
+
+-(void) toHighLightStatus{
     if([GV getGlobalStatus]==LIST){
-        if(!isSelected){
+        if(isSelected){
             [lblTitle setTextColor:[Util colorWithHexString:@"#263439ff"]];
             [viewArr setImage:[UIImage imageNamed:@"list_function_arr_over.png"]];
         }else{
@@ -51,16 +57,10 @@
             [viewArr setImage:[UIImage imageNamed:@"list_function_arr.png"]];
         }
     }
-    [super touchesBegan:touches withEvent:event];
 }
 
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
     [super touchesEnded:touches withEvent:event];
-    if(isSelected){
-        isSelected=NO;
-    }else{
-        isSelected=YES;
-    }
 }
 
 

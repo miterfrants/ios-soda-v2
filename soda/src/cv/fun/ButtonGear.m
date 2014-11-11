@@ -83,7 +83,7 @@
     UIBezierPath *circleBorderPath=[UIBezierPath bezierPath];
     [circleBorderPath addArcWithCenter:CGPointMake(22, 22) radius:18.5 startAngle:0 endAngle:M_PI*2 clockwise:YES];
     circleShape.strokeColor= color;
-    circleShape.lineWidth=3.5f;
+    circleShape.lineWidth=1.5f;
     circleShape.fillColor=[UIColor clearColor].CGColor;
     circleShape.path=circleBorderPath.CGPath;
     return circleShape;
@@ -98,9 +98,9 @@
     [circlePath addArcWithCenter:CGPointMake(19, 19) radius:19 startAngle:0 endAngle:M_PI*2 clockwise:YES];
     circleMask.path=circlePath.CGPath;
     
-    viewShadow.layer.shadowOffset = CGSizeMake(5.5f,5.5f);
-    viewShadow.layer.shadowRadius = 2.0f;
-    viewShadow.layer.shadowOpacity = .7f;
+    viewShadow.layer.shadowOffset = CGSizeMake(3.2f,3.2f);
+    viewShadow.layer.shadowRadius = 1.0f;
+    viewShadow.layer.shadowOpacity = 0.7f;
     viewShadow.layer.shadowColor = [Util colorWithHexString:@"#000000ff"].CGColor
     ;
     viewShadow.layer.shadowPath=circlePath.CGPath;

@@ -19,13 +19,13 @@
         iconPhone=[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"phone.png"]];
         [iconPhone setFrame:CGRectMake(12, 20, 44, 44)];
         [self addSubview:iconPhone];
-        lblDescForPhone =[[UILabel alloc] initWithFrame:CGRectMake(iconPhone.frame.origin.x+iconPhone.frame.size.width+5,
+        lblDescForPhone =[[LabelForChangeUILang alloc] initWithFrame:CGRectMake(iconPhone.frame.origin.x+iconPhone.frame.size.width+5,
                                                                   iconPhone.frame.origin.y,
                                                                   165,
                                                                    40)];
         lblDescForPhone.lineBreakMode=NSLineBreakByCharWrapping;
         lblDescForPhone.numberOfLines=2;
-        lblDescForPhone.text=@"Show only where there is a phone number.";
+        lblDescForPhone.key=@"show_only_phone_number";
         [lblDescForPhone setFont:self.gv.fontListFunctionTitle];
         [lblDescForPhone setTextColor:[UIColor whiteColor]];
         [self addSubview:lblDescForPhone];
@@ -44,13 +44,13 @@
         iconOpening=[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"light.png"]];
         [iconOpening setFrame:CGRectMake(12, 79, 44, 44)];
         [self addSubview:iconOpening];
-        lblDescForOpening =[[UILabel alloc] initWithFrame:CGRectMake(iconOpening.frame.origin.x+iconOpening.frame.size.width+5,
+        lblDescForOpening =[[LabelForChangeUILang alloc] initWithFrame:CGRectMake(iconOpening.frame.origin.x+iconOpening.frame.size.width+5,
                                                                    iconOpening.frame.origin.y,
                                                                    165,
                                                                    40)];
         lblDescForOpening.lineBreakMode=NSLineBreakByCharWrapping;
         lblDescForOpening.numberOfLines=2;
-        lblDescForOpening.text=@"Show only where there is opening now.";
+        lblDescForOpening.key=@"show_only_opening";
         [lblDescForOpening setFont:self.gv.fontListFunctionTitle];
         [lblDescForOpening setTextColor:[UIColor whiteColor]];
         [self addSubview:lblDescForOpening];
@@ -69,13 +69,13 @@
         iconFavorite=[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"favorite.png"]];
         [iconFavorite setFrame:CGRectMake(12, 148, 44, 44)];
         [self addSubview:iconFavorite];
-        lblDescForFavorite =[[UILabel alloc] initWithFrame:CGRectMake(iconFavorite.frame.origin.x+iconFavorite.frame.size.width+5,
+        lblDescForFavorite =[[LabelForChangeUILang alloc] initWithFrame:CGRectMake(iconFavorite.frame.origin.x+iconFavorite.frame.size.width+5,
                                                                      iconFavorite.frame.origin.y,
                                                                      165,
                                                                      40)];
         lblDescForFavorite.lineBreakMode=NSLineBreakByCharWrapping;
         lblDescForFavorite.numberOfLines=2;
-        lblDescForFavorite.text=@"Show only where there is in your favorite.";
+        lblDescForFavorite.key=@"show_only_on_your_favorite";
         [lblDescForFavorite setFont:self.gv.fontListFunctionTitle];
         [lblDescForFavorite setTextColor:[UIColor whiteColor]];
         [self addSubview:lblDescForFavorite];
@@ -94,12 +94,13 @@
         iconHeart=[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"heart.png"]];
         [iconHeart setFrame:CGRectMake(12, 217, 44, 44)];
         [self addSubview:iconHeart];
-        lblDescForHeart =[[UILabel alloc] initWithFrame:CGRectMake(iconHeart.frame.origin.x+iconHeart.frame.size.width+5,
+        lblDescForHeart =[[LabelForChangeUILang alloc] initWithFrame:CGRectMake(iconHeart.frame.origin.x+iconHeart.frame.size.width+5,
                                                                       iconHeart.frame.origin.y,
                                                                       165,
                                                                       20)];
         lblDescForHeart.numberOfLines=1;
-        lblDescForHeart.text=@"Rating better than: 0";
+        lblDescForHeart.key=@"ratting_better_than";
+        lblDescForHeart.text=[NSString stringWithFormat:@"%@: 0",[DB getUI:@"ratting_better_than"]];
         [lblDescForHeart setFont:self.gv.fontListFunctionTitle];
         [lblDescForHeart setTextColor:[UIColor whiteColor]];
         [self addSubview:lblDescForHeart];
@@ -121,13 +122,13 @@
         iconOfficialSuggest=[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"official_flag.png"]];
         [iconOfficialSuggest setFrame:CGRectMake(12, 286, 44, 44)];
         [self addSubview:iconOfficialSuggest];
-        lblDescForOfficialSuggest =[[UILabel alloc] initWithFrame:CGRectMake(iconOfficialSuggest.frame.origin.x+iconOfficialSuggest.frame.size.width+5,
+        lblDescForOfficialSuggest =[[LabelForChangeUILang alloc] initWithFrame:CGRectMake(iconOfficialSuggest.frame.origin.x+iconOfficialSuggest.frame.size.width+5,
                                                                       iconOfficialSuggest.frame.origin.y,
                                                                       165,
                                                                       40)];
         lblDescForOfficialSuggest.lineBreakMode=NSLineBreakByCharWrapping;
         lblDescForOfficialSuggest.numberOfLines=2;
-        lblDescForOfficialSuggest.text=@"Show only where there is official suggest.";
+        lblDescForOfficialSuggest.key=@"show_only_soda_suggestion";
         [lblDescForOfficialSuggest setFont:self.gv.fontListFunctionTitle];
         [lblDescForOfficialSuggest setTextColor:[UIColor whiteColor]];
         [self addSubview:lblDescForOfficialSuggest];
@@ -145,7 +146,7 @@
     return self;
 }
 - (void)sliderChange:(NSNotification *)notification{
-    lblDescForHeart.text=[NSString stringWithFormat:@"Rating better than: %.1f", sliderForHeart.value];
+    lblDescForHeart.text=[NSString stringWithFormat:@"%@: %.1f",[DB getUI:@"ratting_better_than"], sliderForHeart.value];
     [self saveFilterConfig:notification];
 }
 -(void)initialFilterSetting:(ButtonCate *)selected{
@@ -154,7 +155,7 @@
     [switchForOpening setOn:selected.isOnlyShowOpening];
     [switchForPhone setOn:selected.isOnlyShowPhone];
     [sliderForHeart setValue:selected.rating];
-    lblDescForHeart.text=[NSString stringWithFormat:@"Rating better than: %.1f", sliderForHeart.value];
+    lblDescForHeart.text=[NSString stringWithFormat:@"%@: %.1f",[DB getUI:@"ratting_better_than"] ,sliderForHeart.value];
 }
 
 -(void)saveFilterConfig:(NSNotification *)notification{
@@ -165,6 +166,7 @@
     selected.isOnlyShowOfficialSuggest=[switchForOfficialSuggest isOn];
     selected.isOnlyShowOpening=[switchForOpening isOn];
     selected.rating=floor(sliderForHeart.value*10+0.5)/10;
+    [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"list_save_config"];
     NSMutableDictionary *dicParameter=[[NSMutableDictionary alloc] init];
     if(selected.isOnlyShowFavorite){
         [dicParameter setValue:@"1" forKey:@"is_only_favorite"];

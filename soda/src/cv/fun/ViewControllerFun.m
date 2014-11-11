@@ -77,46 +77,68 @@
     NSLog(@"fun:%@",NSStringFromClass(touch.view.class));
 
     if([GV getGlobalStatus]==MENU && [touch.view isKindOfClass:ButtonFb.class]){
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_login_fb"];
         [self loginByFb];
     }else if([GV getGlobalStatus]==MENU &&[touch.view isKindOfClass:ButtonGoogle.class]){
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_login_google"];
         [self loginByGoogle];
     }else if([GV getGlobalStatus]==MENU && [touch.view isMemberOfClass:[ButtonMenu class]]){
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_expand_menu"];
         ButtonMenu *btn=(ButtonMenu *) touch.view;
         [self animationExpand:btn.name];
     }else if([GV getGlobalStatus]==MENU && [touch.view isMemberOfClass:[ButtonReset class]]){
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_reset"];
         UIAlertView *alert = [[UIAlertView alloc]
                               initWithTitle:@"Reset"
                               message:@"Confirm to abort all personal setting?"
                               delegate:self
                               cancelButtonTitle:@"No"
                               otherButtonTitles:@"Yes",nil];
+        alert.tag=AlertViewTypeMailEmpty;
         [alert show];
     }else if([GV getGlobalStatus]==MENU && [touch.view isMemberOfClass:[ButtonForPersonal class]]){
         ButtonForPersonal *btn=(ButtonForPersonal *) touch.view;
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:[NSString stringWithFormat:@"btn_expand_menu_%@",btn.name]];
         [self animationExpand:btn.name];
     }else if([GV getGlobalStatus]==COMMON){
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_expand_menu_in_common"];
         [self.view.superview bringSubviewToFront:self.view];
         [self statusCurrentToMenu];
     }else if([GV getGlobalStatus]==LIST || [GV getGlobalStatus]==LIST_EXPAND ){
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_expand_menu_in_list"];
         [self.view.superview bringSubviewToFront:self.view];
         [self statusCurrentToMenu];
     }else if([touch.view isKindOfClass:[ButtonLogout class]]){
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_logout"];
         [self logout];
     }else if([touch.view isKindOfClass:[ButtonMail class]]){
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_send_mail"];
         [self sendMail];
     }
     [super touchesEnded:touches withEvent:event];
 }
 
 -(void)sendMail{
-    self.mail = [[MFMailComposeViewController alloc]init];
-    self.mail.mailComposeDelegate = self;
-    [self.mail setToRecipients:[NSArray arrayWithObjects:@"miterfrants@gmail.com",nil]];
-    [self.mail setCcRecipients:[NSArray arrayWithObjects:@"miterfrants@hotmail.com",@"dream.devil@msa.hinet.net",nil]];
-    [self.mail setSubject:[DB getUI:@"offer_soda_some_suggestion"]];
-    [self.mail setMessageBody:[DB getUI:@""] isHTML:NO];
-    [self presentViewController:self.mail animated:YES completion:^{
-    }];
+
+    if (MFMailComposeViewController.canSendMail){
+        self.mail = [[MFMailComposeViewController alloc]init];
+        self.mail.mailComposeDelegate = self;
+        [self.mail setToRecipients:[NSArray arrayWithObjects:@"miterfrants@gmail.com",nil]];
+        [self.mail setCcRecipients:[NSArray arrayWithObjects:@"miterfrants@hotmail.com",@"dream.devil@msa.hinet.net",nil]];
+        [self.mail setSubject:[DB getUI:@"offer_soda_some_suggestion"]];
+        [self.mail setMessageBody:[DB getUI:@""] isHTML:NO];
+        [self presentViewController:self.mail animated:YES completion:^{
+        }];
+    }else{
+        UIAlertView *alert = [[UIAlertView alloc]
+                              initWithTitle:[DB getUI:@"exception"]
+                              message:[DB getUI:@"your_device_not_support_email_please_setting_up_a_email_account_with_your_iphone"]
+                              delegate:self
+                              cancelButtonTitle:[DB getUI:@"ok"]
+                              otherButtonTitles:nil,nil];
+        alert.tag=AlertViewTypeMailEmpty;
+        [alert show];
+    }
 }
 
 -(void)mailComposeController:(MFMailComposeViewController *)controller
@@ -154,24 +176,29 @@
 
 - (void)alertView:(UIAlertView *)alertView
 clickedButtonAtIndex:(NSInteger)buttonIndex{
-    if (buttonIndex == 1) {
-        NSLog(@"YES, reset");
-        AppDelegate *app=(AppDelegate *)[[UIApplication sharedApplication] delegate];
-        NSArray *keys=gv.dicLang.allKeys;
-        for(int i=0;i<keys.count;i++){
-            if([[keys objectAtIndex:i] isEqualToString:[Util getLang]]){
-                [viewMenu.viewConfig.pickLang selectRow:i inComponent:0 animated:YES];
+    if(alertView.tag==AlertViewTypeResetApp){
+        if (buttonIndex == 1) {
+            NSLog(@"YES, reset");
+            AppDelegate *app=(AppDelegate *)[[UIApplication sharedApplication] delegate];
+            NSArray *keys=gv.dicLang.allKeys;
+            for(int i=0;i<keys.count;i++){
+                if([[keys objectAtIndex:i] isEqualToString:[Util getLang]]){
+                    [viewMenu.viewConfig.pickLang selectRow:i inComponent:0 animated:YES];
+                }
             }
+            [DB dropAllTable];
+            [app iniConfig];
+            [self initProfileSetting];
+            [DB changeLang:[Util getLang]];
+            [app changeUILang];
+            [app resizeView];
+        } else {
+            NSLog(@"NO");
         }
-        [DB dropAllTable];
-        [app iniConfig];
-        [self initProfileSetting];
-        [DB changeLang:[Util getLang]];
-        [app changeUILang];
-        [app resizeView];
-    } else {
-        NSLog(@"NO");
+    }else if(alertView.tag==AlertViewTypeMailEmpty){
+        
     }
+
 }
 
 -(void) initProfileSetting{
@@ -469,10 +496,10 @@ clickedButtonAtIndex:(NSInteger)buttonIndex{
     dispatch_async(dispatch_get_main_queue(), ^{
         NSLog(@"ViewControllerFun.generateSecretIconByDic add subview");
         for(int i=0;i<self.arrSecretIcon.count;i++){
-            ButtonSecretIcon *icon=[[ButtonSecretIcon alloc] initWithSecretIcon:[self.arrSecretIcon objectAtIndex:i] frame:CGRectMake(i%2*100, floor(i/2)*110+5, 100, 94)];
+            ButtonSecretIcon *icon=[[ButtonSecretIcon alloc] initWithSecretIcon:[self.arrSecretIcon objectAtIndex:i] frame:CGRectMake(i%2*100, ceil(i/2)*110+5, 100, 94)];
             [viewMenu.viewSecret.scrollViewSecret addSubview:icon];
         }
-        [viewMenu.viewSecret.scrollViewSecret setContentSize:CGSizeMake(viewMenu.viewSecret.scrollViewSecret.frame.size.width, arrSecretIcon.count/2*110+5+94+30)];
+        [viewMenu.viewSecret.scrollViewSecret setContentSize:CGSizeMake(viewMenu.viewSecret.scrollViewSecret.frame.size.width, ceil((float)arrSecretIcon.count/2)*110+54+30)];
         [viewMenu.viewSecret.gifLoading setHidden:YES];
         //change secret icon status by login
         [viewMenu.viewSecret checkSecretByCondition:@"user_login"];

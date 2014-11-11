@@ -16,7 +16,7 @@
 @property double originY;
 @property id targetRef;
 @property GV *gv;
--(void) addArrowBorder;
+-(void)addArrowBorder:(CGPoint) pointStart size:(CGSize)size isUp:(BOOL) isUp;
 -(void)statusPreviousStatusToTip:(UIView *)target title:(NSString*)title msg:(NSString*)msg;
 -(void)statusTipToPreviousStatus;
 @end

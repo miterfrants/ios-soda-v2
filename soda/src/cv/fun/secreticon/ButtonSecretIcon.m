@@ -12,8 +12,7 @@
 #import <FacebookSDK/FacebookSDK.h>
 #import "SocialUtil.h"
 #import "UserInteractionLog.h"
-#import <AudioToolbox/AudioToolbox.h>
-#import <CoreFoundation/CoreFoundation.h>
+#import "GameModel.h"
 
 @implementation ButtonSecretIcon
 @synthesize iconId,secretId,tip,imgViewIcon,isGet,isSync,lblName,name,iconName;
@@ -46,7 +45,7 @@
             BOOL isDirectory;
             if(![NFM fileExistsAtPath:[self pathOfImage] isDirectory:&isDirectory]){
                 NSLog(@"check icon not exist and downlaod");
-                [self downloadSecretIcon];
+                [self downloadSecretIcon:NO];
             }else{
                 NSLog(@"icon exist and apeend to icon");
                 [imgViewIcon setImage:[UIImage imageWithContentsOfFile:[self pathOfImage]]];
@@ -58,17 +57,46 @@
     return self;
 }
 
--(void)downloadSecretIcon{
-    //這邊會有lock 問題 要抓單一執行續來處理
+-(void)downloadSecretIcon:(BOOL)isNew{
+    self.isLoading=YES;
     [self.loading removeFromSuperview];
     self.loading=nil;
     self.loading=[[LoadingCircle alloc] initWithFrameAndThick:CGRectMake((self.frame.size.width-40)/2, (self.frame.size.width-40)/2, 40, 40) thick:2];
     [self addSubview:self.loading];
     [self.loading start];
-    
-    NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(_downloadSecretIcon) object:nil];
-    [self.gv.FMDatabaseQueue addOperation:operation];
+    NSString *strIsNew=@"0";
+    if(isNew){
+        strIsNew=@"1";
+    }
+    NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(downloadSecretIconFromRemote:) object:strIsNew];
+    [self.gv.backgroundThreadManagement addOperation:operation];
+}
 
+-(void)downloadSecretIconFromRemote:(NSString *) strIsNew{
+    self.isGet=YES;
+    //access token
+    NSString *accessToken=@"";
+    if(self.gv.loginType==Facebook){
+        accessToken=[FBSession activeSession].accessTokenData.accessToken;
+    }else if(self.gv.loginType==Google){
+        accessToken=self.gv.googleAccessToken;
+    }
+    
+    if([strIsNew boolValue] && self.gv.loginType==Facebook){
+        //dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0), ^{
+        [SocialUtil shareNewSecretIconToFacebookWithIconId:self.iconName iconId:self.iconId];
+    }
+    
+    //get icon
+    NSString *url= [NSString stringWithFormat:@"%@://%@/%@?action=%@&secret_id=%@&member_id=%@&icon_id=%d&access_token=%@",self.gv.urlProtocol,self.gv.domain,self.gv.controllerIcon,self.gv.actionDownloadSecretIcon,self.secretId,self.gv.localUserId,self.iconId,accessToken];
+    [Util saveImgFile:url pathDest:[self pathOfImage] isOverWrite:NO];
+
+    
+    url=[url stringByAppendingFormat:@"&is_over=%@",@"true"];
+    NSLog(@"%@",url);
+    [Util saveImgFile:url pathDest:[self pathOfOverImage] isOverWrite:NO];
+    NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(updateLocalDBAndAppendRemoteLog:) object:strIsNew];
+    [self.gv.FMDatabaseQueue addOperation:operation];
 }
 
 -(void)changeLockIconToDownloadIcon{
@@ -78,14 +106,16 @@
 
 
 //FMDatabaseQueue;
-//peter modify 修改為只有資料庫的操作用FMDatabase Queue 的操作
--(void)_downloadSecretIcon{
+-(void)updateLocalDBAndAppendRemoteLog:(NSString *) strIsNew{
         NSLog(@"downloadSecretIcon async:%@",self.name);
+        BOOL isNew=[strIsNew boolValue];
         FMDatabase *db=[DB getShareInstance].db;
         [db open];
         [db beginTransaction];
         @try {
-            self.isGet=YES;
+            //update local db
+            [db executeUpdate:[NSString stringWithFormat:@"UPDATE secret_icon SET is_get=1 WHERE name='%@'",self.name]];
+
             //access token
             NSString *accessToken=@"";
             if(self.gv.loginType==Facebook){
@@ -93,17 +123,6 @@
             }else if(self.gv.loginType==Google){
                 accessToken=self.gv.googleAccessToken;
             }
-            //get icon
-            NSString *url= [NSString stringWithFormat:@"%@://%@/%@?action=%@&secret_id=%@&member_id=%@&icon_id=%d&access_token=%@",self.gv.urlProtocol,self.gv.domain,self.gv.controllerIcon,self.gv.actionDownloadSecretIcon,self.secretId,self.gv.localUserId,self.iconId,accessToken];
-            [Util saveImgFile:url pathDest:[self pathOfImage] isOverWrite:NO];
-            //NSLog(@"%@",url);
-
-            url=[url stringByAppendingFormat:@"&is_over=%@",@"true"];
-            [Util saveImgFile:url pathDest:[self pathOfOverImage] isOverWrite:NO];
-            
-            //update local db
-            [db executeUpdate:[NSString stringWithFormat:@"UPDATE secret_icon SET is_get=1 WHERE name='%@'",self.name]];
-            
             //add log to remote;
             NSString *addDownloadLogURL=[NSString stringWithFormat:@"%@://%@/%@?action=%@&member_id=%@&icon_id=%d&creator_ip=%@&access_token=%@",
                                          self.gv.urlProtocol ,
@@ -133,26 +152,21 @@
             [db close];
             NSLog(@"downloadSecretIcon finish:%@",self.name);
             [self performSelectorOnMainThread:@selector(changeLockIconToDownloadIcon) withObject:nil waitUntilDone:NO];
+            self.isLoading=NO;
+            if(isNew){
+                GameNotification *notification=[[GameNotification alloc]init];
+                notification.icon=[UIImage imageWithContentsOfFile:[self pathOfImage]];
+                notification.title=[NSString stringWithFormat:@"%@: %@",[DB getUIInnerFMDatabaseQueue:@"new_secret_icon" ],[DB getUIInnerFMDatabaseQueue:self.name]];
+                NSString *storyURL=@"";
+                notification.msg=@"";
+                [GameModel addGameNotification:notification];
+            }
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.loading stop];
             });
-
         }
 }
 
-- (void)playAudio{
-    NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(_playAudio) object:nil];
-    [self.gv.AudioQueue addOperations:[NSArray arrayWithObjects:operation, nil] waitUntilFinished:NO];
-}
-
--(void)_playAudio{
-    NSString *path  = [[NSBundle mainBundle] pathForResource:@"get_sound_effect" ofType:@"m4a"];
-    NSURL *pathURL = [NSURL fileURLWithPath : path];
-    SystemSoundID audioEffect;
-    AudioServicesCreateSystemSoundID((CFURLRef) CFBridgingRetain(pathURL), &audioEffect);
-    AudioServicesPlaySystemSound(audioEffect);
-    AudioServicesRemoveSystemSoundCompletion(audioEffect);
-}
 
 
 
@@ -177,6 +191,8 @@
 
 -(void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
+    [self.timerCheckShowHint invalidate];
+    self.timerCheckShowHint=nil;
     if(self.isCanceled){
         return;
     }
@@ -186,13 +202,28 @@
 
 -(void)toTouchStatus{
     UIImage *imgIcon=nil;
-    [UserInteractionLog showTip:self titleKey:@"operation_hint" tipKey:tip];
+    if(self.isLoading){
+        return;
+    }
+    self.timerCheckShowHint=[NSTimer scheduledTimerWithTimeInterval:0.3 target:self selector:@selector(showHint:) userInfo:nil repeats:NO];
+
     if(isGet){
         imgIcon=[UIImage imageWithContentsOfFile:[self pathOfOverImage]];
     }else{
         imgIcon=[UIImage imageNamed:@"lock_over.png"];
     }
     [imgViewIcon setImage:imgIcon];
+}
+
+-(void)showHint:(id)sender{
+    if(isGet){
+        [UserInteractionLog showTip:self titleKey:[DB getUI:self.name] tipKey:tip];
+    }else{
+        [UserInteractionLog showTip:self titleKey:@"operation_hint" tipKey:tip];
+    }
+    //這邊比較特別 因為時間差的關係 事件傳到root 不會被設定為 tip_shown
+    self.gv.previousStatusForTip=MENU;
+    [GV setGlobalStatus:TIP_SHOWED];
 }
 
 -(void)toCommonStatus{

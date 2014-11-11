@@ -7,7 +7,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "GV.h"
 
 @interface LabelForChangeUILang : UILabel
-
+@property (nonatomic, retain) NSString *key;
+@property GV *gv;
+@property SEL completeInvoke;
+@property UIView *parentView;
+-(void)changeLang;
 @end

@@ -20,4 +20,5 @@
 +(BOOL)changeLang:(NSString *) lang;
 +(void)dropAllTable;
 +(void)getSecretIconFromRemote:(void(^)(NSMutableDictionary *data, NSError *connectionError)) completion;
++(NSString *)getUIInnerFMDatabaseQueue:(NSString *)key;
 @end

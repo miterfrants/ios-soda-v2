@@ -19,8 +19,8 @@
     self = [super initWithFrame:frame];
     if (self) {
         self.name=@"favorite";
-        lblTitle=[[UILabel alloc] init];
-        lblTitle.text=[DB getUI:@"favorite"];
+        lblTitle=[[LabelForChangeUILang alloc] init];
+        lblTitle.key=@"favorite";
         [lblTitle setFont:[GV sharedInstance].fontMenuTitle];
         [lblTitle setTextColor:[UIColor whiteColor]];
         [lblTitle setFrame:CGRectMake(68, 30, 200, 40)];
@@ -28,11 +28,11 @@
         self.scrollViewFavorite=[[ScrollViewProtoType alloc] initWithFrame:CGRectMake(0,80,frame.size.width,self.gv.screenH)];
         [self addSubview:self.scrollViewFavorite];
         
-        self.lblEmptyInfo=[[UILabel alloc] init];
+        self.lblEmptyInfo=[[LabelForChangeUILang alloc] init];
         [self.lblEmptyInfo setFont:self.gv.fontNormalForHebrew];
         [self.lblEmptyInfo setTextColor:[UIColor whiteColor]];
         [self.lblEmptyInfo setFrame:CGRectMake((frame.size.width-200)/2, 120, 200, 40)];
-        [self.lblEmptyInfo setText:[DB getUI:@"no_data"]];
+        self.lblEmptyInfo.key=@"no_data";
         [self.lblEmptyInfo setTextAlignment:NSTextAlignmentCenter];
         [self.lblEmptyInfo setHidden:YES];
         [self addSubview:self.lblEmptyInfo];
@@ -58,6 +58,8 @@
         FavoriteItem *favoriteItem=[[FavoriteItem alloc]initWithFrame:CGRectMake(0, currPos, self.frame.size.width, 25)];
         favoriteItem.phone=dataItem.phone;
         favoriteItem.seq=i;
+        favoriteItem.lat=dataItem.lat;
+        favoriteItem.lng=dataItem.lng;
         favoriteItem.identification=dataItem.identification;
         [favoriteItem setName:dataItem.name];
         [favoriteItem setAddress:dataItem.address];

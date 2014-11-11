@@ -8,9 +8,10 @@
 
 #import <UIKit/UIKit.h>
 #import "GV.h"
+#import "LabelForChangeUILang.h"
 
 @interface ViewExpandedPanel : UIView
 @property NSString *name;
-@property UILabel *lblTitle;
+@property LabelForChangeUILang *lblTitle;
 @property GV *gv;
 @end

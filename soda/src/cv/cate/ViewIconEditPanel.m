@@ -47,21 +47,22 @@
         topBorder.frame = CGRectMake(-1, 17, frame.size.width+2, frame.size.height+1);
         [self.layer addSublayer:topBorder];
         
-        //test
-        GV *gv=[GV sharedInstance];
-        NSString *strTitle=[DB getUI:@"edit_title"];
-        NSString *strKeyWord=[DB getUI:@"edit_keyword"];
-        CGSize sizeTitle=[strTitle sizeWithAttributes: @{NSFontAttributeName:gv.titleFont}];
-        CGSize sizeKeyword=[strKeyWord sizeWithAttributes: @{NSFontAttributeName:gv.titleFont}];
-        double minW=sizeTitle.width;
-        if(sizeTitle.width<sizeKeyword.width){
-            minW=sizeKeyword.width;
-        }
-        double widthTotal=10+minW+10+8+200;
-        viewEditTitle=[[ViewEditTitle alloc]initWithFrame:CGRectMake((gv.screenW-widthTotal)/2, 32, widthTotal, 28) minWidth:minW title:strTitle];
+        //inner will change viewEditTitle, viewEditKeyword frame;
+        viewEditTitle=[[ViewEditTitle alloc]initWithFrameAndKey:CGRectMake(0, 32, self.gv.screenW, 28) titleKey:@"edit_title"];
         [self addSubview:viewEditTitle];
-        viewEditKeyword=[[ViewEditTitle alloc]initWithFrame:CGRectMake((gv.screenW-widthTotal)/2, 75, widthTotal, 28) minWidth:minW title:strKeyWord];
+        viewEditKeyword=[[ViewEditTitle alloc]initWithFrameAndKey:CGRectMake(0, 75, self.gv.screenW, 28) titleKey:@"edit_keyword"];
         [self addSubview:viewEditKeyword];
+        double minLabelWidth=viewEditKeyword.lblDisplayTitle.frame.size.width;
+        if(viewEditKeyword.lblDisplayTitle.frame.size.width<viewEditTitle.lblDisplayTitle.frame.size.width){
+            minLabelWidth=viewEditTitle.lblDisplayTitle.frame.size.width;
+        }
+        [viewEditTitle repose:minLabelWidth];
+        [viewEditKeyword repose:minLabelWidth];
+        
+        viewEditTitle.lblDisplayTitle.parentView=self;
+        viewEditKeyword.lblDisplayTitle.parentView=self;
+        viewEditTitle.lblDisplayTitle.completeInvoke=@selector(changeUILangComplete);
+        viewEditKeyword.lblDisplayTitle.completeInvoke=@selector(changeUILangComplete);
         
         //icon scroll view
         scrollViewIcon=[[ScrollViewIcon alloc] init];
@@ -70,5 +71,22 @@
     return self;
 }
 
+-(void)changeUILangComplete{
+    int padding=10;
+    CGSize labelSizeForViewEditKeyword=[viewEditKeyword.lblDisplayTitle sizeThatFits:CGSizeMake(100, 28)];
+    [viewEditKeyword.lblDisplayTitle setFrame:CGRectMake(padding
+                                         , 0, labelSizeForViewEditKeyword.width, 28)];
+
+    
+    CGSize labelSizeForViewEditTitle=[viewEditTitle.lblDisplayTitle sizeThatFits:CGSizeMake(100, 28)];
+    [viewEditTitle.lblDisplayTitle setFrame:CGRectMake(padding
+                                                         , 0, labelSizeForViewEditTitle.width, 28)];
+    double minLabelWidth=viewEditKeyword.lblDisplayTitle.frame.size.width;
+    if(viewEditKeyword.lblDisplayTitle.frame.size.width<viewEditTitle.lblDisplayTitle.frame.size.width){
+        minLabelWidth=viewEditTitle.lblDisplayTitle.frame.size.width;
+    }
+    [viewEditTitle repose:minLabelWidth];
+    [viewEditKeyword repose:minLabelWidth];
+}
 
 @end

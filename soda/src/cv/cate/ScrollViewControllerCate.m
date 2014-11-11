@@ -15,6 +15,7 @@
 #import "GV.h"
 #import "DB.h"
 #import "FMDatabase.h"
+#import "FMDatabaseAdditions.h"
 #import "Util.h"
 
 @implementation ScrollViewControllerCate
@@ -78,8 +79,6 @@
             NSString *keywordForSearch=[resultForSearch stringForColumn:@"keyword"];
             NSString *iconForSearch=[resultForSearch stringForColumn:@"icon"];
             NSString *distanceForSearch=[resultForSearch stringForColumn:@"distance"];
-            NSString *centerLatForSearch=[resultForSearch stringForColumn:@"center_lat"];
-            NSString *centerLngForSearch=[resultForSearch stringForColumn:@"center_lng"];
             NSString *isOnlyShowPhoneForSearch=[resultForSearch stringForColumn:@"is_only_phone"];
             NSString *isOnlyShowOpeningForSearch=[resultForSearch stringForColumn:@"is_only_opening"];
             NSString *isOnlyShowFavoriteForSearch=[resultForSearch stringForColumn:@"is_only_favorite"];
@@ -89,7 +88,6 @@
             NSString *sortingKey=[resultForSearch stringForColumn:@"sorting_key"];
             self.buttonCateForSearch= [[ButtonCate alloc] initWithIconName:iconForSearch frame:CGRectMake(0,0,0,0) title:titleForSearch name:nameForSearch lang:lang keyword:keywordForSearch iden:idenForSearch];
             self.buttonCateForSearch.distance=[distanceForSearch doubleValue];
-            self.buttonCateForSearch.centerLocation =CLLocationCoordinate2DMake([centerLatForSearch floatValue], [centerLngForSearch floatValue]);
             self.buttonCateForSearch.isOnlyShowFavorite=[isOnlyShowFavoriteForSearch boolValue];
             self.buttonCateForSearch.isOnlyShowOfficialSuggest=[isOnlyShowOfficialSuggestForSearch boolValue];
             self.buttonCateForSearch.isOnlyShowOpening=[isOnlyShowOpeningForSearch boolValue];
@@ -97,6 +95,16 @@
             self.buttonCateForSearch.rating=[ratingForSearch doubleValue];
             self.buttonCateForSearch.sortingKey=sortingKey;
         }
+        [db close];
+        self.custCenterLocation = CLLocationCoordinate2DMake([[DB getSysConfig:@"center_lat"] floatValue], [[DB getSysConfig:@"center_lng"] floatValue]);
+        self.custDist = [[DB getSysConfig:@"distance"] floatValue];
+        if([[DB getSysConfig:@"is_cust_location"] isEqual:@"Y"]){
+            self.isCustLocation = YES;
+        }else {
+            self.isCustLocation = NO;
+        }
+
+
         //view bg
         float height=188;
         viewBG =[[UIImageView alloc]initWithImage:[self imageByCropping:[UIImage imageNamed:@"bg.png"]  toRect:CGRectMake(0,height , gv.screenW*2, gv.screenH*2-height)]];
@@ -105,9 +113,9 @@
 
         
         //scroll view
-        [scrollViewCate setContentSize:CGSizeMake(gv.screenW, floor((i-1)/2)*132+50+94)];
-        scrollViewCate.originalHeight=floor((i-1)/2)*132+94+50;
-        NSLog(@"scrollViewCate originalHeight:%f",(float) floor((i-1)/2)*132+94+50);
+        [scrollViewCate setContentSize:CGSizeMake(gv.screenW, ceil((float)i/2)*132+20)];
+        scrollViewCate.originalHeight=ceil((float)i/2)*132+20;
+        NSLog(@"scrollViewCate originalHeight:%f",(float) ceil((float)i/2)*132+20);
         [self.view addSubview:scrollViewCate];
         [scrollViewCate bringSubviewToFront:scrollViewCate.btnRemoveCate];
         
@@ -136,7 +144,6 @@
                                                  selector:@selector(keyboardWillHide:)
                                                      name:UIKeyboardWillHideNotification
                                                    object:nil];
-        
     }
     return self;
 }
@@ -245,6 +252,9 @@
         [touch.view isKindOfClass:ButtonCate.class]
     ){
         selectedButtonCate=(ButtonCate *) touch.view;
+        //google analytics click button event to common list
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:[NSString stringWithFormat:@"cate_button_%@",selectedButtonCate.name]];
+        [UserInteractionLog sendAnalyticsView:@"list"];
         [self statusCommonToList];
     }else if(
              [touch.view isEqual:viewIconEditPeanel.viewEditKeyword.txtContent] ||
@@ -291,21 +301,23 @@
         [target.txtContent selectAll:self];
     }else if([touch.view isEqual:viewIconEditPeanel.btnSave]){
         NSLog(@"%@",@"condition 9:");
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_save_cate"];
         [self saveAllButtonCateToDB];
         return;
     }else if([touch.view isKindOfClass:[ButtonRemoveCate class]]){
         NSLog(@"%@",@"condition 10:");
         UIAlertView *alert = [[UIAlertView alloc]
-                              initWithTitle:@"Remove Confirm"
-                              message:@"Confirm remove icon?"
+                              initWithTitle:[DB getUI:@"remove_confirm"]
+                              message:[DB getUI:@"do_you_want_to_remove_it"]
                               delegate:self
-                              cancelButtonTitle:@"No"
-                              otherButtonTitles:@"Yes",nil];
+                              cancelButtonTitle:[DB getUI:@"no"]
+                              otherButtonTitles:[DB getUI:@"yes"],nil];
         [alert show];
         //delete local data on db
         //animation remove cate slide end hide edit panel
     }else{
         NSLog(@"%@",@"condition 12:");
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"touch_cancel"];
         [self statusEditToCommon];
     }
     NSLog(@"%@",@"bubble event:");
@@ -316,13 +328,15 @@
     NSLog(@"%@",alertView);
     if (buttonIndex == 1) {
         NSLog(@"YES, remove icon");
+        [UserInteractionLog sendAnalyticsEvent:@"alert" label:[NSString stringWithFormat:@"remove_cate_%@",selectedButtonCate.name]];
+        //這邊很容易 lock db thread
         FMDatabase *db=[DB getShareInstance].db;
         [db open];
         [db executeUpdate:[NSString stringWithFormat:@"DELETE FROM collection WHERE id=%d",selectedButtonCate.iden]];
         [db close];
         [self animationRemoveCateSlide];
-
     } else {
+        [UserInteractionLog sendAnalyticsEvent:@"alert" label:@"remove_cancel"];
         NSLog(@"NO");
     }
 }
@@ -552,7 +566,11 @@ int animationObjectFinishCount=0;
                               if(finished){
                                   animationObjectFinishCount+=1;
                                   if(animationObjectFinishCount==animationObjectStartCount){
-                                      NSLog(@"finish all animation ");
+                                      [selectedButtonCate removeFromSuperview];
+                                      self.scrollViewCate.originalHeight=floor((scrollViewCate.subviews.count-4)/2)*132+50+94;
+                                      [scrollViewCate setContentSize:CGSizeMake(gv.screenW,(self.view.frame.size.height-(self.gv.screenH-viewIconEditPeanel.frame.size.height)+scrollViewCate.originalHeight))];
+
+                                      NSLog(@"finish all animation remove cate ");
                                       [updateBlurTimer invalidate];
                                       updateBlurTimer=nil;
                                   }
@@ -583,13 +601,7 @@ int animationObjectFinishCount=0;
 -(void) animationCateSlide{
     animationObjectStartCount=0;
     animationObjectFinishCount=0;
-    [updateBlurTimer invalidate];
-    updateBlurTimer=nil;
-    updateBlurTimer=[NSTimer scheduledTimerWithTimeInterval:0.024
-                                                     target:self
-                                                   selector:@selector(updateBlurViewAndResizeScrollViewContentSize)
-                                                   userInfo:nil
-                                                    repeats:YES];
+
     NSArray *subviews=self.scrollViewCate.subviews;
     for(int i=0;i<subviews.count;i++){
         if([[subviews objectAtIndex:i] isKindOfClass:[ButtonCate class]]){
@@ -618,11 +630,8 @@ int animationObjectFinishCount=0;
                               if (finished)
                               {
                                   animationObjectFinishCount+=1;
-
                                   if(animationObjectStartCount==animationObjectFinishCount){
                                       [self popupEditIconPanel:nil];
-                                      [updateBlurTimer invalidate];
-                                      updateBlurTimer =nil;
                                   }
                               }
                           }];
@@ -669,7 +678,7 @@ int animationObjectFinishCount=0;
     //change app status to edit without keyboard;
     [self.view.superview bringSubviewToFront:self.view];
     [GV setGlobalStatus:EDIT_WITHOUT_KEYBOARD];
-
+    [UserInteractionLog sendAnalyticsEvent:@"touch_hold" label:[NSString stringWithFormat:@"btn_cate_%@",selectedButtonCate.name]];
     //prevent use touch search textfield firing keyboardWillHide
     //and status is EditWithKeyboard change to EditWithoutKeyboard;
     //then keyboard animation not complete, the root invoke statusEditToCommon;
@@ -714,8 +723,10 @@ int animationObjectFinishCount=0;
 
 -(IBAction)saveAllButtonCateToDB{
     NSArray *views=self.scrollViewCate.subviews;
+    int countOfCateButton=0;
     for(int i=0;i<views.count;i++){
         if( [[views objectAtIndex:(NSUInteger)i] isKindOfClass:ButtonCate.class]){
+            countOfCateButton+=1;
             ButtonCate* btn=(ButtonCate *) [views objectAtIndex:(NSUInteger)i];
             
             FMDatabase *db=[DB getShareInstance].db;

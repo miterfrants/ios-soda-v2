@@ -22,8 +22,8 @@
     if (self) {
         self.name=@"profile";
         
-        self.lblTitle=[[UILabel alloc] init];
-        self.lblTitle.text=[DB getUI:@"profile"];
+        self.lblTitle=[[LabelForChangeUILang alloc] init];
+        self.lblTitle.key=@"profile";
         [self.lblTitle setFont:[GV sharedInstance].fontMenuTitle];
         [self.lblTitle setTextColor:[UIColor whiteColor]];
         [self.lblTitle setFrame:CGRectMake(68, 20, 200, 40)];
@@ -42,7 +42,7 @@
         [self addSubview:self.lblUsageTitle];
         self.lblUsageTitle.text=[NSString stringWithFormat:@"%@:",[DB getUI:@"usage_time"]];
         CGSize expectedUsageSize=[self.lblUsageTitle sizeThatFits:CGSizeMake(frame.size.width-15, 30)];
-        self.loadingForUsage=[[LoadingCircle alloc] initWithFrameAndThick:CGRectMake(self.lblUsageTitle.frame.origin.x+expectedUsageSize.width+10, self.lblUsageTitle.frame.origin.y+expectedUsageSize.height/2, expectedUsageSize.height, expectedUsageSize.height)  thick:1];
+        self.loadingForUsage=[[LoadingCircle alloc] initWithFrameAndThick:CGRectMake(self.lblUsageTitle.frame.origin.x+expectedUsageSize.width+10, self.lblUsageTitle.frame.origin.y+expectedUsageSize.height/2-3, expectedUsageSize.height, expectedUsageSize.height)  thick:1];
         [self addSubview:self.loadingForUsage];
 
         //place count;
@@ -52,7 +52,7 @@
         [self.lblBuildedPlaceCount setText:[NSString stringWithFormat:@"%@:",[DB getUI:@"builded_place"]]];
         [self addSubview:self.lblBuildedPlaceCount];
         CGSize expectedBuildedPlace=[self.lblBuildedPlaceCount sizeThatFits:CGSizeMake(self.frame.size.width-self.lblBuildedPlaceCount.frame.origin.x, 30)];
-        self.loadingForBuildedPlace=[[LoadingCircle alloc]initWithFrameAndThick:CGRectMake(self.lblBuildedPlaceCount.frame.origin.x+expectedBuildedPlace.width+10, self.lblBuildedPlaceCount.frame.origin.y+expectedBuildedPlace.height/2, expectedBuildedPlace.height, expectedBuildedPlace.height) thick:1.0f];
+        self.loadingForBuildedPlace=[[LoadingCircle alloc]initWithFrameAndThick:CGRectMake(self.lblBuildedPlaceCount.frame.origin.x+expectedBuildedPlace.width+10, self.lblBuildedPlaceCount.frame.origin.y+expectedBuildedPlace.height/2-3, expectedBuildedPlace.height, expectedBuildedPlace.height) thick:1.0f];
         [self addSubview:self.loadingForBuildedPlace];
         
         //review count;
@@ -62,7 +62,7 @@
         [self.lblReviewCount setTextColor:[UIColor whiteColor]];
         [self addSubview:self.lblReviewCount];
         CGSize expectedSizeOfReviewCount=[self.lblReviewCount sizeThatFits:CGSizeMake(frame.size.width-self.lblUsageTitle.frame.origin.x, 30)];
-        self.loadingForReviewCount=[[LoadingCircle alloc]initWithFrameAndThick:CGRectMake(self.lblReviewCount.frame.origin.x+expectedSizeOfReviewCount.width+10, self.lblReviewCount.frame.origin.y+expectedSizeOfReviewCount.height/2, expectedSizeOfReviewCount.height, expectedSizeOfReviewCount.height) thick:1.0f];
+        self.loadingForReviewCount=[[LoadingCircle alloc]initWithFrameAndThick:CGRectMake(self.lblReviewCount.frame.origin.x+expectedSizeOfReviewCount.width+10, self.lblReviewCount.frame.origin.y+expectedSizeOfReviewCount.height/2-3, expectedSizeOfReviewCount.height, expectedSizeOfReviewCount.height) thick:1.0f];
         [self addSubview:self.loadingForReviewCount];
 
     }
@@ -90,13 +90,13 @@
     }
     [UserInteractionLog getAsyncProfile:self.gv.localUserId accessToken:accessToken completion:^(NSMutableDictionary *data, NSError *connectionError) {
         dispatch_async(dispatch_get_main_queue(), ^{
-            self.totalSecondsFromRemote=[[[data valueForKey:@"result"] valueForKey:@"usage_time"] intValue];
+            self.gv.totalSecondsFromRemote=[[[data valueForKey:@"result"] valueForKey:@"usage_time"] intValue];
             //from db send error or save remote not succcess.
             int usageSecondsFromDB=[UserInteractionLog getUsageSecondsFromDB];
-            self.totalSecondsFromRemote+=usageSecondsFromDB;
+            self.gv.totalSecondsFromRemote+=usageSecondsFromDB;
             
             //usage time
-            self.lblUsageTitle.text=[NSString stringWithFormat:@"%@:  %@",[DB getUI:@"usage_time" ],[self calculateTimeWithSec:self.totalSecondsFromRemote]];
+            self.lblUsageTitle.text=[NSString stringWithFormat:@"%@:  %@",[DB getUI:@"usage_time" ],[self calculateTimeWithSec:self.gv.totalSecondsFromRemote]];
             
             //builded place count
             int buildedPlaceCount=[[[data valueForKey:@"result"] valueForKey:@"builded_place_count"] intValue];
@@ -118,21 +118,7 @@
 -(void)timerStart{
     self.gv.appExitDate=[NSDate date];
     NSTimeInterval secondsBetween = [self.gv.appExitDate timeIntervalSinceDate:self.gv.appLaunchDate];
-
-    ViewControllerRoot *root=(ViewControllerRoot *)self.gv.viewControllerRoot;
-    if(secondsBetween+self.totalSecondsFromRemote>5*60){
-        [root.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"5_minutes_usage"];
-    }
-    if(secondsBetween+self.totalSecondsFromRemote>5*60*2){
-        [root.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"10_minutes_usage"];
-    }
-    if(secondsBetween+self.totalSecondsFromRemote>5*60*4){
-        [root.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"20_minutes_usage"];
-    }
-    if(secondsBetween+self.totalSecondsFromRemote>5*60*8){
-        [root.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"40_minutes_usage"];
-    }
-    NSString *record=[self calculateTimeWithSec:secondsBetween+self.totalSecondsFromRemote];
+    NSString *record=[self calculateTimeWithSec:secondsBetween+self.gv.totalSecondsFromRemote];
     self.lblUsageTitle.text=[NSString stringWithFormat:@"%@:  %@",[DB getUI:@"usage_time" ],record];
 }
 -(void)timerStop{

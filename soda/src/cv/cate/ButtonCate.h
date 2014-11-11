@@ -31,6 +31,7 @@
 @property NSString *sortingKey;
 @property GV *gv;
 @property BOOL isEdit;
+//所有的類別的centerLocation 將會用同一個
 @property CLLocationCoordinate2D centerLocation;
 -(id)initWithIconName:(NSString *)pIconName frame:(CGRect)frame title:(NSString *) title name:(NSString*) pName lang:(NSString *) pLang keyword:(NSString *) pKeyword iden:(int) pIden;
 -(void)toCommonStatus;

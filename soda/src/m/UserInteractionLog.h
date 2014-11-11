@@ -17,4 +17,6 @@
 +(int)getUsageSecondsFromDB;
 +(void)sendLaunchLog;
 +(void)showTip:(id)target titleKey:(NSString *)titleKey tipKey:(NSString *)tipKey;
++(void)sendAnalyticsView:(NSString *) name;
++(void) sendAnalyticsEvent:(NSString *)action label:(NSString*)label;
 @end

@@ -17,8 +17,8 @@
     self = [super initWithFrame:frame];
     if (self) {
         self.name=@"suggestion";
-        lblTitle=[[UILabel alloc] init];
-        lblTitle.text=[DB getUI:@"about_us"];
+        lblTitle=[[LabelForChangeUILang alloc] init];
+        lblTitle.key=@"about_us";
         [lblTitle setFont:[GV sharedInstance].fontMenuTitle];
         [lblTitle setTextColor:[UIColor whiteColor]];
         [lblTitle setFrame:CGRectMake(68, 30, 200, 40)];
@@ -35,7 +35,7 @@
         [self.scrollView addSubview:self.btnMail];
         [self.btnMail setHidden:YES];
         
-        self.loading=[[LoadingCircle alloc] initWithFrameAndThick:CGRectMake((frame.size.width-30)/2, 87, 30, 30) thick:3];
+        self.loading=[[LoadingCircle alloc] initWithFrameAndThick:CGRectMake((frame.size.width-30)/2, 87, 30, 30) thick:1.5];
         [self addSubview:self.loading];
     }
     return self;
@@ -53,13 +53,10 @@
             NSString *aboutUs = [[data objectForKey:@"result"] valueForKey:@"about_us"];
             NSString *totalUsers =[[[data objectForKey:@"result"] valueForKey:@"total_users"] stringValue];
             NSString *totalPlaces =[[[data objectForKey:@"result"] valueForKey:@"total_places"] stringValue];
-            
             NSRange rangeOfTotalUsers=[aboutUs rangeOfString:@"{total_users}"];
             NSRange rangeOfTotalPlaces=[aboutUs rangeOfString:@"{total_places}"];
-            
             aboutUs=[aboutUs stringByReplacingOccurrencesOfString:@"{total_users}" withString:totalUsers];
             aboutUs=[aboutUs stringByReplacingOccurrencesOfString:@"{total_places}" withString:totalPlaces];
-            
             if(rangeOfTotalUsers.location<rangeOfTotalPlaces.location){
                 rangeOfTotalPlaces.location-=@"{total_users}".length -totalUsers.length;
             }else{
@@ -67,6 +64,7 @@
             }
             rangeOfTotalUsers.length=totalUsers.length;
             rangeOfTotalPlaces.length=totalPlaces.length;
+
             
             NSRange rangeFirst;
             NSRange rangeSecond;
@@ -77,7 +75,7 @@
                 rangeFirst=rangeOfTotalUsers;
                 rangeSecond=rangeOfTotalPlaces;
             }
-            
+
             NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:aboutUs];
             
             NSMutableParagraphStyle *parStyleForName=[[NSMutableParagraphStyle alloc] init];
@@ -92,7 +90,6 @@
                                      range:NSMakeRange(0, aboutUs.length)];
             
 
-            
             //normal
             [attributedString addAttribute:NSForegroundColorAttributeName
                                      value:[UIColor darkGrayColor]
@@ -100,7 +97,6 @@
             [attributedString addAttribute:NSFontAttributeName
                                      value:self.gv.fontArticleForHerbrew
                                      range:NSMakeRange(0,rangeFirst.location)];
-            
             
             [attributedString addAttribute:NSForegroundColorAttributeName
                                      value:[UIColor whiteColor]
@@ -129,8 +125,6 @@
             [attributedString addAttribute:NSFontAttributeName
                                      value:self.gv.fontArticleForHerbrew
                                      range:NSMakeRange(rangeSecond.location+rangeSecond.length,aboutUs.length- rangeSecond.location-rangeSecond.length)];
-
-            
 
             
             self.lblAboutUs.attributedText=attributedString;

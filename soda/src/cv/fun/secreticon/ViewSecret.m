@@ -17,8 +17,8 @@
     self = [super initWithFrame:frame];
     if (self) {
         self.name=@"secreticon";
-        lblTitle=[[UILabel alloc] init];
-        lblTitle.text=[DB getUI:@"icon_collection"];
+        lblTitle=[[LabelForChangeUILang alloc] init];
+        lblTitle.key=@"icon_collection";
         [lblTitle setFont:[GV sharedInstance].fontMenuTitle];
         [lblTitle setTextColor:[UIColor whiteColor]];
         [lblTitle setFrame:CGRectMake(68, 30, 200, 40)];
@@ -34,11 +34,17 @@
     for(int i=0;i<scrollViewSecret.subviews.count;i++){
         if([[scrollViewSecret.subviews objectAtIndex:i] isKindOfClass:[ButtonSecretIcon class]]){
            ButtonSecretIcon *icon= (ButtonSecretIcon *)[scrollViewSecret.subviews objectAtIndex:i];
+            if([tip isEqualToString:@"5_minutes_usage"]){
+                self.gv.is5minsUsage=YES;
+            }else if([tip isEqualToString:@"10_minutes_usage"]){
+                self.gv.is10minsUsage=YES;
+            }else if([tip isEqualToString:@"20_minutes_usage"]){
+                self.gv.is20minsUsage=YES;
+            }else if([tip isEqualToString:@"40_minutes_usage"]){
+                self.gv.is40minsUsage=YES;
+            }
             if([icon.tip isEqual:tip] && !icon.isGet){
-                NSLog(@"ViewSecret.checkSecretByCondition:%@ download icon",icon.name);
-                //peter modify  3秒內只播一次 
-                [icon playAudio];
-                [icon downloadSecretIcon];
+                [icon downloadSecretIcon:YES];
             }
         }
     }

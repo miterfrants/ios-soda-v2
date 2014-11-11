@@ -110,6 +110,10 @@
             [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"tip",@"1"]];
             [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"notification",@"1"]];
             [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"lang",[Util getLang]]];
+            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%f')",@"center_lat",0.0f]];
+            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%f')",@"center_lng",0.0f]];
+            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%f')",@"distance",300.0f]];
+            [db executeUpdate:[NSString stringWithFormat:@"insert into sys_config (name,content) VALUES ('%@','%@')",@"is_cust_location",@"N"]];
             //coin 先不實作
         }
         @catch (NSException *exception) {
@@ -268,7 +272,7 @@ NSString *sysConfigResult=@"";
         if(checkCollection>0){
             sql=[NSString stringWithFormat:@"UPDATE ui SET title='%@' WHERE lang='%@' AND name='%@'", [dicCate valueForKey:@"title"],[dicCate valueForKey:@"lang"],[dicCate valueForKey:@"name"]];
         }else{
-            sql=[NSString stringWithFormat:@"INSERT INTO ui (name,title,lang) VALUES ('%@','%@','%@')",[dicCate valueForKey:@"name"],[dicCate valueForKey:@"title"],[dicCate valueForKey:@"lang"] ];
+            sql=[NSString stringWithFormat:@"INSERT INTO ui (name,title,lang) VALUES ('%@','%@','%@')",[dicCate valueForKey:@"name"],[[dicCate valueForKey:@"title"] stringByReplacingOccurrencesOfString:@"'" withString:@"''"],[dicCate valueForKey:@"lang"] ];
         }
         [db executeUpdate:sql];
     }
@@ -313,6 +317,17 @@ NSString *uiResult;
     [db open];
     uiResult=[db stringForQuery:[NSString stringWithFormat:@"SELECT title FROM ui WHERE name='%@' AND lang='%@'",[dicParam valueForKey:@"key"], [dicParam valueForKey:@"lang"]]];
     [db close];
+}
+
++(NSString *)getUIInnerFMDatabaseQueue:(NSString *)key{
+    FMDatabase *db=[DB getShareInstance].db;
+    [db open];
+    NSString *result=[db stringForQuery:[NSString stringWithFormat:@"SELECT title FROM ui WHERE name='%@' AND lang=(select content from sys_config where name='lang')",key]];
+    [db close];
+    if(!result){
+        return [key stringByReplacingOccurrencesOfString:@"_" withString:@" "];
+    }
+    return result;
 }
 
 +(BOOL) clearLocalCollection:db{

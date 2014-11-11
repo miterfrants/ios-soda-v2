@@ -7,6 +7,7 @@
 //
 
 #import "ButtonProtoType.h"
+#import <FacebookSDK/FacebookSDK.h>
 
 @interface ButtonLike : ButtonProtoType
 @property UIImageView *imgViewFill;

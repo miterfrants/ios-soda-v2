@@ -7,6 +7,7 @@
 //
 
 #import "LabelForChangeUILang.h"
+#import "DB.h"
 
 @implementation LabelForChangeUILang
 
@@ -14,9 +15,22 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        // Initialization code
+        self.gv=[GV sharedInstance];
     }
     return self;
+}
+
+-(void) setKey:(NSString *)value{
+    self.text=[DB getUI:value];
+    [self.gv.arrLabelForChangeUILang addObject:self];
+    _key=value;
+}
+
+-(void)changeLang{
+    self.text=[DB getUI:self.key];
+    if(self.parentView && self.completeInvoke){
+        [self.parentView performSelectorOnMainThread:self.completeInvoke withObject:nil waitUntilDone:YES];
+    }
 }
 
 /*

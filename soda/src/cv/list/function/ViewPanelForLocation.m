@@ -11,6 +11,7 @@
 #import "SliderDistance.h"
 #import "DB.h"
 #import "ScrollViewControllerCate.h"
+#import "ScrollViewControllerList.h"
 #import "ViewTip.h"
 @implementation ViewPanelForLocation
 @synthesize mapview,switchLocation,sliderDist,updateDBDistanceTimer,circle
@@ -28,7 +29,7 @@
         mapview.myLocationEnabled = YES;
         mapview.accessibilityElementsHidden=NO;
         mapview.delegate=self;
-
+        [mapview clear];
         [self addSubview:mapview];
         
         CLLocationCoordinate2D circleCenter = CLLocationCoordinate2DMake(0, 0);
@@ -37,7 +38,27 @@
         circle.map=mapview;
         circle.fillColor = [Util colorWithHexString:@"b6e6e672"];
         circle.strokeColor = [Util colorWithHexString:@"#66abab72"];
-        circle.strokeWidth = 3;
+        circle.zIndex=1;
+        circle.strokeWidth = 1;
+
+        GMSMutablePath *path = [GMSMutablePath path];
+
+        [path addCoordinate:[mapview.projection coordinateForPoint:CGPointMake(self.gv.screenW/2, mapview.frame.size.height/2-5)]];
+        [path addCoordinate:[mapview.projection coordinateForPoint:CGPointMake(self.gv.screenW/2, mapview.frame.size.height/2+5)]];
+        self.centerCrossVertical = [GMSPolyline polylineWithPath:path];
+        self.centerCrossVertical.strokeColor=[Util colorWithHexString:@"#263439FF"];
+        self.centerCrossVertical.strokeWidth=0.5;
+        self.centerCrossVertical.zIndex=2;
+        self.centerCrossVertical.map=mapview;
+        
+        path = [GMSMutablePath path];
+        [path addCoordinate:[mapview.projection coordinateForPoint:CGPointMake(self.gv.screenW/2+5, mapview.frame.size.height/2)]];
+        [path addCoordinate:[mapview.projection coordinateForPoint:CGPointMake(self.gv.screenW/2-5, mapview.frame.size.height/2)]];
+        self.centerCrosshorizontal = [GMSPolyline polylineWithPath:path];
+        self.centerCrosshorizontal.strokeColor=[Util colorWithHexString:@"#263439FF"];
+        self.centerCrosshorizontal.strokeWidth=0.5;
+        self.centerCrosshorizontal.zIndex=2;
+        self.centerCrosshorizontal.map=mapview;
         
         switchLocation=[[SwitchLocation alloc] initWithFrame:CGRectMake((self.gv.screenW-207)/2, 14, 207, 28)];
         [self addSubview:switchLocation];
@@ -61,20 +82,17 @@
         viewBGForTxtCenterAddress.userInteractionEnabled=NO;
         CAGradientLayer *gradient = [CAGradientLayer layer];
         gradient.frame = viewBGForTxtCenterAddress.bounds;
-        gradient.colors = [NSArray arrayWithObjects:(id)[[Util colorWithHexString:@"8fc9c8ff"] CGColor], (id)[[Util colorWithHexString:@"8fc9c87f"] CGColor], nil];
+        gradient.colors = [NSArray arrayWithObjects:(id)[[Util colorWithHexString:@"#8fc9c8ff"] CGColor], (id)[[Util colorWithHexString:@"#8fc9c87f"] CGColor], nil];
         [viewBGForTxtCenterAddress.layer insertSublayer:gradient atIndex:0];
         [self addSubview:viewBGForTxtCenterAddress];
         [viewBGForTxtCenterAddress setAlpha:0.0];
         
-        CGSize fontSize=[@"Center:" sizeWithAttributes:@{NSFontAttributeName:self.gv.fontListFunctionTitle }];
-        lblCenter=[[UILabel alloc]initWithFrame:CGRectMake(18, mapview.frame.origin.y+8, fontSize.width, 28)];
-        [lblCenter setFont:self.gv.fontListFunctionTitle];
-        [lblCenter setTextColor:[UIColor whiteColor]];
-        [lblCenter setText:@"Center:"];
-//        lblCenter.layer.shadowOffset = CGSizeMake(0.0f,0.0f);
-//        lblCenter.layer.shadowRadius = 2.0f;
-//        lblCenter.layer.shadowOpacity = .8f;
-//        lblCenter.layer.shadowColor = [Util colorWithHexString:@"#000000ff"].CGColor;
+
+        lblCenter=[[LabelForChangeUILang alloc]initWithFrame:CGRectMake(18, mapview.frame.origin.y+8, 50, 28)];
+        [lblCenter setFont:self.gv.fontNormalForHebrew];
+        [lblCenter setTextAlignment:NSTextAlignmentRight];
+        [lblCenter setTextColor:[Util colorWithHexString:@"#263439FF"]];
+        lblCenter.key=@"center";
         [lblCenter setHidden:YES];
         [lblCenter setAlpha:0.0f];
         [self addSubview:lblCenter];
@@ -109,8 +127,10 @@
     [txtCenterAdderss resignFirstResponder];
     if ([touch.view isKindOfClass:[SwitchLocation class]]) {
         if(switchLocation.isOn){
+            [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"list_other_center"];
             [self animationShowOtherCenter];
         }else{
+            [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"list_current_center"];
             [self animationHideOtherCenter];
         }
         [self updateCameraCenterAndDB:YES];
@@ -150,14 +170,13 @@
                     NSDictionary *dicLocation=[[[[data objectForKey:@"results"] objectAtIndex:0] objectForKey:@"geometry"] objectForKey:@"location"];
                     CLLocationCoordinate2D tempLocation=CLLocationCoordinate2DMake([[dicLocation valueForKey:@"lat"] floatValue], [[dicLocation valueForKey:@"lng"] floatValue]);
                     selected.centerLocation=tempLocation;
-                    NSLog(@"%f",selected.centerLocation.longitude);
                 }else{
                     return;
                 }
                 [self updateCameraCenterAndDB:YES];
             });
         }else{
-            NSLog(@"ZERO_RESULTS");
+            NSLog(@"%@",[data objectForKey:@"status"]);
             dispatch_async(dispatch_get_main_queue(), ^{
                 ViewTip *tip=(ViewTip *)self.gv.viewTip;
                 [tip statusPreviousStatusToTip:self title:[DB getUI:@"operation_hint"] msg:[DB getUI:@"cant_find_address"]];
@@ -171,8 +190,7 @@
         [switchLocation turnOn:YES];
     }
     ScrollViewControllerCate *scrollViewControllerCate =(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
-    ButtonCate *selected =scrollViewControllerCate.selectedButtonCate;
-    selected.centerLocation=coordinate;
+    scrollViewControllerCate.custCenterLocation = coordinate;
     [self.txtCenterAdderss resignFirstResponder];
     [self updateCameraCenterAndDB:YES];
     [self convertCoordinateToAddress];
@@ -214,6 +232,13 @@
     updateDBDistanceTimer =nil;
     double tempDist=[self getDist];
     [circle setRadius:tempDist];
+    double screenDist=[mapview.projection pointsForMeters:tempDist atCoordinate:circle.position];
+    if(screenDist>self.gv.screenW/2){
+        [mapview animateToZoom:mapview.camera.zoom-1];
+    }else if(screenDist<40){
+        [mapview animateToZoom:mapview.camera.zoom+1];
+    }
+    [self updateCenterCross:circle.position];
     if(tempDist>1000){
         tempDist=floor(tempDist*100/1000+0.5)/100;
         [self.lblDistance setText:[NSString stringWithFormat:@"%.2f km",tempDist]];
@@ -221,6 +246,11 @@
         [self.lblDistance setText:[NSString stringWithFormat:@"%.0f m",tempDist]];
     }
     updateDBDistanceTimer=[NSTimer scheduledTimerWithTimeInterval:0.5 target:self selector:@selector(updateSelectedButtonCateDistanceAndDB) userInfo:nil repeats:NO];
+
+}
+
+-(void)zoomFit:(double)factDist centerLocation:(CLLocationCoordinate2D) centerLocation{
+
 
 }
 
@@ -232,26 +262,40 @@
 }
 
 -(void)initialDistanceAndCenter:(ButtonCate *)selected{
+    NSLog(@"initialDistanceAndCenter");
+    if(selected==NULL){
+        selected= [[ButtonCate alloc] init];
+    }
+    if(selected.distance<=0){
+        selected.distance = 67;
+    }
     double dist=selected.distance;
     double a=1.055654553102258628588387749223;
     double b=77.541123059140389250715902339511;
     double x=log10(dist)/log10(a)-b;
     [sliderDist setValue:x];
-    [circle setRadius:x];
+    if (x>=0){
+        [circle setRadius:x];
+    }
     [self sliderChange:nil];
-    if(selected.centerLocation.latitude!=0 && selected.centerLocation.longitude!=0){
+    ScrollViewControllerCate *svCate = (ScrollViewControllerCate *) self.gv.scrollViewControllerCate;
+    if(svCate.isCustLocation){
         [circle setPosition:selected.centerLocation];
         GMSCameraPosition *camera= [GMSCameraPosition cameraWithLatitude:selected.centerLocation.latitude
                                                                longitude:selected.centerLocation.longitude
                                                                     zoom:15];
         [mapview setCamera:camera];
+
+        double screenRadius=[mapview.projection pointsForMeters:dist atCoordinate:selected.centerLocation];
+        GMSCoordinateBounds *circleBound= [[GMSCoordinateBounds alloc]initWithCoordinate:[mapview.projection coordinateForPoint:CGPointMake(self.gv.screenW/2-screenRadius, self.mapview.frame.size.height/2)]
+                    coordinate:[mapview.projection coordinateForPoint:CGPointMake(self.gv.screenW/2+screenRadius, self.mapview.frame.size.height/2)]];
+       GMSCameraUpdate *update = [GMSCameraUpdate fitBounds:circleBound withPadding:20];
+        [mapview animateWithCameraUpdate:update];
         [switchLocation turnOn:NO];
         [self convertCoordinateToAddress];
     }else{
         [switchLocation turnOff:NO];
     }
-
-
 }
 
 -(void)updateSelectedButtonCateDistanceAndDB{
@@ -264,26 +308,32 @@
 -(void)_updateDBCollectionDist:(NSString *)iden{
     FMDatabase *db=[DB getShareInstance].db;
     [db open];
-    NSLog(@"%@",[NSString stringWithFormat:@"UPDATE collection set distance='%.2f' WHERE id=%d", [self getDist],[iden intValue]]);
-    [db executeUpdate:[NSString stringWithFormat:@"UPDATE collection set distance='%.2f' WHERE id=%d", [self getDist],[iden intValue]]];
+    [db executeUpdate:[NSString stringWithFormat:@"UPDATE sys_config set content='%.2f' WHERE name='distance'", [self getDist]]];
     [db close];
+    ScrollViewControllerCate *scrollViewControllerCate =(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
+    scrollViewControllerCate.custDist = [self getDist];
 }
 
 -(void) updateCameraCenterAndDB:(BOOL) isUpdateDB{
     NSLog(@"ViewPanelForLocation.updateCameraCenterAndDB");
     ScrollViewControllerCate *scrollViewControllerCate =(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
+    ScrollViewControllerList *scrollViewControllerList =(ScrollViewControllerList *)self.gv.scrollViewControlllerList;
     ButtonCate *selected =scrollViewControllerCate.selectedButtonCate;
     NSMutableDictionary *dicParameter=[[NSMutableDictionary alloc] init];
     //center 是由外面傳進來的
     if(switchLocation.isOn){
-        [self updateCamera:selected.centerLocation];
-        [dicParameter setValue:[NSString stringWithFormat:@"%f",selected.centerLocation.latitude] forKey:@"lat"];
-        [dicParameter setValue:[NSString stringWithFormat:@"%f",selected.centerLocation.longitude] forKey:@"lng"];
+        if(selected.centerLocation.latitude!=0 && selected.centerLocation.longitude!=0){
+            [self updateCamera:selected.centerLocation];
+            [dicParameter setValue:[NSString stringWithFormat:@"%f",selected.centerLocation.latitude] forKey:@"lat"];
+            [dicParameter setValue:[NSString stringWithFormat:@"%f",selected.centerLocation.longitude] forKey:@"lng"];
+        }else{
+            selected.centerLocation = scrollViewControllerList.locationManager.location.coordinate;
+        }
     }else{
+        selected.centerLocation=CLLocationCoordinate2DMake(0, 0);
         CLLocationManager *locationManager = [[CLLocationManager alloc] init];
         locationManager.distanceFilter = kCLDistanceFilterNone;
         locationManager.desiredAccuracy = kCLLocationAccuracyBest;
-        [locationManager startUpdatingLocation];
         CLLocationCoordinate2D tempCenter = CLLocationCoordinate2DMake(locationManager.location.coordinate.latitude, locationManager.location.coordinate.longitude);
         [self updateCamera:tempCenter];
         [dicParameter setValue:@"0" forKey:@"lat"];
@@ -301,16 +351,45 @@
     camera= [GMSCameraPosition cameraWithLatitude:cameraCenter.latitude
                                         longitude:cameraCenter.longitude
                                              zoom:mapview.camera.zoom];
-    NSLog(@"cameraCenter:%f",cameraCenter.latitude);
+    [self updateCenterCross:cameraCenter];
     [circle setPosition:cameraCenter];
     [mapview setCamera:camera];
+    
+}
+
+-(void) updateCenterCross:(CLLocationCoordinate2D) cameraCenter{
+    self.centerCrossVertical.map=nil;
+    self.centerCrosshorizontal.map=nil;
+    self.centerCrosshorizontal=nil;
+    self.centerCrossVertical=nil;
+    
+    GMSMutablePath *path = [GMSMutablePath path];
+    CGPoint centerPoint=[mapview.projection pointForCoordinate:cameraCenter];
+    [path addCoordinate:[mapview.projection coordinateForPoint:CGPointMake(centerPoint.x+5, centerPoint.y)]];
+    [path addCoordinate:[mapview.projection coordinateForPoint:CGPointMake(centerPoint.x-5, centerPoint.y)]];
+    self.centerCrosshorizontal = [GMSPolyline polylineWithPath:path];
+    self.centerCrosshorizontal.strokeColor=[Util colorWithHexString:@"#263439FF"];
+    self.centerCrosshorizontal.strokeWidth=0.5;
+    self.centerCrosshorizontal.zIndex=2;
+    self.centerCrosshorizontal.map=mapview;
+    
+    path = [GMSMutablePath path];
+    [path addCoordinate:[mapview.projection coordinateForPoint:CGPointMake(centerPoint.x, centerPoint.y+5)]];
+    [path addCoordinate:[mapview.projection coordinateForPoint:CGPointMake(centerPoint.x, centerPoint.y-5)]];
+    self.centerCrossVertical = [GMSPolyline polylineWithPath:path];
+    self.centerCrossVertical.strokeColor=[Util colorWithHexString:@"#263439FF"];
+    self.centerCrossVertical.strokeWidth=0.5;
+    self.centerCrossVertical.zIndex=2;
+    self.centerCrossVertical.map=mapview;
+
 }
 
 -(void)_updateDBCollectionCenter:(NSMutableDictionary *)dicParameters{
     FMDatabase *db=[DB getShareInstance].db;
     [db open];
-    NSLog(@"%@",[NSString stringWithFormat:@"UPDATE collection set center_lat='%f',center_lng='%f' WHERE id=%d",[[dicParameters valueForKey:@"lat"] floatValue],[[dicParameters valueForKey:@"lng"] floatValue]  ,[[dicParameters valueForKey:@"id"] intValue]]);
-    [db executeUpdate:[NSString stringWithFormat:@"UPDATE collection set center_lat='%f',center_lng='%f' WHERE id=%d",[[dicParameters valueForKey:@"lat"] floatValue],[[dicParameters valueForKey:@"lng"] floatValue]  ,[[dicParameters valueForKey:@"id"] intValue]]];
+    NSLog(@"%@",[NSString stringWithFormat:@"UPDATE sys_config set content='%f' WHERE name='center_lat'",[[dicParameters valueForKey:@"lat"] floatValue]]);
+    [db executeUpdate:[NSString stringWithFormat:@"UPDATE sys_config set content='%f' WHERE name='center_lat'",[[dicParameters valueForKey:@"lat"] floatValue]]];
+    [db executeUpdate:[NSString stringWithFormat:@"UPDATE sys_config set content='%f' WHERE name='center_lng'",[[dicParameters valueForKey:@"lng"] floatValue]]];
     [db close];
 }
 @end

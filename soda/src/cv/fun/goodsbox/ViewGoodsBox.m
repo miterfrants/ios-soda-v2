@@ -15,8 +15,8 @@
     self = [super initWithFrame:frame];
     if (self) {
         self.name=@"goodsbox";
-        lblTitle=[[UILabel alloc] init];
-        lblTitle.text=[DB getUI:@"goods_box"];
+        lblTitle=[[LabelForChangeUILang alloc] init];
+        lblTitle.key=@"goods_box";
         [lblTitle setFont:[GV sharedInstance].fontMenuTitle];
         [lblTitle setTextColor:[UIColor whiteColor]];
         [lblTitle setFrame:CGRectMake(68, 30, 200, 40)];

@@ -14,7 +14,7 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        self.viewBg=[[UIImageView alloc]initWithImage:[UIImage imageNamed:@"direction.png"]];
+        self.viewBg=[[UIImageView alloc]initWithImage:[UIImage imageNamed:@"showmap.png"]];
         [self addSubview:self.viewBg];
         [self.viewBg setFrame:CGRectMake(0, 0, frame.size.width, frame.size.height)];
         self.name=@"map";

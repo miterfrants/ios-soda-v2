@@ -14,7 +14,7 @@
 {
     self = [super initWithFrame:frame];
     if (self) {
-        self.viewBg= [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"pin.png"]];
+        self.viewBg= [[UIImageView alloc] initWithImage:[UIImage imageNamed:@"showmap.png"]];
         [self.viewBg setFrame:CGRectMake(0, 0,self.viewBg.frame.size.width/2, self.viewBg.frame.size.height/2)];
         [self addSubview:self.viewBg];
     }
@@ -25,7 +25,7 @@
 -(void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event
 {
     if([GV getGlobalStatus]==LIST){
-        UIImage *bg=[UIImage imageNamed:@"pin_over.png"];
+        UIImage *bg=[UIImage imageNamed:@"showmap_over.png"];
         [self.viewBg setImage:bg];
     }
     [super touchesBegan:touches withEvent:event];
@@ -51,7 +51,7 @@
 
 
 -(void)toUnHighLightStatus{
-    UIImage *bg=[UIImage imageNamed:@"pin.png"];
+    UIImage *bg=[UIImage imageNamed:@"showmap.png"];
     [self.viewBg setImage:bg];
 }
 @end

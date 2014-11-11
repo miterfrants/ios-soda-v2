@@ -7,13 +7,14 @@
 //
 
 #import "ButtonProtoType.h"
+#import "LabelForChangeUILang.h"
 
 @interface ButtonFunction : ButtonProtoType
-@property UILabel *lblTitle;
+@property LabelForChangeUILang *lblTitle;
 @property UIImageView *viewArr;
 @property BOOL isSelected;
 @property NSString *name;
--(id)initWithFrameAndName:(CGRect) frame title:(NSString *) title;
+-(id)initWithFrameAndName:(CGRect) frame titleKey:(NSString *) titleKey;
 -(void)toUnHighLightStatus;
 -(void)toHighLightStatus;
 @end

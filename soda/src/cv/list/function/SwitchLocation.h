@@ -8,10 +8,11 @@
 
 #import <UIKit/UIKit.h>
 #import "ViewProtoType.h"
+#import "LabelForChangeUILang.h"
 
 @interface SwitchLocation : ViewProtoType
-@property UILabel *lblOn;
-@property UILabel *lblOff;
+@property LabelForChangeUILang *lblOn;
+@property LabelForChangeUILang *lblOff;
 @property UIView *viewButton;
 @property UIView *viewBorder;
 @property CAShapeLayer *layerBg;

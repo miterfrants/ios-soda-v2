@@ -5,16 +5,12 @@
 //  Created by Po-Hsiang Huang on 2014/4/2.
 //  Copyright (c) 2014年 ___FULLUSERNAME___. All rights reserved.
 //
-//1.profile 檢查的機制把開啟app的時間送過來，關掉app的時間送過來同時把使用時間送過來，檢查有沒有在可允許誤差範圍;
-//from local 處理資料庫
-//3.checkSecretIcon  share 到 facebook 會block 住main thread
-//4.新增new category scroll view 會過長
-//5.整合同時播放得到audio
-//6.得到icon 的 popup
-//9.icon scroll bar有點衝突修正
-//13.沒有設定email的人會出現exception;
-//14.如果沒有filter condition list item會疊在一起;
-//16.如果是loading 停用tip
+
+
+//102
+//搜尋中心問題
+
+
 
 #import "AppDelegate.h"
 #import <GoogleOpenSource/GoogleOpenSource.h>
@@ -24,16 +20,50 @@
 #import "File.h"
 #import "Util.h"
 #import "UserInteractionLog.h"
+#import "GameModel.h"
+#import "GAI.h"
+
 
 @implementation AppDelegate
 @synthesize root,gv,tip;
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
-    
+    gv.bgLoopTimer=[NSTimer scheduledTimerWithTimeInterval:5 target:self selector:@selector(loopDo) userInfo:nil repeats:YES];
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     [self.window makeKeyAndVisible];
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
+    //google analytics initial
+    [[GAI sharedInstance] trackerWithTrackingId:@"UA-48350612-1"];
+    
+    //check allow get location and better than 3G network.
+    
+    
+    
+    //game model;
+    [GameModel initialTimer:^(UIImage *pIcon, NSString *title, NSString *msg) {
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self.pop.imgViewIcon setImage:pIcon];
+            [self.pop.imgViewIcon setFrame:CGRectMake(0, 0, 100,94)];
+            self.pop.lblTitle.text=title;
+            self.pop.lblMessage.text=msg;
+            [self.pop.lblTitle setFont:self.gv.fontNormalForHebrew];
+            [self.pop.lblTitle setTextColor:[UIColor whiteColor]];
+            [self.pop.lblTitle setFrame:CGRectMake(90, 10, self.gv.screenW-44-10, 20)];
+            [self.pop.lblMessage setFont:self.gv.fontArticleForHerbrew];
+            self.pop.lblMessage.numberOfLines=9999;
+            CGSize expectedMessageSize =[self.pop.lblMessage sizeThatFits:CGSizeMake(self.gv.screenW-100-10, 999999)];
+            [self.pop.lblMessage setFrame:CGRectMake(90, 10+20, expectedMessageSize.width,expectedMessageSize.height)];
+            [self.pop.lblMessage setTextColor:[UIColor darkGrayColor]];
+            
+            if(expectedMessageSize.height+20+20>80){
+                [self.pop setFrame:CGRectMake(-self.gv.screenW, self.gv.screenH-expectedMessageSize.height-20-20, self.gv.screenW, expectedMessageSize.height+20+20)];
+            }
+            [self.pop fadeIn:nil];
+        });
+    }];
+
+    
     
     //fb login
     if (FBSession.activeSession.state == FBSessionStateCreatedTokenLoaded) {
@@ -56,10 +86,6 @@
     //map key;
     [GMSServices provideAPIKey:@"AIzaSyCW4c3kjZgQeAL7QGF0tWKJ9OycP19slW4"];
     
-    
-    //temp;
-
-    
     //root view
     NSLog(@"initial root view");
     root=[[ViewControllerRoot alloc]init];
@@ -80,14 +106,52 @@
     self.gv.keyboardTopInput=self.keyboardTopInput;
     
     self.gv.appLaunchDate=[NSDate date];
+    
+    
+    self.pop=[[PopupView alloc]initWithFrame:CGRectMake(-self.gv.screenW, self.gv.screenH-80, self.gv.screenW, 80)];
+    UIView *topBorder=[[UIView alloc]initWithFrame:CGRectMake(0, 0, self.gv.screenW, 1)];
+    [topBorder setBackgroundColor:[UIColor whiteColor]];
+    [self.pop addSubview:topBorder];
+    [self.pop setBackgroundColor:[Util colorWithHexString:@"#8fc9c8ff"]];
+    [self.pop setClipsToBounds:YES];
+    self.pop.delegate=[GameModel shareInstance];
+    [self.window addSubview:self.pop];
+    
+    
     return YES;
+}
+
+
+int loopCount=0;
+-(void)loopDo{
+    loopCount+=1;
+    //加上使用時間
+    self.gv.appExitDate=[NSDate date];
+    if(loopCount%4==0){
+        [UserInteractionLog sendUsageTimeWithStartTime:self.gv.appLaunchDate eTime:self.gv.appExitDate];
+        self.gv.appLaunchDate=self.gv.appExitDate;
+    }
+    NSTimeInterval secondsBetween = [self.gv.appExitDate timeIntervalSinceDate:self.gv.appLaunchDate];
+    if(!self.gv.is5minsUsage && secondsBetween+self.gv.totalSecondsFromRemote>5*60){
+        [root.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"5_minutes_usage"];
+    }
+    if(!self.gv.is10minsUsage && secondsBetween+self.gv.totalSecondsFromRemote>5*60*2){
+        [root.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"10_minutes_usage"];
+    }
+    if(!self.gv.is20minsUsage && secondsBetween+self.gv.totalSecondsFromRemote>5*60*4){
+        [root.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"20_minutes_usage"];
+    }
+    if(!self.gv.is40minsUsage && secondsBetween+self.gv.totalSecondsFromRemote>5*60*8){
+        [root.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"40_minutes_usage"];
+    }
+
 }
 
 -(void)iniConfig{
     gv=[GV sharedInstance];
     
     //ini url
-    gv.domain=@"36.224.20.235";
+    gv.domain=@"loca.tips";
     gv.controllerCollection=@"api/soda/collection.aspx";
     gv.controllerUI=@"api/soda/ui.aspx";
     gv.controllerIcon=@"api/soda/icon.aspx";
@@ -160,7 +224,7 @@
     gv.listBufferCount=20;
     gv.isBlurModel=NO;
     gv.localUserId=@"";
-    
+    gv.arrLabelForChangeUILang=[[NSMutableArray alloc] init];
     //很容易 OVER_REQUEST_LIMIT You have exceeded your daily request quota for this API
     //目前想到一個方法用地點密度的方式在radar search 的時候做local server 地點密度的測試
     //如果密度夠高就用local端的資料
@@ -204,16 +268,18 @@
     gv.fontArticleForHerbrew=[UIFont fontWithName:@"HelveticaNeue-Light" size:14.0f];
     
     //key
-    gv.googleWebKey=@"AIzaSyCYM1UUnXbgP3eD__x2EjIugNOy-vE3McY";
+    gv.googleWebKey=@"AIzaSyDX0drEfiBpop1Fn7h1BKUPFI42LuYPcRg";
     
     //get aysnc background thread
     gv.backgroundThreadManagement=[[NSOperationQueue alloc] init];
+    gv.InertPlaceQueue=[[NSOperationQueue alloc]init];
     gv.AudioQueue=[[NSOperationQueue alloc] init];
     gv.FMDatabaseQueue =[[NSOperationQueue alloc]init];
     [gv.FMDatabaseQueue setMaxConcurrentOperationCount:1];
     gv.GooglePlaceDetailQueue =[[NSOperationQueue alloc]init];
     [gv.GooglePlaceDetailQueue setMaxConcurrentOperationCount:1];
     [gv.AudioQueue setMaxConcurrentOperationCount:1];
+    [gv.InertPlaceQueue setMaxConcurrentOperationCount:1];
     NSLog(@"finish initail conifg");
     [UserInteractionLog sendLaunchLog];
 }
@@ -371,6 +437,7 @@
                 NSMutableDictionary *dicUserInfo= [Util jsonWithUrl:[NSString stringWithFormat:@"%@://%@/%@?action=%@&source=4&outer_id=%@&access_token=%@",gv.urlProtocol ,gv.domain,gv.controllerMember,gv.actionGetLocalMember,person.identifier,auth.accessToken]];
                     NSLog(@"%@",[NSString stringWithFormat:@"%@://%@/%@?action=%@&source=4&outer_id=%@&access_token=%@",gv.urlProtocol ,gv.domain,gv.controllerMember,gv.actionGetLocalMember,person.identifier,auth.accessToken]);
                     gv.localUserId=[[[dicUserInfo objectForKey:@"results"] valueForKey:@"user_id"] stringValue];
+                    NSLog(@"%@",dicUserInfo);
                     NSLog(@"%@",gv.localUserId);
                     gv.localUserName=[[dicUserInfo objectForKey:@"results"] valueForKey:@"user_name"];
                     
@@ -442,7 +509,7 @@
 }
 
 -(void)changeUILang{
-    root.viewControllerTop.lblHint.text=[DB getUI:@"search"];
+
     
     ScrollViewCate *scrollViewCate=(ScrollViewCate *)root.scrollViewControllerCate.scrollViewCate;
     int childLen=(int)scrollViewCate.subviews.count;
@@ -465,40 +532,35 @@
         NSString *title=[results stringForColumn:@"title"];
         NSString *name=[results stringForColumn:@"name"];
         NSString *keyword=[results stringForColumn:@"keyword"];
-        NSString *icon=[results stringForColumn:@"icon"];
+        //NSString *icon=[results stringForColumn:@"icon"];
         int iden=[results intForColumn:@"id"];
         ButtonCate *cate=(ButtonCate *) [dicOfCateButton objectForKey:name];
+        if([root.viewControllerTop.breadCrumbView.btnSecond.lblCate.text isEqualToString:cate.titleLabel.text]){
+            root.viewControllerTop.breadCrumbView.btnSecond.lblCate.text=title;
+        }
         cate.name=name;
+        cate.originalTitle=title;
         cate.titleLabel.text=title;
         cate.keyword=keyword;
-        cate.imgViewIcon=[[UIImageView alloc] initWithImage:[UIImage imageNamed:icon]];
-        cate.iconName=icon;
+        //cate.imgViewIcon=[[UIImageView alloc] initWithImage:[UIImage imageNamed:icon]];
+        //cate.iconName=icon;
         cate.iden=iden;
-        [cate updateCollection];
+        cate.lblTitle.text=title;
         i+=1;
     }
     [results close];
     [db close];
-
-    root.scrollViewControllerCate.viewIconEditPeanel.viewEditKeyword.lblDisplayTitle.text=[DB getUI:@"edit_keyword"];
-    root.scrollViewControllerCate.viewIconEditPeanel.viewEditTitle.lblDisplayTitle.text=[DB getUI:@"edit_title"];
-    root.viewControllerFun.viewMenu.viewConfig.lblTitle.text=[DB getUI:@"config"];
-    root.viewControllerFun.viewMenu.viewSuggestion.lblTitle.text=[DB getUI:@"about_us"];
-    root.viewControllerFun.viewMenu.viewProfile.lblTitle.text=[DB getUI:@"profile"];
-    root.viewControllerFun.viewMenu.viewConfig.lblShareFavoriteToSocial.text=[DB getUI:@"share_favorite"];
-    root.viewControllerFun.viewMenu.viewConfig.lblShareGoodToSocial.text=[DB getUI:@"share_good"];
-    root.viewControllerFun.viewMenu.viewConfig.lblShareIconToSocial.text=[DB getUI:@"share_icon"];
-    root.viewControllerFun.viewMenu.viewConfig.lblOperatingTip.text=[DB getUI:@"tip"];
-    root.viewControllerFun.viewMenu.viewConfig.lblNotificationForDiscover.text=[DB getUI:@"notification"];
-    root.viewControllerFun.viewMenu.viewConfig.btnLogout.lblTitle.text=[DB getUI:@"logout"];
     
-    root.viewControllerFun.viewMenu.viewConfig.btnRest.lblTitle.text=[DB getUI:@"reset"];
-    root.viewControllerFun.viewMenu.viewConfig.lblLang.text=[DB getUI:@"lang"];
+    for(NSString *key in dicOfCateButton){
+        ButtonCate * btnCate=(ButtonCate *)[dicOfCateButton objectForKey:key];
+        [btnCate updateCollection];
+    }
     
-    root.viewControllerFun.viewMenu.viewFavorite.lblTitle.text=[DB getUI:@"favorite"];
-    root.viewControllerFun.viewMenu.viewSecret.lblTitle.text=[DB getUI:@"icon_collection"];
-    root.viewControllerFun.viewMenu.viewGoodsBox.lblTitle.text=[DB getUI:@"goods_box"];
-    
+    for(int i=0;i<self.gv.arrLabelForChangeUILang.count;i++){
+        LabelForChangeUILang * lbl=(LabelForChangeUILang *)[self.gv.arrLabelForChangeUILang objectAtIndex:i];
+        [lbl changeLang];
+    }
+    [root.scrollViewControllerList.viewFunBar.viewPanelForSort.pickSortingKey reloadAllComponents];
 }
 
 -(void) resizeView{

@@ -10,6 +10,7 @@
 #import "Util.h"
 #import "ViewFavorite.h"
 #import "DB.h"
+#import "ScrollViewControllerCate.h"
 
 @implementation FavoriteItem
 
@@ -42,6 +43,17 @@
         self.btnPhone.userInteractionEnabled=NO;
         [self.btnPhone addTarget:self action:@selector(call) forControlEvents:UIControlEventTouchUpInside];
         
+        self.btnDirection=[[ButtonProtoType alloc] initWithFrame:CGRectMake(44+10, 0, 44, 44)];
+        self.btnDirection.viewBg=[[UIImageView alloc]initWithImage:[UIImage imageNamed:@"direction.png"]];
+        self.btnDirection.iconOverNameForProtoType=@"direction_over.png";
+        self.btnDirection.iconNameForProtoType=@"direction.png";
+        [self.btnDirection.viewBg setFrame:CGRectMake(0, 0, 44, 44)];
+        [self.btnDirection addSubview:self.btnDirection.viewBg];
+        [self addSubview:self.btnDirection];
+        [self.btnDirection setAlpha:0.0f];
+        self.btnDirection.userInteractionEnabled=NO;
+        [self.btnDirection addTarget:self action:@selector(takeMeThere:) forControlEvents:UIControlEventTouchUpInside];
+        
         self.btnDel=[[ButtonProtoType alloc]initWithFrame:CGRectMake(self.frame.size.width-44, 0, 44, 44)];
         self.btnDel.viewBg=[[UIImageView alloc]initWithImage:[UIImage imageNamed:@"remove.png"]];
         self.btnDel.iconOverNameForProtoType=@"remove_over.png";
@@ -53,6 +65,34 @@
         [self.btnDel addTarget:self action:@selector(del) forControlEvents:UIControlEventTouchUpInside];
     }
     return self;
+}
+
+-(void) takeMeThere:(ButtonProtoType *)sender{
+    if ([[UIApplication sharedApplication] canOpenURL:
+         [NSURL URLWithString:@"comgooglemaps://"]]) {
+        
+        [UserInteractionLog sendAnalyticsEvent:@"tocuh" label:@"googel_map_direction_in_favorite"];
+        NSString *url =[NSString stringWithFormat:@"comgooglemaps-x-callback://?saddr=&daddr=%F,%F&directionsmode=walking&x-success=com.planb  .soda://?resume=true&x-source=soda",self.lat,self.lng];
+        [[UIApplication sharedApplication] openURL:
+         [NSURL URLWithString:[url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    } else {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[DB getUI:@"your_iphone_is_not_installed_google_map_yet"] message:@"" delegate:self cancelButtonTitle:[DB getUI:@"cancel_and_use_apple_map"] otherButtonTitles:[DB getUI:@"install_google_map"],nil];
+        [alert show];
+    }
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (buttonIndex == 1) {
+        [UserInteractionLog sendAnalyticsEvent:@"tocuh" label:@"apple_map_direction_in_favorite"];
+        NSString *url =[NSString stringWithFormat:@"itms-apps://itunes.apple.com/app/id585027354?mt=8"];
+        [[UIApplication sharedApplication] openURL:
+         [NSURL URLWithString:[url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    } else {
+        [UserInteractionLog sendAnalyticsEvent:@"tocuh" label:@"install_google_map_in_favorite"];
+        NSString *url=[NSString stringWithFormat:@"http://maps.apple.com/?daddr=%F,%F&saddr=curcupertino",self.lat,self.lng];
+        [[UIApplication sharedApplication] openURL:
+         [NSURL URLWithString:[url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    }
 }
 
 -(void)setName:(NSString *)name{
@@ -86,7 +126,6 @@ bool isDelete=NO;
 -(void)_del{
     FMDatabase *db=[DB getShareInstance].db;
     [db open];
-    NSLog([NSString stringWithFormat:@"DELETE FROM favorite WHERE id=%d",self.identification]);
     isDelete=[db executeUpdate:[NSString stringWithFormat:@"DELETE FROM favorite WHERE id=%d",self.identification]];
     [db close];
 }
@@ -179,8 +218,10 @@ bool isDelete=NO;
         if(self.viewCon.frame.origin.x<0){
             [self.btnPhone setAlpha:0];
             [self.btnDel setAlpha:fabs(self.viewCon.frame.origin.x)/30];
+            [self.btnDirection setAlpha:0];
         }else if(self.viewCon.frame.origin.x>0){
             [self.btnPhone setAlpha:(self.viewCon.frame.origin.x/30)];
+            [self.btnDirection setAlpha:((self.viewCon.frame.origin.x-44-10)/30)];
             [self.btnDel setAlpha:0];
         }
     }
@@ -188,8 +229,8 @@ bool isDelete=NO;
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
     self.iniOffsetX=self.viewCon.frame.origin.x;
     double targetX=0;
-    if(self.iniOffsetX>10){
-        targetX=30;
+    if(self.iniOffsetX>30){
+        targetX=90;
     }else if(self.iniOffsetX<-10){
         targetX=-30;
     }
@@ -198,26 +239,32 @@ bool isDelete=NO;
     [UIView animateWithDuration:0.20 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
         [self.viewCon setFrame:CGRectMake(targetX, 0, self.viewCon.frame.size.width, self.frame.size.height)];
         self.iniOffsetX=targetX;
-        if(targetX==30){
+        if(targetX==90){
             [self.btnDel setAlpha:0];
             [self.btnPhone setAlpha:1];
+            [self.btnDirection setAlpha:1];
         }else if(targetX==-30){
             [self.btnDel setAlpha:1];
             [self.btnPhone setAlpha:0];
+            [self.btnDirection setAlpha:0];
         }else{
             [self.btnDel setAlpha:0];
             [self.btnPhone setAlpha:0];
+            [self.btnDirection setAlpha:0];
         }
     } completion:^(BOOL finished) {
         if(finished){
-            if(targetX==30){
+            if(targetX==90){
                 self.btnPhone.userInteractionEnabled=YES;
+                self.btnDirection.userInteractionEnabled=YES;
                 self.btnDel.userInteractionEnabled=NO;
             }else if(targetX==-30){
                 self.btnPhone.userInteractionEnabled=NO;
+                self.btnDirection.userInteractionEnabled=NO;
                 self.btnDel.userInteractionEnabled=YES;
             }else{
                 self.btnPhone.userInteractionEnabled=NO;
+                self.btnDirection.userInteractionEnabled=NO;
                 self.btnDel.userInteractionEnabled=NO;
             }
         }

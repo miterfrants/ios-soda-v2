@@ -7,9 +7,9 @@
 //
 
 #import "ButtonMenu.h"
-
+#import "LabelForChangeUILang.h"
 @interface ButtonRoundedCorner : ButtonMenu
-@property UILabel *lblTitle;
+@property LabelForChangeUILang *lblTitle;
 @property CGRect originFrame;
-- (id)initWithFrame:(CGRect)frame buttonTitle:(NSString*) buttonTitle;
+- (id)initWithFrame:(CGRect)frame buttonTitleKey:(NSString*) buttonTitleKey;
 @end

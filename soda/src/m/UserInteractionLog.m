@@ -12,10 +12,25 @@
 #import "FMDatabaseAdditions.h"
 #import <FacebookSDK/FacebookSDK.h>
 #import "ViewTip.h"
-
+#import "PopupView.h"
+#import "GAI.h"
+#import "GAIFields.h"
+#import "GAIDictionaryBuilder.h"
 @implementation UserInteractionLog
 +(void)sendFuncCountWIthActionName:(NSString *)name{
     
+}
++(void) sendAnalyticsEvent:(NSString *)action label:(NSString*)label{
+    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker send:[[GAIDictionaryBuilder createEventWithCategory:@"UX"
+                                                          action:action
+                                                           label:label
+                                                           value:nil] build]];
+}
++(void) sendAnalyticsView:(NSString *)name{
+    id<GAITracker> tracker = [[GAI sharedInstance] defaultTracker];
+    [tracker send:[[[GAIDictionaryBuilder createAppView] set:name
+                                                      forKey:kGAIScreenName] build]];
 }
 +(void)sendUsageTimeWithStartTime:(NSDate *) sTime eTime:(NSDate *) eTime{
     GV *gv=[GV sharedInstance];
@@ -33,13 +48,11 @@
         accessToken=gv.googleAccessToken;
     }
     NSString *url=[NSString stringWithFormat:@"%@://%@/%@?action=%@&s_date=%@&e_date=%@&member_id=%@&access_token=%@",gv.urlProtocol,gv.domain,gv.controllerInteraction,gv.actionAddUsageLog,sTimeStr,eTimeStr,gv.localUserId,accessToken];
-    NSLog(@"%@",url);
     [Util jsonAsyncWithUrl:url target:self cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:5 completion:^(NSMutableDictionary *data, NSError *connectionError) {
         if(connectionError || ![[data valueForKey:@"status"]isEqualToString:@"OK"]){
             [UserInteractionLog sendErrorReportWithUrl:url errMsg:[data valueForKey:@"err_msg"]];
             [self insertUsageLogToLocal:sTimeStr eDateTime:eTimeStr];
         }else{
-            NSLog(@"%@",data);
         }
     } queue:gv.backgroundThreadManagement];
 }
@@ -149,4 +162,6 @@ int usageSecondsFromDB;
     ViewTip *tip=(ViewTip *)gv.viewTip;
     [tip statusPreviousStatusToTip:target title:[DB getUI:titleKey] msg:[DB getUI:tipKey]];
 }
+
+
 @end

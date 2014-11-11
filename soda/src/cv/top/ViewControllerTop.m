@@ -8,6 +8,7 @@
 
 #import "ViewControllerTop.h"
 #import "ViewControllerRoot.h"
+#import "ScrollViewControllerCate.h"
 #import "ScrollViewControllerList.h"
 #import "ViewTip.h"
 #import "FMDatabaseAdditions.h"
@@ -33,12 +34,12 @@
         btnAdd=[[ButtonAdd alloc]init];
         [self.view addSubview:btnAdd];
         
-        lblHint=[[UILabel alloc]init];
+        lblHint=[[LabelForChangeUILang alloc]init];
         [self.view addSubview:lblHint];
         [lblHint setFrame:CGRectMake(txtSearch.frame.origin.x+10, txtSearch.frame.origin.y, txtSearch.frame.size.width, txtSearch.frame.size.height)];
         [lblHint setFont:txtSearch.font];
         [lblHint setTextColor:[UIColor whiteColor]];
-        [lblHint setText:[NSString stringWithFormat:@"%@",[DB getUI:@"search"] ]];
+        lblHint.key=@"search";
         
         breadCrumbView=[[BreadCrumbView alloc]init];
         [self.view addSubview:breadCrumbView];
@@ -73,7 +74,6 @@
 }
 
 -(void) touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
-
     UITouch *touch = [[event allTouches] anyObject];
     NSLog(@"top:%@",NSStringFromClass(touch.view.class));
     if([touch.view isEqual:txtSearch]){
@@ -85,6 +85,9 @@
               [GV getGlobalStatus]==LIST_EXPAND_WITHKEYBOARD
               )){
         NSLog(@"top condition:2");
+        //google analytics list to home
+         [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_home"];
+         [UserInteractionLog sendAnalyticsView:@"home"];
         [self statusListToCommon];
         ViewControllerRoot* root=(ViewControllerRoot*) gv.viewControllerRoot;
         [root.scrollViewControllerCate animationShowCate];
@@ -97,6 +100,7 @@
               )
               ){
         NSLog(@"top condition:3");
+         [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_refresh"];
         ScrollViewControllerList *sclist=(ScrollViewControllerList *)self.gv.scrollViewControlllerList;
         [sclist refresh];
         return;
@@ -108,6 +112,8 @@
             NSLog(@"top condition:4");
             ScrollViewControllerCate *scrollViewControllerCate=(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
             scrollViewControllerCate.selectedButtonCate=scrollViewControllerCate.buttonCateForSearch;
+            [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_search"];
+            [UserInteractionLog sendAnalyticsView:@"list"];
             [self statusCommonToList];
         }
     }else if([touch.view isEqual:btnSearch] && [GV getGlobalStatus]==SEARCH){
@@ -130,6 +136,7 @@
         NSLog(@"top condition:7");
         [self statusSearchToCommon];
         if([GV getGlobalStatus]==COMMON &&  [touch.view isKindOfClass:[ButtonAdd class]]){
+            [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"btn_add_cate"];
             [self addNewSearchCate];
         }
     }
@@ -164,8 +171,10 @@ int collectionLen=0;
     //這個應該要搬一下 搬到 scrollViewCate底下
     root.scrollViewControllerCate.selectedButtonCate=newButtonCate;
     [root.scrollViewControllerCate.scrollViewCate addSubview:newButtonCate];
-    [root.scrollViewControllerCate.scrollViewCate setContentSize:CGSizeMake(gv.screenW, floor((collectionLen)/2)*132+50+94)];
-    root.scrollViewControllerCate.scrollViewCate.originalHeight=floor((collectionLen-1)/2)*132+50+94;
+
+    //這邊把contentSize 攝高一點
+    NSLog(@"addNewSearchCate:%f",ceil((float)collectionLen/2)*132+20);
+    root.scrollViewControllerCate.scrollViewCate.originalHeight=ceil((float)collectionLen/2)*132+20;
     [root.scrollViewControllerCate.scrollViewCate bringSubviewToFront:root.scrollViewControllerCate.scrollViewCate.btnRemoveCate];
     [root.scrollViewControllerCate animationCateSlide];
     [root.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"pin"];
@@ -176,7 +185,7 @@ int collectionLen=0;
     [db open];
     [db executeUpdate:[NSString stringWithFormat:@"INSERT INTO collection (name,google_types,title,keyword,icon,lang,other_source,is_default,sort,distance) VALUES ('%@','%@','%@','%@','%@',(SELECT content FROM sys_config WHERE name='lang'),'',0,(select (sort+0)/2 from collection order by sort limit 1),300)",txtSearch.text,@"",txtSearch.text,txtSearch.text,@""]];
     iden=(int) [db lastInsertRowId];
-    collectionLen=[db intForQuery:@"SELECT COUNT(*) FROM collection WHERE lang=(SELECT CONTENT from sys_config WHERE name='lang' LIMIT 1)"];
+    collectionLen=[db intForQuery:@"SELECT COUNT(*) FROM collection WHERE lang=(SELECT CONTENT from sys_config WHERE name='lang' LIMIT 1) and name !='search'"];
     [db close];
 }
 
@@ -184,8 +193,11 @@ int collectionLen=0;
     if([GV getGlobalStatus]!=COMMON){
         return;
     }
+    ScrollViewControllerCate *cateVC = (ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
+    cateVC.scrollViewCate.scrollEnabled = NO;
     [GV setGlobalStatus:SEARCH];
     [lblHint setText:@""];
+    cateVC.scrollViewCate.scrollEnabled = YES;
 }
 -(void)statusSearchToCommon{
     if([GV getGlobalStatus]!=SEARCH){
@@ -221,6 +233,7 @@ int collectionLen=0;
     [keyboardTopInput hideKeyboard:nil];
     ScrollViewControllerList *scrollViewControlllerList = (ScrollViewControllerList *)self.gv.scrollViewControlllerList;
     [scrollViewControlllerList.viewFunBar.viewPanelForLocation.txtCenterAdderss resignFirstResponder];
+    [scrollViewControlllerList.locationManager stopUpdatingLocation];
     [self animationHideBreadCrumb];
     [GV setGlobalStatus:COMMON];
 }

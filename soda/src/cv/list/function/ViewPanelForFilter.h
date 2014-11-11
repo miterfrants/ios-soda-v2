@@ -8,25 +8,27 @@
 
 #import "ViewProtoType.h"
 #import "ButtonCate.h"
+#import "LabelForChangeUILang.h"
+
 @interface ViewPanelForFilter : ViewProtoType
 @property UIImageView *iconPhone;
-@property UILabel *lblDescForPhone;
+@property LabelForChangeUILang *lblDescForPhone;
 @property UISwitch *switchForPhone;
 
 @property UIImageView *iconOpening;
-@property UILabel *lblDescForOpening;
+@property LabelForChangeUILang *lblDescForOpening;
 @property UISwitch *switchForOpening;
 
 @property UIImageView *iconFavorite;
-@property UILabel *lblDescForFavorite;
+@property LabelForChangeUILang *lblDescForFavorite;
 @property UISwitch *switchForFavorite;
 
 @property UIImageView *iconHeart;
-@property UILabel *lblDescForHeart;
+@property LabelForChangeUILang *lblDescForHeart;
 @property UISlider *sliderForHeart;
 
 @property UIImageView *iconOfficialSuggest;
-@property UILabel *lblDescForOfficialSuggest;
+@property LabelForChangeUILang *lblDescForOfficialSuggest;
 @property UISwitch *switchForOfficialSuggest;
 
 -(void)initialFilterSetting:(ButtonCate *)selected;

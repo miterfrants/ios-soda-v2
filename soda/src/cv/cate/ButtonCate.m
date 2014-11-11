@@ -27,6 +27,7 @@
 }
 
 -(id)initWithIconName:(NSString *)pIconName frame:(CGRect)frame title:(NSString *) title name:(NSString*) pName lang:(NSString *) pLang keyword:(NSString *) pKeyword iden:(int) pIden{
+
     self = [super initWithFrame:frame];
     if (self) {
         gv=[GV sharedInstance];
@@ -130,6 +131,29 @@
     NSInvocationOperation *operation=[[NSInvocationOperation alloc]initWithTarget:self selector:@selector(_updateCollection) object:nil];
     [self.gv.FMDatabaseQueue addOperations:[NSArray arrayWithObjects:operation, nil] waitUntilFinished:YES];
 }
+
+//這裡的center 和 dist 都改為同一來源
+-(void) setCenterLocation:(CLLocationCoordinate2D)centerLocation{
+    ScrollViewControllerCate *parent = (ScrollViewControllerCate *) self.gv.scrollViewControllerCate;
+    parent.custCenterLocation = centerLocation;
+}
+
+-(CLLocationCoordinate2D) centerLocation{
+    ScrollViewControllerCate *parent = (ScrollViewControllerCate *) self.gv.scrollViewControllerCate;
+    return parent.custCenterLocation;
+}
+
+-(void) setDistance:(double)distance{
+    ScrollViewControllerCate *parent = (ScrollViewControllerCate *) self.gv.scrollViewControllerCate;
+    parent.custDist = distance;
+}
+
+-(double) distance{
+    ScrollViewControllerCate *parent = (ScrollViewControllerCate *) self.gv.scrollViewControllerCate;
+    return parent.custDist;
+}
+
+
 -(void)_updateCollection{
     FMDatabase *db=[DB getShareInstance].db;
     [db open];
@@ -151,6 +175,10 @@
     }
     
     [db executeUpdate:[NSString stringWithFormat:@"UPDATE collection SET distance=%f,center_lat=%f,center_lng=%f,is_only_phone=%d,is_only_opening=%d,is_only_favorite=%d,rating=%f,is_only_official_suggest=%d,sorting_key='%@' where id=%d",self.distance,self.centerLocation.latitude,self.centerLocation.longitude,intOnlyShowPhone,intOnlyOpening,intOnlyFavorite,self.rating,intOnlyOfficialSuggest,self.sortingKey,self.iden]];
+    
+    //update sys_config center_lag center_lng
+    [db executeUpdate:[NSString stringWithFormat:@"UPDATE sys_config SET content=%f where name='center_lat'",self.centerLocation.latitude]];
+    [db executeUpdate:[NSString stringWithFormat:@"UPDATE sys_config SET content=%f where name='center_lng'",self.centerLocation.longitude]];
     [db close];
 }
 @end

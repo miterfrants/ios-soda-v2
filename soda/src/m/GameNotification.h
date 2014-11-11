@@ -9,5 +9,8 @@
 #import <Foundation/Foundation.h>
 
 @interface GameNotification : NSObject
-
+@property NSDate *createdTime;
+@property NSString *title;
+@property NSString *msg;
+@property UIImage *icon;
 @end

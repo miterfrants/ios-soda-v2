@@ -48,6 +48,11 @@ typedef NS_ENUM(NSUInteger,CommentSource){
     CommentSourceFourSquare=5
 };
 
+typedef NS_ENUM(NSUInteger,AlertViewType){
+    AlertViewTypeResetApp=1,
+    AlertViewTypeMailEmpty=2
+};
+
 
 @interface GV : NSObject
 //Controller AND URL
@@ -113,6 +118,13 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property GooglePlaceAPIPool *gpApiPool;
 @property NSDate *appLaunchDate;
 @property NSDate *appExitDate;
+@property NSTimer *bgLoopTimer;
+@property int totalSecondsFromRemote;
+@property BOOL is5minsUsage;
+@property BOOL is10minsUsage;
+@property BOOL is20minsUsage;
+@property BOOL is40minsUsage;
+@property NSMutableArray *arrLabelForChangeUILang;
 
 //view
 @property UIViewController* viewControllerRoot;
@@ -159,6 +171,7 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property NSString *listHeight;
 @property NSString *listWidth;
 @property NSOperationQueue *backgroundThreadManagement;
+@property NSOperationQueue *InertPlaceQueue;
 @property NSOperationQueue *FMDatabaseQueue;
 @property NSOperationQueue *AudioQueue;
 @property NSOperationQueue *GooglePlaceDetailQueue;
@@ -169,6 +182,7 @@ typedef NS_ENUM(NSUInteger,CommentSource){
 @property int listBufferCount;
 @property BOOL isBlurModel;
 @property NSMutableDictionary *dicLang;
+@property CLLocationManager *locationManager;
 
 // message from which our instance is obtained
 + (GV *)sharedInstance;

@@ -51,11 +51,16 @@
 @property BOOL isCancelCurrentLoadItemListMarker;
 @property NSMutableArray *arrItemList;
 @property UIImageView *noDataCat;
+@property LabelForChangeUILang *lblNoData;
+@property ListItem *expandedItem;
 @property BOOL isShowNoDataCate;
 @property BOOL isHidingNoDataCat;
 @property ButtonProtoType *btnNext;
 @property ButtonProtoType *btnPrevious;
+@property ButtonProtoType *btnTakeMeThere;
 @property ButtonMore *btnMore;
+@property GMSMarker *selectedMarker;
+
 -(void)showNoDataCat;
 -(void)hideNoDataCat;
 

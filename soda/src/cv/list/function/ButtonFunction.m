@@ -20,24 +20,32 @@
     return self;
 }
 
--(id)initWithFrameAndName:(CGRect) frame title:(NSString *) title{
+-(id)initWithFrameAndName:(CGRect) frame titleKey:(NSString *) titleKey{
     self = [super initWithFrame:frame];
     if (self) {
-        self.name=[title lowercaseString];
-        lblTitle=[[UILabel alloc]init];
-        CGSize fontSize=[title sizeWithAttributes:@{NSFontAttributeName:self.gv.fontListFunctionTitle }];
-        [lblTitle setFrame:CGRectMake((self.gv.screenW/3-fontSize.width-16/2-5)/2, 0, fontSize.width, frame.size.height)];
+        self.name=[titleKey lowercaseString];
+        lblTitle=[[LabelForChangeUILang alloc]init];
         [lblTitle setFont:self.gv.fontListFunctionTitle];
         [lblTitle setTextAlignment:NSTextAlignmentCenter];
-        [lblTitle setText:title];
+        lblTitle.key=titleKey;
+        lblTitle.completeInvoke=@selector(fitTitleSize);
+        lblTitle.parentView=self;
+
         [lblTitle setTextColor:[UIColor whiteColor]];
         [self addSubview:lblTitle];
         
         viewArr=[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"list_function_arr.png"]];
         [self addSubview:viewArr];
-        [viewArr setFrame:CGRectMake(lblTitle.frame.origin.x+lblTitle.frame.size.width+5, 18, 23/2, 16/2)];
+        [self fitTitleSize];
+
     }
     return self;
+}
+
+-(void)fitTitleSize{
+    CGSize fontSize=[lblTitle sizeThatFits:CGSizeMake(self.frame.size.width-23/2, self.frame.size.height-16/2)];
+    [lblTitle setFrame:CGRectMake((self.gv.screenW/3-fontSize.width-16/2-5)/2, 0, fontSize.width, self.frame.size.height)];
+    [viewArr setFrame:CGRectMake(lblTitle.frame.origin.x+lblTitle.frame.size.width+5, 18, 23/2, 16/2)];
 }
 
 -(void)touchesBegan:(NSSet*)touches withEvent:(UIEvent*)event

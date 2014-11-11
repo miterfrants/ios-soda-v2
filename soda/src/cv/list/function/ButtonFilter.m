@@ -11,7 +11,7 @@
 @implementation ButtonFilter
 - (id)initWithFrame:(CGRect)frame
 {
-    self = [super initWithFrameAndName:frame title:[DB getUI:@"filter"]];
+    self = [super initWithFrameAndName:frame titleKey:@"filter"];
     if (self) {
     }
     return self;

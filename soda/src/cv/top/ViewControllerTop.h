@@ -13,13 +13,14 @@
 #import "ViewControllerProtoType.h"
 #import "BreadCrumbView.h"
 #import "ButtonRefresh.h"
+#import "LabelForChangeUILang.h"
 
 @interface ViewControllerTop : ViewControllerProtoType
 @property  TextViewSearch *txtSearch;
 @property  ButtonSearch *btnSearch;
 @property  ButtonAdd *btnAdd;
 @property ButtonRefresh *btnRefresh;
-@property UILabel *lblHint;
+@property LabelForChangeUILang *lblHint;
 @property BreadCrumbView *breadCrumbView;
 @property BOOL isSearchList;
 -(void)pin;

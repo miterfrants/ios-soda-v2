@@ -12,12 +12,12 @@
 
 @implementation ButtonRoundedCorner
 @synthesize lblTitle,originFrame;
-- (id)initWithFrame:(CGRect)frame buttonTitle:(NSString*) buttonTitle
+- (id)initWithFrame:(CGRect)frame buttonTitleKey:(NSString*) buttonTitleKey
 {
     self = [super initWithFrame:frame];
     if (self) {
-        lblTitle=[[UILabel alloc] init];
-        lblTitle.text=buttonTitle;
+        lblTitle=[[LabelForChangeUILang alloc] init];
+        lblTitle.key=buttonTitleKey;
         [lblTitle setFont:self.gv.contentFont];
         [lblTitle setTextColor:[Util colorWithHexString:@"#419291FF"]];
         [lblTitle setFrame:CGRectMake(0, 0, frame.size.width, 30)];

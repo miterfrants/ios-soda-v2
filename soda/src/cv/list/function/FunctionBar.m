@@ -123,6 +123,7 @@
     self.isExpanded=YES;
     if(target ==[dicViewPanel objectForKey:btnLocation.name]){
         [viewPanelForLocation.txtCenterAdderss startObserver];
+        
     }else{
         [viewPanelForLocation.txtCenterAdderss stopObserver];
     }

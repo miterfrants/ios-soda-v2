@@ -11,7 +11,7 @@
 @implementation ButtonSort
 - (id)initWithFrame:(CGRect)frame
 {
-    self = [super initWithFrameAndName:frame title:[DB getUI:@"sort"]];
+    self = [super initWithFrameAndName:frame titleKey:@"sort"];
     if (self) {
     }
     return self;

@@ -36,14 +36,13 @@
     if (self) {
         [GV setGlobalStatus:COMMON];
         gv=[GV sharedInstance];
-        
-
 
         
         //view bg
         viewBG =[[UIImageView alloc]init];
         [viewBG setImage:[UIImage imageNamed:@"bg.png"]];
-        [viewBG setFrame:CGRectMake(0, 0, gv.screenW,gv.screenH)];
+        NSLog(@"%f",self.gv.screenH);
+        [viewBG setFrame:CGRectMake(0, 0, gv.screenW,568)];
         [self.view addSubview:viewBG];
         
         viewControllerTop=[[ViewControllerTop alloc]init];
@@ -63,6 +62,7 @@
         [self.view addSubview:scrollViewControllerList.view];
         gv.scrollViewControlllerList=scrollViewControllerList;
         
+        //popup view;
 
     }
     return self;
@@ -85,7 +85,7 @@
 }
 
 -(void) customTouchesEnded:(UIViewController *)controller{
-    NSLog(@"controller class:%@", NSStringFromClass(controller.class));
+    NSLog(@"root controller class:%@", NSStringFromClass(controller.class));
     if(
        [GV getGlobalStatus]==SEARCH &&
        ![controller isKindOfClass:viewControllerTop.class]
@@ -114,19 +114,22 @@
         NSLog(@"root condition 4");
         [viewControllerTop animationShowBreadCrumb:scrollViewControllerCate.selectedButtonCate.iconName name:scrollViewControllerCate.selectedButtonCate.lblTitle.text];
         [scrollViewControllerList animationShowList];
-        [scrollViewControllerList loadListAndInitWithKeyword:scrollViewControllerCate.selectedButtonCate.keyword type:@"" dist:scrollViewControllerCate.selectedButtonCate.distance center:scrollViewControllerCate.selectedButtonCate.centerLocation];
+        [scrollViewControllerList loadListAndInitWithKeyword:scrollViewControllerCate.selectedButtonCate.keyword type:@"" dist:scrollViewControllerCate.selectedButtonCate.distance center:scrollViewControllerCate.custCenterLocation];
     }else if(
              [GV getGlobalStatus]==LIST
              &&
              [controller isKindOfClass:[ViewControllerTop class]]
              ){
         NSLog(@"root condition 5");
+        NSLog(@"%f",scrollViewControllerCate.selectedButtonCate.distance);
+        NSLog(@"%f",scrollViewControllerCate.custCenterLocation.latitude);
+        NSLog(@"%f",scrollViewControllerCate.custCenterLocation.longitude);
         [viewControllerTop animationShowBreadCrumb:@"search.png" name:viewControllerTop.txtSearch.text];
         [self.viewControllerFun.viewMenu.viewSecret checkSecretByCondition:@"search"];
         [scrollViewControllerCate animationHideCate];
         [scrollViewControllerList animationShowList];
         scrollViewControllerCate.selectedButtonCate.keyword=viewControllerTop.txtSearch.text;
-        [scrollViewControllerList loadListAndInitWithKeyword:viewControllerTop.txtSearch.text type:@"" dist:300 center:scrollViewControllerCate.selectedButtonCate.centerLocation];
+        [scrollViewControllerList loadListAndInitWithKeyword:viewControllerTop.txtSearch.text type:@"" dist:scrollViewControllerCate.custDist center:scrollViewControllerCate.custCenterLocation];
     }else if(
         [GV getGlobalStatus]==TIP
     ){
@@ -135,7 +138,7 @@
     }else if(
         [GV getGlobalStatus]==TIP_SHOWED
     ){
-        NSLog(@"root condition 7");
+        NSLog(@"root condition 7:%d",gv.previousStatusForTip);
         [((ViewTip *)[GV sharedInstance].viewTip) statusTipToPreviousStatus];
     }
 }

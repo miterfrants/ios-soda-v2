@@ -14,7 +14,7 @@
 @property UIImageView *gifLoading;
 @property NSMutableArray *arrFavoriteItem;
 @property UISwipeGestureRecognizer *swipeLeftRecognizer;
-@property UILabel *lblEmptyInfo;
+@property LabelForChangeUILang *lblEmptyInfo;
 -(void)generateFavoriteItem;
 -(void)clearFavoriteItem;
 @end

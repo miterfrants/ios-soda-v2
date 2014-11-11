@@ -11,6 +11,9 @@
 #import "Util.h"
 #import "ViewPanelForLocation.h"
 #import "ScrollViewControllerCate.h"
+#import "ScrollViewControllerList.h"
+#import "DB.h"
+
 @implementation SwitchLocation
 
 - (id)initWithFrame:(CGRect)frame
@@ -45,17 +48,17 @@
         self.viewButton.layer.shadowColor = [Util colorWithHexString:@"#CCCCCCff"].CGColor
         ;
         
-        self.lblOff=[[UILabel alloc] initWithFrame:CGRectMake(0, 0, 100, 28)];
+        self.lblOff=[[LabelForChangeUILang alloc] initWithFrame:CGRectMake(0, 0, 100, 28)];
         [self.lblOff setTextAlignment:NSTextAlignmentCenter];
         [self.lblOff setFont:[GV sharedInstance].fontListFunctionTitle];
         [self.lblOff setTextColor:[Util colorWithHexString:@"#263439FF"]];
-        [self.lblOff setText:@"current"];
-
-        self.lblOn=[[UILabel alloc] initWithFrame:CGRectMake(100, 0, 100, 28)];
+        self.lblOff.key=@"current";
+        
+        self.lblOn=[[LabelForChangeUILang alloc] initWithFrame:CGRectMake(100, 0, 100, 28)];
         [self.lblOn setTextAlignment:NSTextAlignmentCenter];
         [self.lblOn setFont:[GV sharedInstance].fontListFunctionTitle];
         [self.lblOn setTextColor:[Util colorWithHexString:@"66acabff"]];
-        [self.lblOn setText:@"other"];
+        self.lblOn.key=@"other";
         [self addSubview:self.lblOff];
         [self addSubview:self.lblOn];
     }
@@ -73,11 +76,14 @@
 
 -(void) turnOn:(BOOL) animation{
      self.isOn=YES;
+    [DB setSysConfig:@"is_cust_location" value:@"Y"];
     ViewPanelForLocation *supercon=(ViewPanelForLocation *)[self superview];
+    ScrollViewControllerList *svList= (ScrollViewControllerList *)self.gv.scrollViewControlllerList;
+    [svList.locationManager stopUpdatingLocation];
+    ScrollViewControllerCate *svCate= (ScrollViewControllerCate *) self.gv.scrollViewControllerCate;
+    svCate.isCustLocation=YES;
     [supercon animationShowOtherCenter];
-//    ScrollViewControllerCate *scrollViewControllerCate =(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
-//    ButtonCate *selected =scrollViewControllerCate.selectedButtonCate;
-//    [supercon updateCamera:selected.centerLocation];
+
     if(animation){
         [UIView animateWithDuration:0.34 delay:0.0 options:UIViewAnimationOptionAllowUserInteraction animations:^
          {
@@ -100,7 +106,12 @@
 }
 -(void) turnOff:(BOOL) animation{
      self.isOn=NO;
+    ScrollViewControllerList *svList= (ScrollViewControllerList *)self.gv.scrollViewControlllerList;
+    [DB setSysConfig:@"is_cust_location" value:@"N"];
+    [svList.locationManager startUpdatingLocation];
     ViewPanelForLocation *supercon=(ViewPanelForLocation *)[self superview];
+    ScrollViewControllerCate *svCate= (ScrollViewControllerCate *) self.gv.scrollViewControllerCate;
+    svCate.isCustLocation=NO;
     [supercon animationHideOtherCenter];
     
     ScrollViewControllerCate *scrollViewControllerCate =(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;

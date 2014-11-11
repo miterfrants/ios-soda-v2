@@ -24,7 +24,6 @@
 
 @property NSTimer *timer;
 
-@property int totalSecondsFromRemote;
 -(void) loadProfile;
 -(void)timerStop;
 -(void) initProfile;

@@ -13,7 +13,7 @@
 
 - (id)initWithFrame:(CGRect)frame
 {
-    self = [super initWithFrameAndName:frame title:[DB getUI:@"location"]];
+    self = [super initWithFrameAndName:frame titleKey:@"location"];
     if (self) {
     }
     return self;

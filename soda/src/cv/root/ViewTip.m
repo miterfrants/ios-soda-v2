@@ -25,6 +25,7 @@
         [lblMsg setFont:gv.fontHintForHebrew];
         [lblTitle setTextColor:[UIColor whiteColor]];
         [lblMsg setTextColor:[UIColor darkGrayColor]];
+        lblMsg.numberOfLines=100;
         viewBorder =[[UIView alloc] init];
         [self addSubview:viewBorder];
         [self addSubview:lblTitle];
@@ -63,9 +64,9 @@
     double arrorOriginY=0;
     
     //對話框超過螢幕
-    if(pointOfCenter.x+maxWidth/2+borderLeftRightPadding>self.gv.screenW){
+    if(pointOfCenter.x+maxWidth/2+borderLeftRightPadding>self.gv.screenW-20){
         tipOriginX=self.gv.screenW-maxWidth-edgePadding-borderLeftRightPadding*2;
-    }else if(pointOfCenter.x-maxWidth/2-borderLeftRightPadding<0){
+    }else if(pointOfCenter.x-maxWidth/2-borderLeftRightPadding<20){
         tipOriginX=edgePadding;
     }else{
         tipOriginX=pointOfCenter.x-maxWidth/2-borderLeftRightPadding;
@@ -163,7 +164,6 @@
     viewBorder.layer.sublayers=nil;
     CAShapeLayer *layer= [CAShapeLayer layer];
     UIBezierPath *path=[UIBezierPath bezierPath];
-    NSLog(@"%f",pointStart.x);
     double radius=2.5;
     if(isUp){
         [path moveToPoint:CGPointMake(pointStart.x, size.height+8)];

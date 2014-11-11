@@ -27,24 +27,24 @@ switchShareIconToSocial;
         self.name=@"config";
         double padding=22;
         
-        lblTitle=[[UILabel alloc] init];
-        lblTitle.text=[DB getUI:@"config"];
+        lblTitle=[[LabelForChangeUILang alloc] init];
         [lblTitle setFont:[GV sharedInstance].fontMenuTitle];
         [lblTitle setTextColor:[UIColor whiteColor]];
         [lblTitle setFrame:CGRectMake(68, 30, 200, 40)];
+        lblTitle.key=@"config";
         [self addSubview:lblTitle];
         
         self.scrollView=[[ScrollViewProtoType alloc] initWithFrame:CGRectMake(0, 80, frame.size.width,self.gv.screenH-80)];
         [self addSubview:self.scrollView];
         
         // Initialization code
-        lblLang =[[UILabel alloc]initWithFrame:CGRectMake(15,10,101,40)];
+        lblLang =[[LabelForChangeUILang alloc]initWithFrame:CGRectMake(15,10,101,40)];
         [lblLang setTextColor:[UIColor whiteColor]];
         [lblLang setFont:gv.fontNormalForHebrew];
         [lblLang setLineBreakMode:NSLineBreakByWordWrapping];
         [lblLang setMultipleTouchEnabled:YES];
         [lblLang setNumberOfLines:3];
-        [lblLang setText:[DB getUI:@"lang"]];
+        lblLang.key=@"lang";
         [self.scrollView addSubview:lblLang];
         
         pickLang =[[UIPickerView alloc] initWithFrame:CGRectMake(
@@ -56,13 +56,13 @@ switchShareIconToSocial;
         [self.scrollView addSubview:pickLang];
 
         padding=22;
-        lblShareFavoriteToSocial = [[UILabel alloc]initWithFrame:CGRectMake(15,lblLang.frame.origin.y+lblLang.frame.size.height+padding,120,40)];
+        lblShareFavoriteToSocial = [[LabelForChangeUILang alloc]initWithFrame:CGRectMake(15,lblLang.frame.origin.y+lblLang.frame.size.height+padding,120,40)];
         [lblShareFavoriteToSocial setTextColor:[UIColor whiteColor]];
         [lblShareFavoriteToSocial setFont:gv.fontNormalForHebrew];
         [lblShareFavoriteToSocial setLineBreakMode:NSLineBreakByWordWrapping];
         [lblShareFavoriteToSocial setMultipleTouchEnabled:YES];
         [lblShareFavoriteToSocial setNumberOfLines:3];
-        [lblShareFavoriteToSocial setText:[DB getUI:@"share_favorite"]];
+        lblShareFavoriteToSocial.key=@"share_favorite";
         [self.scrollView addSubview:lblShareFavoriteToSocial];
         
         switchShareFavoriteToSocial=[[SwitchProfile alloc] initWithFrame:CGRectMake(
@@ -79,7 +79,7 @@ switchShareIconToSocial;
         
         
         padding=22;
-        lblShareGoodToSocial = [[UILabel alloc]initWithFrame:CGRectMake(
+        lblShareGoodToSocial = [[LabelForChangeUILang alloc]initWithFrame:CGRectMake(
                                                                         15,lblShareFavoriteToSocial.frame.origin.y+lblShareFavoriteToSocial.frame.size.height+padding,
                                                                         lblShareFavoriteToSocial.frame.size.width,
                                                                         40)];
@@ -88,7 +88,7 @@ switchShareIconToSocial;
         [lblShareGoodToSocial setLineBreakMode:NSLineBreakByWordWrapping];
         [lblShareGoodToSocial setMultipleTouchEnabled:YES];
         [lblShareGoodToSocial setNumberOfLines:3];
-        [lblShareGoodToSocial setText:[DB getUI:@"share_good"]];
+        lblShareGoodToSocial.key=@"share_good";
         [self.scrollView addSubview:lblShareGoodToSocial];
         
         switchShareGoodToSocial=[[SwitchProfile alloc] initWithFrame:CGRectMake(
@@ -102,7 +102,7 @@ switchShareIconToSocial;
         [self.scrollView addSubview:switchShareGoodToSocial];
         
         
-        lblShareIconToSocial = [[UILabel alloc]initWithFrame:CGRectMake(
+        lblShareIconToSocial = [[LabelForChangeUILang alloc]initWithFrame:CGRectMake(
                                                                         15,lblShareGoodToSocial.frame.origin.y+lblShareGoodToSocial.frame.size.height+padding,
                                                                         lblShareFavoriteToSocial.frame.size.width,
                                                                         40)];
@@ -111,7 +111,7 @@ switchShareIconToSocial;
         [lblShareIconToSocial setLineBreakMode:NSLineBreakByWordWrapping];
         [lblShareIconToSocial setMultipleTouchEnabled:YES];
         [lblShareIconToSocial setNumberOfLines:3];
-        [lblShareIconToSocial setText:[DB getUI:@"share_icon"]];
+        lblShareIconToSocial.key=@"share_icon";
         [self.scrollView addSubview:lblShareIconToSocial];
         
         switchShareIconToSocial=[[SwitchProfile alloc] initWithFrame:CGRectMake(
@@ -127,7 +127,7 @@ switchShareIconToSocial;
         
         
         
-        lblOperatingTip = [[UILabel alloc]initWithFrame:CGRectMake(
+        lblOperatingTip = [[LabelForChangeUILang alloc]initWithFrame:CGRectMake(
                                                                    15,lblShareIconToSocial.frame.origin.y+lblShareIconToSocial.frame.size.height+padding,
                                                                    lblShareFavoriteToSocial.frame.size.width,
                                                                    40)];
@@ -136,7 +136,7 @@ switchShareIconToSocial;
         [lblOperatingTip setLineBreakMode:NSLineBreakByWordWrapping];
         [lblOperatingTip setMultipleTouchEnabled:YES];
         [lblOperatingTip setNumberOfLines:3];
-        [lblOperatingTip setText:[DB getUI:@"tip"]];
+        lblOperatingTip.key=@"tip";
         [self.scrollView addSubview:lblOperatingTip];
         
         switchOperatingTip=[[SwitchProfile alloc] initWithFrame:CGRectMake(
@@ -150,7 +150,7 @@ switchShareIconToSocial;
         [self.scrollView addSubview:switchOperatingTip];
         
         
-        lblNotificationForDiscover = [[UILabel alloc]initWithFrame:CGRectMake(
+        lblNotificationForDiscover = [[LabelForChangeUILang alloc]initWithFrame:CGRectMake(
                                                                               15,lblOperatingTip.frame.origin.y+lblOperatingTip.frame.size.height+padding,
                                                                               lblShareFavoriteToSocial.frame.size.width,
                                                                               40)];
@@ -159,7 +159,7 @@ switchShareIconToSocial;
         [lblNotificationForDiscover setLineBreakMode:NSLineBreakByWordWrapping];
         [lblNotificationForDiscover setMultipleTouchEnabled:YES];
         [lblNotificationForDiscover setNumberOfLines:3];
-        lblNotificationForDiscover.text= [DB getUI:@"notification"];
+        lblNotificationForDiscover.key=@"notification";
         [self.scrollView addSubview:lblNotificationForDiscover];
         
         switchNotificationForDiscover=[[SwitchProfile alloc] initWithFrame:CGRectMake(
@@ -175,12 +175,12 @@ switchShareIconToSocial;
         
         btnLogout=[[ButtonLogout alloc]initWithFrame:CGRectMake(lblLang.frame.origin.x,
                                                                 lblNotificationForDiscover.frame.origin.y+lblNotificationForDiscover.frame.size.height+padding+10,
-                                                                180, 30) buttonTitle:[DB getUI:@"logout" ]];
+                                                                180, 30) buttonTitleKey:@"logout"];
         
         [self.scrollView addSubview:btnLogout];
 
         
-        btnRest = [[ButtonReset alloc]initWithFrame:CGRectMake(lblLang.frame.origin.x, btnLogout.frame.origin.y+btnLogout.frame.size.height+padding+10, 180, 31) buttonTitle:[DB getUI:@"reset" ]];
+        btnRest = [[ButtonReset alloc]initWithFrame:CGRectMake(lblLang.frame.origin.x, btnLogout.frame.origin.y+btnLogout.frame.size.height+padding+10, 180, 31) buttonTitleKey:@"reset"];
         [self.scrollView addSubview:btnRest];
         
         [self.scrollView setContentSize:CGSizeMake(frame.size.width, btnRest.frame.origin.y+btnRest.frame.size.height+padding)];
@@ -200,11 +200,11 @@ switchShareIconToSocial;
 }
 -(void)showChangeLangHint:(id)sender{
     UIAlertView *alert = [[UIAlertView alloc]
-                          initWithTitle:@"Language Setting"
-                          message:@"Do you want to change language?"
+                          initWithTitle:[DB getUI:@"language_setting"]
+                          message:[DB getUI:@"confirm_to_change_language"]
                           delegate:self
-                          cancelButtonTitle:@"No"
-                          otherButtonTitles:@"Yes",nil];
+                          cancelButtonTitle:[DB getUI:@"no"]
+                          otherButtonTitles:[DB getUI:@"yes"],nil];
     [alert show];
 }
 //這個最好搬到 controller 那一層

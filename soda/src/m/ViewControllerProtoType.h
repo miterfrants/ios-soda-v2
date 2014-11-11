@@ -8,6 +8,12 @@
 
 #import <UIKit/UIKit.h>
 #import "GV.h"
-@interface ViewControllerProtoType : UIViewController
+#import "GAITrackedViewController.h"
+#import "GAI.h"
+#import "GAIDictionaryBuilder.h"
+#import "GAIFields.h"
+#import "GAIEcommerceFields.h"
+#import "UserInteractionLog.h"
+@interface ViewControllerProtoType : GAITrackedViewController
 @property (nonatomic,strong) GV *gv;
 @end

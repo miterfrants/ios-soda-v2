@@ -23,6 +23,9 @@
 @property BOOL isSaveData;
 @property NSTimer *updateBlurTimer;
 @property UIImageView *viewBG;
+@property CLLocationCoordinate2D custCenterLocation;
+@property BOOL isCustLocation;
+@property double custDist;
 @property int fileIndex;
 @property ButtonCate *buttonCateForSearch;
 -(void)selectButtonAndClearAll:(int)iden isRestoreOriginalData:(BOOL) isRestoreOriginalData;

@@ -15,12 +15,15 @@
 @property UILabel *lblAddress;
 @property ButtonProtoType *btnDel;
 @property ButtonProtoType *btnPhone;
+@property ButtonProtoType *btnDirection;
 @property UIView *viewCon;
 @property NSString *phone;
 @property BOOL isTouch;
 @property CGPoint touchPoint;
 @property double iniOffsetX;
 @property int seq;
+@property double lat;
+@property double lng;
 @property int identification;
 -(void)resizeLabel;
 -(void)setName:(NSString *)name;

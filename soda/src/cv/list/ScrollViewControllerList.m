@@ -14,7 +14,8 @@
 #import "ButtonInputForComment.h"
 #import "ButtonExpand.h"
 #import "CustomizeInfoWindow.h"
-
+#import "ViewContainer.h"
+#import "ViewControllerRoot.h"
 
 @interface ScrollViewControllerList ()
 
@@ -27,6 +28,14 @@
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
         self.gv=[GV sharedInstance];
+        locationManager = [[CLLocationManager alloc] init];
+        locationManager.delegate=self;
+        locationManager.distanceFilter = kCLDistanceFilterNone;
+        locationManager.desiredAccuracy = kCLLocationAccuracyBest;
+        if ([self.gv.locationManager respondsToSelector:@selector(requestWhenInUseAuthorization)]) {
+            [self.gv.locationManager requestWhenInUseAuthorization];
+        }
+        [self.locationManager startUpdatingLocation];
         
         arrItemList=[[NSMutableArray alloc] init];
         
@@ -52,12 +61,12 @@
         self.noDataCat=[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"lazy_cat.png"]];
         [self.noDataCat setFrame:CGRectMake((self.gv.screenW-self.noDataCat.frame.size.width/2)/2-40, 70, self.noDataCat.frame.size.width/2, self.noDataCat.frame.size.height/2)];
         [self.view addSubview:self.noDataCat];
-        UILabel *lblNoData=[[UILabel alloc]initWithFrame:CGRectMake(self.noDataCat.frame.size.width, self.noDataCat.frame.size.height-40, 70, 28)];
-        [lblNoData setLineBreakMode:NSLineBreakByCharWrapping];
-        [lblNoData setFont:self.gv.fontListFunctionTitle];
-        [lblNoData setTextColor:[UIColor whiteColor]];
-        [lblNoData setText:@"No Data."];
-        [self.noDataCat addSubview:lblNoData];
+        self.lblNoData=[[LabelForChangeUILang alloc]initWithFrame:CGRectMake(self.noDataCat.frame.size.width, self.noDataCat.frame.size.height-40, 140, 28)];
+        [self.lblNoData setLineBreakMode:NSLineBreakByCharWrapping];
+        [self.lblNoData setFont:self.gv.fontListFunctionTitle];
+        [self.lblNoData setTextColor:[UIColor whiteColor]];
+        self.lblNoData.key=@"no_data";
+        [self.noDataCat addSubview:self.lblNoData];
         [self.noDataCat setAlpha:0.0];
         [self.noDataCat setHidden:YES];
 
@@ -105,9 +114,88 @@
         self.btnNext.layer.shadowOpacity = .5f;
         self.btnNext.layer.shadowColor = [Util colorWithHexString:@"#000000ff"].CGColor
         ;
+        
+
+        self.btnTakeMeThere =[[ButtonProtoType alloc] initWithFrame:CGRectMake((self.gv.screenW-44)/2, self.mapview.frame.size.height-44-10, 44, 44) ];
+        self.btnTakeMeThere.viewBg=[[UIImageView alloc] initWithImage:[UIImage imageNamed:@"circle_direction.png"]];
+        self.btnTakeMeThere.iconOverNameForProtoType=@"circle_direction_over.png";
+        self.btnTakeMeThere.iconNameForProtoType=@"circle_direction.png";
+        [self.btnTakeMeThere.viewBg setFrame:CGRectMake(0, 0, 44, 44)];
+        self.btnTakeMeThere.layer.shadowOffset = CGSizeMake(0.0f,0.0f);
+        self.btnTakeMeThere.layer.shadowRadius = 5.0f;
+        self.btnTakeMeThere.layer.shadowOpacity = .5f;
+        self.btnTakeMeThere.layer.shadowColor = [Util colorWithHexString:@"#000000ff"].CGColor
+        ;
+        [self.btnTakeMeThere addSubview:self.btnTakeMeThere.viewBg];
+        [self.mapview addSubview:self.btnTakeMeThere];
+        [self.btnTakeMeThere addTarget:self action:@selector(takeMeThere:) forControlEvents:UIControlEventTouchUpInside];
+        
         arrRadarResult=[[NSArray alloc] init];
     }
     return self;
+}
+
+-(void)checkGPS{
+    if ([[UIDevice currentDevice].systemVersion floatValue]>8) {
+        if([CLLocationManager locationServicesEnabled]){
+            if([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorized){
+                NSLog(@"%@",@"kCLAuthorizationStatusAuthorized");
+            }else if([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorizedAlways){
+                NSLog(@"%@",@"kCLAuthorizationStatusAuthorizedAlways");
+            }else if([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorizedWhenInUse){
+                NSLog(@"%@",@"kCLAuthorizationStatusAuthorizedWhenInUse");
+            }else if([CLLocationManager authorizationStatus] == kCLAuthorizationStatusDenied){
+                NSLog(@"kCLAuthorizationStatusDenied");
+                self.lblNoData.key = @"please_eanble_gps";
+            }else{
+                NSLog(@"else");
+                self.lblNoData.key = @"please_eanble_gps";
+            }
+        }else{
+            self.lblNoData.key = @"please_eanble_gps";
+        }
+    }
+}
+
+
+-(void) takeMeThere:(ButtonProtoType *)sender{
+     ScrollViewControllerCate *scrollViewControllerCate=(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
+    ButtonCate *selected=scrollViewControllerCate.selectedButtonCate;
+    CLLocationCoordinate2D source=CLLocationCoordinate2DMake(selected.centerLocation.latitude, selected.centerLocation.longitude);
+    if(source.latitude==0 && source.longitude==0){
+        source=CLLocationCoordinate2DMake(self.locationManager.location.coordinate.latitude, self.locationManager.location.coordinate.longitude);
+    }
+    if ([[UIApplication sharedApplication] canOpenURL:
+         [NSURL URLWithString:@"comgooglemaps://"]]) {
+        [UserInteractionLog sendAnalyticsEvent:@"tocuh" label:@"googel_map_direction_in_list"];
+        NSString *url =[NSString stringWithFormat:@"comgooglemaps-x-callback://?saddr=%F,%F&daddr=%F,%F&directionsmode=walking&x-success=com.planb  .soda://?resume=true&x-source=soda",source.latitude,source.longitude,self.expandedItem.lat,self.expandedItem.lng];
+        [[UIApplication sharedApplication] openURL:
+         [NSURL URLWithString:[url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    } else {
+        UIAlertView *alert = [[UIAlertView alloc] initWithTitle:[DB getUI:@"your_iphone_is_not_installed_google_map_yet"] message:@"" delegate:self cancelButtonTitle:[DB getUI:@"cancel_and_use_apple_map"] otherButtonTitles:[DB getUI:@"install_google_map"],nil];
+        [alert show];
+    }
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    NSLog(@"%@",alertView);
+    if (buttonIndex == 1) {
+        [UserInteractionLog sendAnalyticsEvent:@"tocuh" label:@"apple_map_direction_in_list"];
+        NSString *url =[NSString stringWithFormat:@"itms-apps://itunes.apple.com/app/id585027354?mt=8"];
+        [[UIApplication sharedApplication] openURL:
+         [NSURL URLWithString:[url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    } else {
+        [UserInteractionLog sendAnalyticsEvent:@"tocuh" label:@"install_google_map_in_list"];
+        ScrollViewControllerCate *scrollViewControllerCate=(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
+        ButtonCate *selected=scrollViewControllerCate.selectedButtonCate;
+        CLLocationCoordinate2D source=CLLocationCoordinate2DMake(selected.centerLocation.latitude, selected.centerLocation.longitude);
+        if(source.latitude==0 && source.longitude==0){
+            source=CLLocationCoordinate2DMake(self.locationManager.location.coordinate.latitude, self.locationManager.location.coordinate.longitude);
+        }
+        NSString *url=[NSString stringWithFormat:@"http://maps.apple.com/?daddr=%F,%F&saddr=%F,%F",self.expandedItem.lat,self.expandedItem.lng,source.latitude,source.longitude];
+        [[UIApplication sharedApplication] openURL:
+         [NSURL URLWithString:[url stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding]]];
+    }
 }
 
 //peter modify memory leak risk
@@ -130,6 +218,7 @@
     [self.mapview removeFromSuperview];
     [nextItem.scrollViewDetailMap addSubview:self.mapview];
     oriItem.isExpanded=NO;
+    [oriItem.viewArrow setAlpha:0.0f];
     [oriItem.blurBg setAlpha:1.0];
     [oriItem.maskBg setAlpha:1.0];
     [oriItem.blurBg setHidden:NO];
@@ -159,6 +248,8 @@
     nextItem.expandName=@"map";
     nextItem.poseOfCurrentReview=0;
     [nextItem generateReview];
+    [nextItem.viewArrow setAlpha:1.0f];
+    [nextItem.viewArrow setFrame:CGRectMake(nextItem.btnShowMap.frame.origin.x+(nextItem.btnShowMap.frame.size.width-nextItem.viewArrow.frame.size.width)/2, nextItem.viewArrow.frame.origin.y, nextItem.viewArrow.frame.size.width, nextItem.viewArrow.frame.size.height)];
     [nextItem.scrollViewDetailReview setContentOffset:CGPointMake(0, 0)];
     nextItem.isExpanded=YES;
     [scrollViewList bringSubviewToFront:nextItem];
@@ -224,6 +315,7 @@
     [oriItem.maskBg setAlpha:1.0];
     [oriItem.blurBg setHidden:NO];
     [oriItem.maskBg setHidden:NO];
+    [oriItem.viewArrow setAlpha:0.0];
     [oriItem.viewMiddleLigthBorder setAlpha:0.0f];
     [oriItem.viewMiddleDarkBorder setAlpha:0.0f];
     [oriItem.viewGradientBgForName setFrame:CGRectMake(0, -45, self.gv.screenW, 45)];
@@ -249,6 +341,8 @@
     prevItem.expandName=@"map";
     prevItem.poseOfCurrentReview=0;
     [prevItem generateReview];
+    [prevItem.viewArrow setAlpha:1.0];
+    [prevItem.viewArrow setFrame:CGRectMake(prevItem.btnShowMap.frame.origin.x+(prevItem.btnShowMap.frame.size.width-prevItem.viewArrow.frame.size.width)/2, prevItem.viewArrow.frame.origin.y, prevItem.viewArrow.frame.size.width, prevItem.viewArrow.frame.size.height)];
     [prevItem.scrollViewDetailReview setContentOffset:CGPointMake(0, 0)];
     prevItem.isExpanded=YES;
     [scrollViewList bringSubviewToFront:prevItem];
@@ -363,8 +457,8 @@
              [viewFunBar rebackAllButtonWithoutAnimation];
              [viewFunBar contractAllWithoutAnimation];
              ScrollViewControllerCate *scrollViewControllerCate =(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
-             ButtonCate *selected=scrollViewControllerCate.selectedButtonCate;
-             [self loadListAndInitWithKeyword:selected.keyword type:@"" dist:selected.distance center:selected.centerLocation];
+             ViewControllerRoot *rootVC =(ViewControllerRoot *) self.gv.viewControllerRoot;
+             [self loadListAndInitWithKeyword:rootVC.viewControllerTop.txtSearch.text type:@"" dist:scrollViewControllerCate.custDist center:scrollViewControllerCate.custCenterLocation];
          }
      }];
 }
@@ -402,17 +496,21 @@
     [self.loading stop];
 
     CLLocationCoordinate2D searchCenter;
-    if(center.latitude!=0 && center.longitude!=0){
+    ScrollViewControllerCate *svCate= (ScrollViewControllerCate *) self.gv.scrollViewControllerCate;
+    if(svCate.isCustLocation){
         searchCenter=CLLocationCoordinate2DMake(center.latitude, center.longitude);
     }else{
-        locationManager = [[CLLocationManager alloc] init];
-        locationManager.delegate=self;
-        locationManager.distanceFilter = kCLDistanceFilterNone;
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest;
         [locationManager startUpdatingLocation];
         searchCenter=CLLocationCoordinate2DMake(locationManager.location.coordinate.latitude,locationManager.location.coordinate.longitude);
+        if(searchCenter.longitude==0 && searchCenter.latitude == 0 ){
+            [self checkGPS];
+            [self showNoDataCat];
+            return;
+        }
     }
+    
 
+    
     //loading start then finish send request;
     [self.loading setAlpha:0.0f];
     [self.loading setHidden:NO];
@@ -442,8 +540,8 @@
         BOOL isFromLocal =NO;
         //如果是local 然後又沒有rating key 和 condition 就把loading停掉
         if(arrFromLocal.count==0 && arrFromGoogle.count==0){
-            NSLog(@"NO DATA");
             dispatch_async(dispatch_get_main_queue(), ^{
+                self.lblNoData.key = @"no_data";
                 [self showNoDataCat];
                 [self.loading stop];
             });
@@ -455,7 +553,7 @@
             self.arrRadarResult=arrFromLocal;
         }
         
-        if(![self isExistSortingKey]){
+        if(![self isExistSortingKey] && ![self isExistfilterCondition] && !isFromLocal){
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self.loading stop];
             });
@@ -523,7 +621,7 @@
 
 -(NSDictionary *)getRadarPlaceFromGoogle:(CLLocationCoordinate2D) searchCenter dist:(double) dist pKeyword:(NSString*) pKeyword pType:(NSString *) pType {
     NSMutableString *nearbySearchURL=[[NSMutableString alloc] init];
-    [nearbySearchURL appendFormat:@"https://maps.googleapis.com/maps/api/place/radarsearch/json?location=%f,%f&radius=%f&keyword=%@&sensor=false&key=%@&rankBy=prominence&types=%@&language=%@",searchCenter.latitude,searchCenter.longitude,dist,pKeyword,[GV sharedInstance].googleWebKey,pType, [Util langIOSCode:[DB getSysConfig:@"lang"]]];
+    [nearbySearchURL appendFormat:@"https://maps.googleapis.com/maps/api/place/radarsearch/json?location=%f,%f&radius=%f&keyword=%@&sensor=false&key=%@&rankBy=prominence&types=%@&language=%@",searchCenter.latitude,searchCenter.longitude,dist,[Util urlEncode:pKeyword],[GV sharedInstance].googleWebKey,pType, [Util langIOSCode:[DB getSysConfig:@"lang"]]];
     
     NSMutableDictionary *dicHeaders=[[NSMutableDictionary alloc]init];
     [dicHeaders setValue:@"" forKey:@"user-agent"];
@@ -536,6 +634,7 @@
                           userInfo:nil];
         @throw e;
     }
+
     NSDictionary *jsonResult=[Util jsonWithUrl:nearbySearchURL];
     return jsonResult;
 }
@@ -568,7 +667,11 @@
     return NO;
 }
 -(void) createItemFromRadarResultWithIndex:(int) i isExistFilterCondition:(BOOL) isExistFilterCondition isExistSortingKey:(BOOL) isExistSortingKey isFromLocal:(BOOL) isFromLocal isSecondPage:(BOOL) isSecondPage{
-    
+    //如果當下的status 是cate就不繼續做下去
+    if([GV getGlobalStatus]==COMMON){
+        NSLog(@"exit createItemFromRadarResultWithIndex");
+        return;
+    }
     ListItem *item=[[ListItem alloc]init];
     
     //initial
@@ -592,8 +695,6 @@
     }
 
     NSMutableDictionary *dicDataItem= [arrRadarResult objectAtIndex:i];
-    //要不要 distance
-
     if(isFromLocal){
         item.googleId=[[dicDataItem objectForKey:@"result"] valueForKey:@"id"];
         item.lat=[[[[[dicDataItem objectForKey:@"result"] objectForKey:@"geometry"] objectForKey:@"location"] valueForKey:@"lat"] doubleValue];
@@ -653,6 +754,7 @@
         }else{
             if(!beShown){
                 [item removeFromSuperview];
+                [item setHidden:YES];
                 item.isShow=NO;
             }else{
                 self.itemDisplayCount+=1;
@@ -664,7 +766,7 @@
                 [item setAlpha:1.0f];
                 item.isShow=YES;
             }
-            int checkMax=(int)self.arrRadarResult.count;
+            int checkMax=(int)self.arrRadarResult.count-1;
             if(!isFromLocal){
                 checkMax=self.targetIndex;
             }
@@ -673,6 +775,7 @@
                 if(!isFromLocal){
                     double moreButtonOffset =0;
                     if(!self.isEndedForSearchResult){
+                        NSLog(@"not end for serach: %d",self.itemDisplayCount);
                         moreButtonOffset=40;
                         [self.btnMore setAlpha:0.0];
                         [self.btnMore setHidden:NO];
@@ -684,6 +787,10 @@
                     [self.btnMore setHidden:YES];
                 }
                 [self.loading stop];
+                if(self.itemDisplayCount==0){
+                    [self showNoDataCat];
+                    return;
+                }
                 [UIView animateWithDuration:0.28 delay:0 options:UIViewAnimationOptionCurveEaseOut animations:^{
                     if(!self.btnMore.isHidden){
                         [self.btnMore setAlpha:1.0];
@@ -724,7 +831,9 @@
     }else if([selected.sortingKey isEqual:@"distance"]){
         sort=[NSSortDescriptor sortDescriptorWithKey:@"distance" ascending:YES];
     }
-    [arrItemList sortUsingDescriptors:[NSArray arrayWithObject:sort]];
+    if(sort){
+        [arrItemList sortUsingDescriptors:[NSArray arrayWithObject:sort]];
+    }
     int sortingCreateIndex=0;
     for(int i=0;i<arrItemList.count;i++){
         ListItem *item=(ListItem *)[arrItemList objectAtIndex:i];
@@ -842,8 +951,6 @@
 -(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
     //if status is edit selected button
     UITouch* touch=[[event allTouches]anyObject];
-    NSLog(@"list:%@",NSStringFromClass(touch.view.class));    
-
     if([GV getGlobalStatus] == LIST_EXPAND &&
         [touch.view isKindOfClass:[LabelForComment class]]
        ){
@@ -863,6 +970,7 @@
         ListItem* item=(ListItem*)touch.view.superview.superview;
         [item bringSubviewToFront:scrollViewList];
         ButtonExpand *btnExpand=(ButtonExpand *)touch.view;
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:[NSString stringWithFormat:@"expand_detail_place_%@",btnExpand.name]];
         [self statusListToExpand:item expandName:btnExpand.name];
     }else if ([GV getGlobalStatus]==LIST_EXPAND &&
               [touch.view isKindOfClass:[ButtonExpand class]]
@@ -876,9 +984,15 @@
         ButtonExpand *btnExpand=(ButtonExpand *)touch.view;
         if(item.expandName==btnExpand.name){
             [self statusExpandToList:item];
+            [UserInteractionLog sendAnalyticsEvent:@"touch" label:[NSString stringWithFormat:@"contract_detail_place_%@",btnExpand.name]];
         }else{
             [self slideToOtherExpandWitItem:item willExpandDetailName:btnExpand.name];
+            [UserInteractionLog sendAnalyticsEvent:@"touch" label:[NSString stringWithFormat:@"slide_detail_place_%@",btnExpand.name]];
         }
+    }else if([GV getGlobalStatus]==LIST_EXPAND && [touch.view isKindOfClass:[ViewContainer class]] ){
+        ListItem* item=(ListItem*)touch.view.superview;
+        [self statusExpandToList:item];
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"contract_detail_place"];
     }else if([GV getGlobalStatus] == LIST_EXPAND_WITHKEYBOARD &&
        (
         ![touch.view isKindOfClass:[ButtonComment class]]
@@ -899,13 +1013,16 @@
              &&
              [touch.view isKindOfClass:[ButtonPhone class]]){
         NSLog(@"list condition 5: 打電話");
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"call_in_detail"];
         ListItem *item=(ListItem *) touch.view.superview.superview;
         [item call];
     }else if([GV getGlobalStatus]==LIST && [touch.view isKindOfClass:[ButtonFunction class]]){
         NSLog(@"list condition 6: 切換搜尋設定");
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"expand_list_config"];
         [viewFunBar switchViewPanelWithTargetButton:(ButtonFunction *)touch.view];
     }else if([touch.view isKindOfClass:[ButtonSaveReview class]] && [GV getGlobalStatus]== LIST_EXPAND){
         NSLog(@"list condition 7: 存review");
+        [UserInteractionLog sendAnalyticsEvent:@"touch" label:@"save_review"];
         ListItem *item=(ListItem *) touch.view.superview.superview.superview;
         [item saveReview];
     }
@@ -1031,7 +1148,26 @@
     GMSCameraPosition *camera = [GMSCameraPosition cameraWithLatitude:item.lat
                                                             longitude:item.lng
                                                                  zoom:15];
+    //on:other off:current
     [self.mapview clear];
+//    GMSCircle *circle=[[GMSCircle alloc]init];
+//    ScrollViewControllerCate *scrollViewControllerCate =(ScrollViewControllerCate *)self.gv.scrollViewControllerCate;
+//    [circle setPosition:scrollViewControllerCate.selectedButtonCate.centerLocation];
+//    [circle setRadius:scrollViewControllerCate.selectedButtonCate.distance];
+//    circle.fillColor = [Util colorWithHexString:@"b6e6e672"];
+//    circle.strokeColor = [Util colorWithHexString:@"#66abab72"];
+//    circle.zIndex=1;
+//    circle.strokeWidth = 1;
+//    circle.map=self.mapview;
+    
+    //沒有中心點用 current location
+//    if(scrollViewControllerCate.selectedButtonCate.centerLocation.latitude==0 &&
+//       scrollViewControllerCate.selectedButtonCate.centerLocation.longitude==0){
+//        [circle setPosition:CLLocationCoordinate2DMake(locationManager.location.coordinate.latitude, locationManager.location.coordinate.longitude)];
+//    }
+    
+    
+//    [self.mapview clear];
     self.arrMarker =[[NSMutableArray alloc]init];
     NSArray *subviews =self.scrollViewList.subviews;
     NSMutableArray *sortinListItem=[[NSMutableArray alloc]init];
@@ -1064,6 +1200,7 @@
             marker.userData=tempItem;
             if([tempItem isEqual:item]){
                 [self.mapview setSelectedMarker:marker];
+                self.selectedMarker=marker;
             }else{
                 UIImage *dot=[UIImage imageNamed:@"hidden_marker.png"];
                 marker.icon=[Util imageWithImage:dot scaledToSize:CGSizeMake(20, 20)];;
@@ -1078,7 +1215,7 @@
 }
 -(GMSCameraPosition *)getNewDownABitOfCameraWithLat:(double) lat lng:(double)lng{
     CGPoint oriCenter=[self.mapview.projection pointForCoordinate:CLLocationCoordinate2DMake(lat,lng)];
-    CGPoint destCenter=CGPointMake(oriCenter.x, oriCenter.y-80);
+    CGPoint destCenter=CGPointMake(oriCenter.x, oriCenter.y-self.gv.screenH*0.1482);
     CLLocationCoordinate2D destCoordinate=[self.mapview.projection coordinateForPoint:destCenter];
     GMSCameraPosition *destCamera = [GMSCameraPosition cameraWithLatitude:destCoordinate.latitude
                                                                 longitude:destCoordinate.longitude
@@ -1103,6 +1240,7 @@
 }
 
 
+
 -(CustomizeInfoWindow *)mapView:(GMSMapView *)mapView markerInfoWindow:(GMSMarker *)marker{
     for(int i =0;i<self.arrMarker.count;i++){
         if([self.arrMarker objectAtIndex:i]!=marker){
@@ -1119,18 +1257,35 @@
     infoWindow.lblName.text=newMarker.name;
     NSString *stringDist=@"";
     if(newMarker.distance>1000){
-        stringDist=[NSString stringWithFormat:@"%.2f 公里",newMarker.distance/1000];
+        stringDist=[NSString stringWithFormat:@"%.2f km",newMarker.distance/1000];
     }else{
-        stringDist=[NSString stringWithFormat:@"%.0f 公尺",newMarker.distance];
+        stringDist=[NSString stringWithFormat:@"%.0f m",newMarker.distance];
     }
-    infoWindow.lblDistance.text=[NSString stringWithFormat:@"距離: %@",stringDist];
+    infoWindow.lblDistance.text=[NSString stringWithFormat:@"%@: %@", [DB getUI:@"distance"],stringDist];
     infoWindow.lblAddress.text=newMarker.address;
     
     [infoWindow initial];
     return infoWindow;
 }
 - (BOOL)mapView:(GMSMapView *)mapView didTapMarker:(GMSMarker *)marker{
-        return YES;
+    if([marker isEqual:self.selectedMarker]){
+        [self.mapview setSelectedMarker:self.selectedMarker];
+    }
+    return YES;
+}
+
+-(void) locationManager:(CLLocationManager *)manager didUpdateLocations:(NSArray *)locations{
+    GMSCameraPosition *camera = [GMSCameraPosition cameraWithLatitude:manager.location.coordinate.latitude
+                                                            longitude:manager.location.coordinate.longitude
+                                                                 zoom:self.viewFunBar.viewPanelForLocation.mapview.camera.zoom];
+    //update selected cate center
+    ScrollViewControllerCate *sv = (ScrollViewControllerCate *) self.gv.scrollViewControllerCate;
+    sv.custCenterLocation = manager.location.coordinate;
+    [self.viewFunBar.viewPanelForLocation.mapview setCamera:camera];
+    [self.viewFunBar.viewPanelForLocation.circle setPosition:CLLocationCoordinate2DMake(manager.location.coordinate.latitude, manager.location.coordinate.longitude)];
+}
+
+-(void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status{
 }
 
 @end

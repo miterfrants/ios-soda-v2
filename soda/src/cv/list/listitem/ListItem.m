@@ -20,7 +20,7 @@ double posLeft;
 {
     self = [super initWithFrame:frame];
     if (self) {
-        self.contentCon=[[UIView alloc] initWithFrame:CGRectMake(0, 0, 320, 150)];
+        self.contentCon=[[ViewContainer alloc] initWithFrame:CGRectMake(0, 0, 320, 150)];
         //self.contentCon.userInteractionEnabled=NO;
         // Initialization code
         CGRect rec=CGRectMake(0, 0, self.gv.screenW, 150);
@@ -156,7 +156,7 @@ double posLeft;
         
         
         //arrow
-        self.viewArrow=[[ViewArrow alloc] initWithFrame:CGRectMake(btnReview.frame.origin.x+(44-20)/2,144, 20, 5)];
+        self.viewArrow=[[ViewArrow alloc] initWithFrame:CGRectMake(btnReview.frame.origin.x+(44-20)/2,145, 20, 5)];
         [self addSubview:self.viewArrow];
         [self.viewArrow setAlpha:0.0f];
         self.viewArrow.userInteractionEnabled=NO;
@@ -229,6 +229,10 @@ double posLeft;
 }
 
 -(void) addLoadGooglePlaceDetailToQueue:(NSString *) ref{
+    if([GV getGlobalStatus]==COMMON){
+        NSLog(@"exit addLoadGooglePlaceDetailToQueue");
+        return;
+    }
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList *)self.gv.scrollViewControlllerList;
     if(scrollViewControllerList.isCancelCurrentLoadItemListMarker){
         return;
@@ -244,62 +248,73 @@ double posLeft;
 }
 
 -(void) _loadDetailFromGoogle:(NSMutableDictionary *) par{
-    if([GV getGlobalStatus]==LIST){
-        //[NSThread sleepForTimeInterval:0.08];
-        NSString *strURL = [NSString stringWithFormat:@"https://maps.googleapis.com/maps/api/place/details/json?reference=%@&sensor=true&key=%@&language=%@",[par valueForKey:@"ref"],[par valueForKey:@"apiKey"] ,[DB getSysConfig:@"lang"]] ;
-        ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList *)self.gv.scrollViewControlllerList;
-        [Util jsonAsyncWithUrl:strURL target:self cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:10 completion:^(NSMutableDictionary *data, NSError *connectionError) {
-            GooglePlaceAPI *api=(GooglePlaceAPI *)[par valueForKey:@"api"];
-            BOOL isError=NO;
-            if(connectionError !=nil|| ![[data valueForKey:@"status"] isEqualToString:@"OK"]){
-                NSLog(@"status:%@",[data valueForKey:@"status"]);
-                NSLog(@"err_msg:%@",[data valueForKey:@"error_message"]);
-                isError=YES;
-            }
-            
-            [[[data objectForKey:@"result"] objectForKey:@"types"] addObject:scrollViewControllerList.keyword];
-            NSData* jsonData = nil;
-            @try {
-                jsonData=[NSJSONSerialization dataWithJSONObject:data options:0 error:nil];
-            }
-            @catch (NSException *exception) {
-                NSLog(@"error:%@",data);
-            }
-            @finally {
-            }
+    if([GV getGlobalStatus]==COMMON){
+        NSLog(@"exit _loadDetailFromGoogle");
+        return;
+    }
+    //[NSThread sleepForTimeInterval:0.08];
+    NSString *strURL = [NSString stringWithFormat:@"https://maps.googleapis.com/maps/api/place/details/json?reference=%@&sensor=true&key=%@&language=%@",[par valueForKey:@"ref"],[par valueForKey:@"apiKey"] ,[DB getSysConfig:@"lang"]] ;
+    ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList *)self.gv.scrollViewControlllerList;
+    //抓googel的資料
+    [Util jsonAsyncWithUrl:strURL target:self cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:10 completion:^(NSMutableDictionary *data, NSError *connectionError) {
+        //GooglePlaceAPI *api=(GooglePlaceAPI *)[par valueForKey:@"api"];
+        BOOL isError=NO;
+        if(connectionError !=nil|| ![[data valueForKey:@"status"] isEqualToString:@"OK"]){
+            NSLog(@"status:%@",[data valueForKey:@"status"]);
+            NSLog(@"err_msg:%@",[data valueForKey:@"error_message"]);
+            NSLog(@"error:%@",connectionError.description);
+            isError=YES;
+        }
+        
+        [[[data objectForKey:@"result"] objectForKey:@"types"] addObject:scrollViewControllerList.keyword];
 
-            if(!isError){
-                //check opening hours
-                if([[data objectForKey:@"result"] objectForKey:@"opening_hours"]==nil && [[data objectForKey:@"result"] objectForKey:@"opening_hours"]==nil){
-                    NSString *name=[[data objectForKey:@"result"] valueForKey:@"name"];
+        NSData* jsonData = nil;
+        @try {
+            jsonData=[NSJSONSerialization dataWithJSONObject:data options:0 error:nil];
+        }
+        @catch (NSException *exception) {
+            NSLog(@"error test:%@",data);
+        }
+        @finally {
+        }
 
-                    //let user grab facebook store opening data to local database
-                    if(self.gv.loginType==Facebook){
-                        //把facebook資料抓回來
-                        //NSLog(@"%@",[NSString stringWithFormat:@"%@:https://graph.facebook.com/search?q=%@&type=page&access_token=%@",name,name,[FBSession activeSession].accessTokenData.accessToken]);
-                        [Util jsonAsyncWithUrl:[NSString stringWithFormat:@"https://graph.facebook.com/search?q=%@&type=page&access_token=%@",name, [FBSession activeSession].accessTokenData.accessToken] target:self cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:5 completion:^(NSMutableDictionary *data, NSError *connectionError) {
-                            //NSLog(@"%@",[NSString stringWithFormat:@"%@:%@",name,data]);
-                        } queue:self.gv.backgroundThreadManagement];
-                    }
+        if(!isError){
+            //check opening hours
+            if([[data objectForKey:@"result"] objectForKey:@"opening_hours"]==nil && [[data objectForKey:@"result"] objectForKey:@"opening_hours"]==nil){
+                NSString *name=[[data objectForKey:@"result"] valueForKey:@"name"];
+
+                //let user grab facebook store opening data to local database
+                if(self.gv.loginType==Facebook){
+                    //把facebook資料抓回來
+                    //NSLog(@"%@",[NSString stringWithFormat:@"%@:https://graph.facebook.com/search?q=%@&type=page&access_token=%@",name,name,[FBSession activeSession].accessTokenData.accessToken]);
+                    [Util jsonAsyncWithUrl:[NSString stringWithFormat:@"https://graph.facebook.com/search?q=%@&type=page&access_token=%@",name, [FBSession activeSession].accessTokenData.accessToken] target:self cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:5 completion:^(NSMutableDictionary *data, NSError *connectionError) {
+                        //NSLog(@"%@",[NSString stringWithFormat:@"%@:%@",name,data]);
+                    } queue:self.gv.backgroundThreadManagement];
                 }
-                NSString* jsonString = [[NSString alloc] initWithBytes:[jsonData bytes] length:[jsonData length] encoding:NSUTF8StringEncoding];
-                NSString *charactersToEscape = @"!*'();:@&=+$,/?%#[]\" ";
-                NSCharacterSet *allowedCharacters = [[NSCharacterSet characterSetWithCharactersInString:charactersToEscape] invertedSet];
+            }
+            NSString* jsonString = [[NSString alloc] initWithBytes:[jsonData bytes] length:[jsonData length] encoding:NSUTF8StringEncoding];
+            NSString* jsonStringEscape=[[jsonString stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]] stringByReplacingOccurrencesOfString:@"&" withString:@"%26"];
+            NSMutableDictionary *test=[data copy];
+            
+            @try {
 
-                NSString* encodeJsonString= [jsonString stringByAddingPercentEncodingWithAllowedCharacters:
-                                             allowedCharacters];
-                
                 NSString *addPlaceToLocalURL =[NSString stringWithFormat:@"%@://%@/%@?action=%@&member_id=%@",self.gv.urlProtocol,self.gv.domain,self.gv.controllerPlace,self.gv.actionAddPlace,self.gv.localUserId];
                 [Util stringAsyncWithUrlByPost:addPlaceToLocalURL cachePolicy:NSURLCacheStorageAllowedInMemoryOnly timeout:3 completion:^(NSURLResponse *response, NSData *data, NSError *connectionError) {
-                    NSString* addLocalresult = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
-                    NSLog(@"%@",addLocalresult);
-                } queue:self.gv.backgroundThreadManagement postData:[NSString stringWithFormat:@"google_place_detail=%@",encodeJsonString]];
+                    NSString* newStr = [[NSString alloc] initWithData:data encoding:NSUTF8StringEncoding];
+                    if (connectionError  || (int)newStr.length>0) {
+                        NSLog(@"error:%@",newStr);
+                    }
+                } queue:self.gv.backgroundThreadManagement postData:[NSString stringWithFormat:@"google_place_detail=%@",jsonStringEscape]];
             }
-            api.busy-=1;
-            self.jsonBaseData=[data objectForKey:@"result"];
-            [scrollViewControllerList initialItemDataAndThen:self isFromLocal:NO];
-        } queue:self.gv.backgroundThreadManagement];
-    }
+            @catch (NSException *exception) {
+            }
+            @finally {
+                
+            }
+        }
+        self.jsonBaseData=[data objectForKey:@"result"];
+        [scrollViewControllerList initialItemDataAndThen:self isFromLocal:NO];
+    } queue:self.gv.backgroundThreadManagement];
 }
 
 
@@ -457,7 +472,7 @@ double posLeft;
     }
     
     //light
-    if([data objectForKey:@"opening_hours"] !=nil && [[data objectForKey:@"opening_hours"] valueForKey:@"open_now"] !=nil){
+    if([data objectForKey:@"opening_hours"] !=[NSNull null]  && [data objectForKey:@"opening_hours"] !=nil && [[data objectForKey:@"opening_hours"] valueForKey:@"open_now"] !=nil){
         self.isExistOpeningData=YES;
         if([[[data objectForKey:@"opening_hours"] valueForKey:@"open_now"] intValue]==1){
             self.isOpening=YES;
@@ -629,6 +644,7 @@ double posLeft;
     self.expandName=detailName;
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList*)self.gv.scrollViewControlllerList;
     scrollViewControllerList.scrollViewList.isAutoAnimation=YES;
+    scrollViewControllerList.expandedItem=self;
     self.poseOfCurrentReview=0;
     [self generateReview];
     [scrollViewDetailReview setContentOffset:CGPointMake(0, 0)];
@@ -952,6 +968,7 @@ double posLeft;
     isExpanded=NO;
     ScrollViewControllerList *scrollViewControllerList=(ScrollViewControllerList*)self.gv.scrollViewControlllerList;
     scrollViewControllerList.scrollViewList.isAutoAnimation=YES;
+    scrollViewControllerList.expandedItem=nil;
     NSArray *arrItemList=scrollViewControllerList.arrItemList;
     [self.btnComment contractCommentArea];
     double duration=0.28;
@@ -981,7 +998,11 @@ double posLeft;
             height-self.gv.screenH+80){
              scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, scrollViewControllerList.scrollViewList.contentSize.height-self.gv.screenH+80);
          }else{
-             scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, self.seq*150);
+             if(scrollViewControllerList.scrollViewList.contentSize.height<self.gv.screenH-80-40){
+                 scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, 0);
+             }else{
+                 scrollViewControllerList.scrollViewList.contentOffset=CGPointMake(0, self.seq*150);
+             }
          }
         [[dicDetailPanel objectForKey:self.expandName] setFrame:CGRectMake(0, 150, self.gv.screenW, self.gv.screenH-80-150)];
 
@@ -1009,6 +1030,11 @@ double posLeft;
      }];
 
 
+}
+-(void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event{
+    [super touchesEnded:touches withEvent:event];
+    NSLog(@"%@",self.googleId);
+    NSLog(@"%@",self.googleTypes);
 }
 
 

@@ -8,9 +8,12 @@
 
 #import <UIKit/UIKit.h>
 #import "ButtonProtoType.h"
+#import "LabelForChangeUILang.h"
 
 @interface ViewEditTitle : ButtonProtoType
-@property UILabel *lblDisplayTitle;
+@property LabelForChangeUILang *lblDisplayTitle;
 @property UITextField *txtContent;
-- (id)initWithFrame:(CGRect)frame minWidth:(double) minWidth title:(NSString*) title;
+@property UIView *bg;
+- (id)initWithFrameAndKey:(CGRect)frame titleKey:(NSString*) titleKey;
+-(void)repose:(double)labelWidth;
 @end

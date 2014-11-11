@@ -8,12 +8,13 @@
 
 #import "ViewProtoType.h"
 #import <GoogleMaps/GoogleMaps.h>
+#import <MapKit/MapKit.h>
 #import "SwitchLocation.h"
 #import "SliderDistance.h"
 #import "ButtonPin.h"
 #import "ButtonCate.h"
 #import "TextFieldCheckCoverOver.h"
-
+#import "LabelForChangeUILang.h"
 @interface ViewPanelForLocation : ViewProtoType<GMSMapViewDelegate>
 @property SliderDistance *sliderDist;
 @property SwitchLocation *switchLocation;
@@ -23,12 +24,17 @@
 @property GMSCircle *circle;
 @property TextFieldCheckCoverOver *txtCenterAdderss;
 @property UIView *viewBGForTxtCenterAddress;
-@property UILabel *lblCenter;
+@property LabelForChangeUILang *lblCenter;
 @property ButtonPin *btnPin;
+@property UIView *viewCross;
+@property GMSPolyline *centerCrossVertical;
+@property GMSPolyline *centerCrosshorizontal;
+
 -(void) updateCameraCenterAndDB:(BOOL) isUpdateDB;
 -(void) updateCamera:(CLLocationCoordinate2D)cameraCenter;
 -(void)initialDistanceAndCenter:(ButtonCate *)selected;
 -(void)animationShowOtherCenter;
 -(void)animationHideOtherCenter;
+-(void) stopUpdateLocationUpdate;
 
 @end

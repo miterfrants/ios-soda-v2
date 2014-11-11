@@ -19,13 +19,14 @@
 @property int iconId;
 @property BOOL isGet;
 @property BOOL isSync;
+@property BOOL isLoading;
 @property NSString *secretId;
 @property NSString *tip;
 @property NSString *name;
 @property NSString *iconName;
+@property NSTimer *timerCheckShowHint;
 @property LoadingCircle *loading;
 
 -(id)initWithSecretIcon:(SecretIcon *) secretIcon frame:(CGRect) frame;
--(void)downloadSecretIcon;
-- (void)playAudio;
+-(void)downloadSecretIcon:(BOOL)isNew;
 @end

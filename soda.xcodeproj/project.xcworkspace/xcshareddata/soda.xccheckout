@@ -10,29 +10,29 @@
 	<string>soda</string>
 	<key>IDESourceControlProjectOriginsDictionary</key>
 	<dict>
-		<key>B85C35BB-2B80-4DAA-B6EB-4C3B14B870CA</key>
+		<key>3F5AAC83D90FFFB1040A043204A99F7C20357269</key>
 		<string>https://github.com/miterfrants/ios-soda-v2.git</string>
 	</dict>
 	<key>IDESourceControlProjectPath</key>
-	<string>soda.xcodeproj/project.xcworkspace</string>
+	<string>soda.xcodeproj</string>
 	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
 	<dict>
-		<key>B85C35BB-2B80-4DAA-B6EB-4C3B14B870CA</key>
+		<key>3F5AAC83D90FFFB1040A043204A99F7C20357269</key>
 		<string>../..</string>
 	</dict>
 	<key>IDESourceControlProjectURL</key>
 	<string>https://github.com/miterfrants/ios-soda-v2.git</string>
 	<key>IDESourceControlProjectVersion</key>
-	<integer>110</integer>
+	<integer>111</integer>
 	<key>IDESourceControlProjectWCCIdentifier</key>
-	<string>B85C35BB-2B80-4DAA-B6EB-4C3B14B870CA</string>
+	<string>3F5AAC83D90FFFB1040A043204A99F7C20357269</string>
 	<key>IDESourceControlProjectWCConfigurations</key>
 	<array>
 		<dict>
 			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
 			<string>public.vcs.git</string>
 			<key>IDESourceControlWCCIdentifierKey</key>
-			<string>B85C35BB-2B80-4DAA-B6EB-4C3B14B870CA</string>
+			<string>3F5AAC83D90FFFB1040A043204A99F7C20357269</string>
 			<key>IDESourceControlWCCName</key>
 			<string>soda</string>
 		</dict>
